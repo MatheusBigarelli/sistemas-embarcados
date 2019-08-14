@@ -1,0 +1,27 @@
+Laboratorio 1
+	- Data de entrega: 26/08
+
+	- Objetivo:
+		- Implementar rotina de redimensionamento de imagem em ASM
+
+	- Requisitos:
+		- O tamanho da imagem devera ser aumentado por um fator de 2 (dobrar altura e largura) 5 vezes e reduzido por 2 5 vezes;
+		- O display deve ser atualizado a cada meio segundo;
+		- A imagem deve ser trocada com aperto de botao;
+		- As cores devem ser invertidas com aperto de botao;
+
+	- Dicas do prof:
+		- A entrada e composta de 3 valores de 8 bits (RGB) -> criar rotina de leitura matricial para a string binaria?
+
+	- Formato do arquivo: PPM
+		- Primeira e segunda linha de cabecalho;
+		- Terceira linha com dimensoes da imagem;
+		- Quarta linha com ultimo nivel de claridade -> Se for menor que 255, mapeia pra maxima claridade?
+		- A partir da quinta linha:
+			- R G B  R G B  R G B  R G B  R G B
+			- FEFEFE FEFE15 ------ ------ ------ -> diferentes niveis de claridade em binario?
+
+	- Atividades:
+		- Planejar estruturas de dados;
+		- Usar codigo exemplo;
+		- Planejar testes;
