@@ -1,5 +1,6 @@
 #include "gpio.h"
 
+
 void GPIO_Init()
 {
 
@@ -9,7 +10,7 @@ void GPIO_Init()
     // Activating ports J and N.
     SYSCTL_RCGCGPIO_R |= GPIO_JN;
 
-    //1b.   ap�s isso verificar no PRGPIO se a porta est� pronta para uso.
+    //1b.   ap?s isso verificar no PRGPIO se a porta est? pronta para uso.
     while ((SYSCTL_PRGPIO_R & (GPIO_JN)) != (GPIO_JN)) { }
 
     // Selecting GPIO with port control.
@@ -36,16 +37,57 @@ void GPIO_Init()
 
     // Enabling internal pull-down resistor for port J
     GPIO_PORTJ_PUR_R = 0x01;
+
+
+
+    // Global interrupt enable.
+    EnableInterrupts();
+
+    // Activates interrupts for port J.
+    NVIC_EN1_R |= 0xFFF;
+
+    NVIC_PRI12_R &= ~0xF0000000; 
+
+    // Activate interrupt for pin J0.
+    GPIO_PORTJ_SI_R = 0x01;
+
+    // Sets interrupt trigger in edge mode.
+    GPIO_PORTJ_IS_R &= ~0x01;    // 0b1111 1011
+
+    // Sets single edge mode.
+    GPIO_PORTJ_IBE_R &= ~0x01;
+
+    // Sets rising edge mode.
+    GPIO_PORTJ_IEV_R |= 0x01;
+
+    // Set interrupt as not masked.
+    GPIO_PORTJ_IM_R |= 0x01;
+}
+
+
+void GPIOJ_Handler(void)
+{
+    // Interrupt ACK.
+    GPIO_PORTJ_ICR_R |= 0x01;
+
+    static int counter = 0;
+
+    counter++;
+    if (counter > 5000)
+    {
+        counter = 0;
+        writePortN(1);
+    }
 }
 
 uint32_t readPortJ()
 {
-    return GPIO_PORTJ_DATA_R;
+    return GPIO_PORTJ_DATA_R & 0x01;
 }
 
 void writePortN(uint32_t arg)
 {
-    temp = GPIO_PORTN_DATA_R;
+    int temp = GPIO_PORTN_DATA_R & 0xFFFFFFFE;
     temp |= (arg & 0x01);
     GPIO_PORTN_DATA_R = temp;
 }

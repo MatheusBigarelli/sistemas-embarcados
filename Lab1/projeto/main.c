@@ -23,7 +23,7 @@ extern void imageResizeASM(uint32_t direction);
 
 // Image is char[row][column][pixelColor].
 // pixelColor is one of RGB.
-typedef Image char ***;
+typedef Image char***;
 
 // Global variables
 Image images[2];
@@ -36,12 +36,21 @@ int main()
 {
     initializeComponents();
 
-    while (1)
+    while(1)
     {
-        displayImage();
-        wait(0.5);
-        imageResize();
+        button_pressed = readPortJ();
+        if (button_pressed)
+            writePortN(0x01);
+        else
+            writePortN(0x00);
     }
+
+    // while (1)
+    // {
+    //     displayImage();
+    //     wait(0.5);
+    //     imageResize();
+    // }
 
     return 0;
 }
@@ -49,9 +58,9 @@ int main()
 
 void initializeComponents()
 {
-    PLLInit();
-    GPIOInit();
-    displayInit();
+    PLL_Init();
+    GPIO_Init();
+    // displayInit();
 }
 
 
