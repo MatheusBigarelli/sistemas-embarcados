@@ -1,0 +1,1 @@
+srec_cat.exe airplane.ppm -Binary -o airplane.c -C-ARRAY -INClude
