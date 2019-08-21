@@ -14,3 +14,6 @@
 .\flash\exemplotiva.o: cfaf128x128x16.h
 .\flash\exemplotiva.o: buttons.h
 .\flash\exemplotiva.o: airplane.h
+.\flash\exemplotiva.o: buffalo.h
+.\flash\exemplotiva.o: bus.h
+.\flash\exemplotiva.o: car.h

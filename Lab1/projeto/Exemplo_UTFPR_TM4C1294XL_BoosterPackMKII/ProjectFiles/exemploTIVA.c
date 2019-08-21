@@ -23,6 +23,12 @@
 #include "cfaf128x128x16.h"
 #include "buttons.h"
 #include "airplane.h"
+#include "buffalo.h"
+#include "bus.h"
+#include "car.h"
+
+extern void SysTick_Init(void);
+extern void SysTick_Wait1ms(uint32_t time);
 
 //To print on the screen
 tContext sContext;
@@ -37,6 +43,7 @@ void invertColors(void);
 void init_all(){
 	cfaf128x128x16Init();
 	button_init();
+	SysTick_Init();
 }
 
 void init_sidelong_menu(){
@@ -57,6 +64,11 @@ int main (void) {
 
 	uint8_t x, y;
 	uint16_t counter;
+	
+	uint8_t iterator = 0;
+
+	unsigned char* images[] = {airplane_image, buffalo_image, bus_image, car_image};
+		
 	bool s1_pressed, s2_pressed;
 	
 	//Initializing all peripherals
@@ -65,11 +77,11 @@ int main (void) {
 	init_sidelong_menu();
 
   while(1){
-			for (y = 0; y < 64; y++)
+			for (y = 0; y < 32; y++)
 			{
-					for (x = 0; x < 96; x++)
+					for (x = 0; x < 48; x++)
 					{
-							if ((eprom[3*96*y + 3*x + 0] + eprom[3*96*y + 3*x + 1] + eprom[3*96*y + 3*x + 2])/3 < 0xAA)
+							if (images[iterator][48*y + x] < 0xAA)
 							{
 									invertColors();
 									GrPixelDraw(&sContext, x+16, y+32);
@@ -83,16 +95,14 @@ int main (void) {
 			s1_pressed = button_read_s1();
 			
 			if (s1_pressed)
+					invertColors();
+			
+			if (button_read_s2())
 			{
-					counter++;
-					if (counter > 2)
-					{
-							counter = 0;
-							invertColors();
-					}		
+					// Change image
+					iterator = (iterator + 1) % 4;
+					SysTick_Wait1ms(500);
 			}
-			//if (button_read_s2())
-					//changeImage();
 	}
 }
 

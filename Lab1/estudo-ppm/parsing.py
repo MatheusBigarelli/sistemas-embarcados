@@ -3,10 +3,12 @@ import struct
 
 def getline(f):
     line = ""
-    byte = "0"
-    while byte != "\n":
+
+    while True:
         byte = f.read(1)
-        line += str(byte)
+        if byte == '\n':
+            break
+        line += byte
 
     return line
 
@@ -15,14 +17,15 @@ def print_file_type(f):
 
     # Magic number
     # Should be P6 for ppm
-    print(line[0] + line[1])
+    print(line)
 
+    # d.write(line)
 
 def print_dimensions(f):
     line = getline(f)
 
     # File has comment
-    if line[0] == "#":
+    while line[0] == "#":
         # Ignore comment
         line = getline(f)
 
@@ -33,55 +36,61 @@ def print_dimensions(f):
 
     print(width + "x" + height)
 
+    # d.write(line)
+
     return width, height
+
 
 
 def print_maxvalue(f):
     line = getline(f)
-    
-    maxvalue = ""
-    counter = 0
-    byte = line[counter]
-    while byte != "\n":
-        maxvalue += byte
-        counter += 1
-        byte = line[counter]
-
-    print(maxvalue)
+    print(line)
+    # d.write(line)
 
 
 def print_image(f, w, h):
-    line = getline(f)
-    
     image = []
+    
+    line = f.read(int(w)*int(h)*3)
+    
     for row in range(int(h)):
         image.append([])
         for col in range(int(w)):
             image[row].append([])
 
+    print len(image)
+
 
     pline = ""
     for row in range(int(h)):
         for column in range(int(w)):
-            r, g, b = struct.unpack("BBB", line[0:3])
-            pline += str(r) + str(g) + str(b) + "  "
-            color = (r + g + b) / 3
-            if color < 255:
-                print color
+            try:
+                r = struct.unpack("B", line[row*3*int(w) + column*3 + 0])
+                g = struct.unpack("B", line[row*3*int(w) + column*3 + 1])
+                b = struct.unpack("B", line[row*3*int(w) + column*3 + 2])
+                
+                color = (r[0] + g[0] + b[0]) / 3
+                image[row][column] = color
+                
 
-            image[row][column] = color
 
-        # print(pline)
+            except Exception as e:
+                print e
 
-    with open('images/airplane.c', 'w') as cfile:
-        cfile.write('unsigned char* image = {')
-        for row in range(int(h)):
-            for col in range(int(w)):
-                if col % 16 == 0:
-                    cfile.write('\n')
-                cfile.write(hex(image[row][column]) + ", ")
-        cfile.write('}')
-        cfile.close()
+    with open('reduced_images\\' + chosen_image + '.c', 'w') as dest_file:
+        dest_file.write("const unsigned char " + chosen_image + "_image[] = {\n")
+    
+        for i in range(int(h)):
+            counter = 0
+            for j in range(int(w)):
+                counter = (counter + 1) % 16
+                if counter == 0:
+                    dest_file.write('\n')
+
+                dest_file.write(str(image[i][j]) + ",")
+
+        dest_file.write("\n};")
+        dest_file.close()
 
 # Available images:
 #   airplane.ppm
@@ -89,20 +98,18 @@ def print_image(f, w, h):
 #   bus.ppm
 #   car.ppm
 
-image = "images/airplane.ppm"
+images = ["airplane", "buffalo", "bus", "car"]
 
-with open(image, "rb") as image_file:
-    # if (correct_file_type()):
-    #     pass
+for chosen_image in images:
+    fi = "reduced_images/" + chosen_image + ".ppm"
 
-    print_file_type(image_file)
+    with open(fi, "rb") as image_file:
+        print_file_type(image_file)
 
-    w, h = print_dimensions(image_file)
+        w, h = print_dimensions(image_file)
 
-    print_maxvalue(image_file)
+        print_maxvalue(image_file)
 
-    raw_input()
+        print_image(image_file, w, h)
 
-    print_image(image_file, w, h)
-
-    image_file.close()
+        image_file.close()

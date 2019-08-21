@@ -1,1 +1,1 @@
-srec_cat.exe airplane.ppm -Binary -o airplane.c -C-ARRAY -INClude
+srec_cat.exe images\car.ppm -Binary -o cfiles\car.c -C-ARRAY -INClude
