@@ -27,6 +27,13 @@
 #include "bus.h"
 #include "car.h"
 
+
+const uint8_t DISPLAY_WIDTH = 128;
+const uint8_t DISPLAY_HEIGTH = 128;
+const uint8_t IMAGE_WIDTH = 48;
+const uint8_t IMAGE_HEIGTH = 32;
+
+
 extern void SysTick_Init(void);
 extern void SysTick_Wait1ms(uint32_t time);
 
@@ -34,7 +41,30 @@ extern void SysTick_Wait1ms(uint32_t time);
 tContext sContext;
 uint32_t background = ClrBlack;
 
+unsigned char* images[] = {airplane_image, car_image};
+uint8_t current_image = 0;
+typedef struct
+{
+		uint8_t width, heigth;
+		unsigned char data[DISPLAY_WIDTH*DISPLAY_HEIGTH];
+} Image;
+
+// States:
+//  0     1     2    3    4   5  6  7  8   9  10
+// 1/32  1/16  1/8  1/4  1/2  1  2  4  8  16  32
+uint8_t current_state = 5;
+uint8_t going_up = 1;
+
+Image image;
+
+
 void invertColors(void);
+void drawImage(void);
+void updateImageState(void);
+void clearDisplay(void);
+
+
+extern void resizeImage(void);
 
 /*----------------------------------------------------------------------------
  *    Initializations
@@ -61,49 +91,53 @@ void init_sidelong_menu(){
  *      Main
  *---------------------------------------------------------------------------*/
 int main (void) {
-
-	uint8_t x, y;
-	uint16_t counter;
 	
-	uint8_t iterator = 0;
-
-	unsigned char* images[] = {airplane_image, buffalo_image, bus_image, car_image};
-		
-	bool s1_pressed, s2_pressed;
-	
-	//Initializing all peripherals
+	// Initializing all peripherals
 	init_all();
-	//Sidelong menu creation
+	// Sidelong menu creation
 	init_sidelong_menu();
+	image.heigth = 32;
+	image.width = 48;
 
   while(1){
-			for (y = 0; y < 32; y++)
-			{
-					for (x = 0; x < 48; x++)
-					{
-							if (images[iterator][48*y + x] < 0xAA)
-							{
-									invertColors();
-									GrPixelDraw(&sContext, x+16, y+32);
-									invertColors();
-							}
-							else
-									GrPixelDraw(&sContext, x+16, y+32);
-					}
-			}
+			resizeImage();
+			clearDisplay();
+			drawImage();
 			
-			s1_pressed = button_read_s1();
+//			if (button_read_s1())
+//					invertColors();
+//			
+//			if (button_read_s2())
+//					// Change image
+//					// Alternates between 0 and 1;
+//					current_image = 1 - current_image;
+//			
+//			SysTick_Wait1ms(2000);
 			
-			if (s1_pressed)
-					invertColors();
-			
-			if (button_read_s2())
-			{
-					// Change image
-					iterator = (iterator + 1) % 4;
-					SysTick_Wait1ms(500);
-			}
+
+		updateImageState();
 	}
+}
+
+
+
+void drawImage(void)
+{
+		uint8_t x, y;
+		for (y = 0; y < image.heigth; y++)
+		{
+				for (x = 0; x < image.width	; x++)
+				{
+						if (image.data[image.width*y + x] < 0xAA)
+						{
+								invertColors();
+								GrPixelDraw(&sContext, x+((DISPLAY_WIDTH-image.width)/2), y+((DISPLAY_HEIGTH-image.heigth)/2));
+								invertColors();
+						}
+						else
+								GrPixelDraw(&sContext, x+((DISPLAY_WIDTH-image.width)/2), y+((DISPLAY_HEIGTH-image.heigth)/2));
+				}
+		}
 }
 
 
@@ -112,4 +146,99 @@ void invertColors(void)
 		GrContextForegroundSet(&sContext, background);
 		background = ~background & 0x00FFFFFF;
 		GrContextBackgroundSet(&sContext, background);
+}
+
+
+void updateImageState(void)
+{
+		if (going_up)
+		{
+			
+				// Reached enlarging limit
+				if (current_state == 10)
+				{
+						current_state = 9;
+						going_up = 0;
+					
+						image.width *= 2;
+						image.heigth *= 2;
+						
+						if (image.heigth > 128)
+							image.heigth = 128;
+						if (image.width > 128)
+							image.width = 128;
+				}
+		
+				else
+				{
+						current_state++;
+						image.width *= 2;
+						image.heigth *= 2;
+						
+						if (image.heigth > 128)
+							image.heigth = 128;
+						if (image.width > 128)
+							image.width = 128;
+					
+						return;
+				}
+		}
+		
+		// Image is shrinking
+		else
+		{
+				// Reached shrinking limit
+				if (current_state == 0)
+				{
+						current_image = 1;
+						going_up = 1;
+					
+						
+						image.heigth /= 2;
+						image.width /= 2;
+						
+						// Needs to be at least 1, because we will
+						// multiply only, then it will get bigger again
+						if (image.heigth == 0)
+							image.heigth = 1;
+						if (image.width == 0)
+							image.width = 1;
+					
+						return;
+				}
+		
+				else
+				{
+						image.heigth /= 2;
+						image.width /= 2;
+						
+						// Needs to be at least 1, because we will
+						// multiply only, then it will get bigger again
+						if (image.heigth == 0)
+							image.heigth = 1;
+						if (image.width == 0)
+							image.width = 1;
+						
+						// Image being shrinked
+						current_state--;
+				}
+		}
+}
+
+
+void clearDisplay(void)
+{
+		uint8_t x, y;
+		// Need to invert colors, because GrPixelDraw()
+		// draws pixel with the foreground color
+		invertColors();
+		for (y = 0; y < DISPLAY_HEIGTH; y++)
+		{
+				for (x = 0; x < DISPLAY_WIDTH; x++)
+				{
+						GrPixelDraw(&sContext, x, y);
+				}
+		}
+		// Setting colors back to normal
+		invertColors();
 }

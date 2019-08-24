@@ -1,10 +1,9 @@
 --cpu=Cortex-M4.fp
 ".\flash\exemplotiva.o"
 ".\flash\airplane.o"
-".\flash\buffalo.o"
-".\flash\bus.o"
 ".\flash\car.o"
 ".\flash\utils.o"
+".\flash\image.o"
 ".\flash\buttons.o"
 ".\flash\cfaf128x128x16.o"
 ".\flash\opt.o"
