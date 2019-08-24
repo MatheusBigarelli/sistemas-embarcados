@@ -45,7 +45,8 @@ unsigned char* images[] = {airplane_image, car_image};
 uint8_t current_image = 0;
 typedef struct
 {
-		uint8_t width, heigth;
+		uint8_t heigth;
+		uint8_t width;
 		unsigned char data[DISPLAY_WIDTH*DISPLAY_HEIGTH];
 } Image;
 
@@ -131,11 +132,11 @@ void drawImage(void)
 						if (image.data[image.width*y + x] < 0xAA)
 						{
 								invertColors();
-								GrPixelDraw(&sContext, x+((DISPLAY_WIDTH-image.width)/2), y+((DISPLAY_HEIGTH-image.heigth)/2));
+								GrPixelDraw(&sContext, x, y);
 								invertColors();
 						}
 						else
-								GrPixelDraw(&sContext, x+((DISPLAY_WIDTH-image.width)/2), y+((DISPLAY_HEIGTH-image.heigth)/2));
+								GrPixelDraw(&sContext, x, y);
 				}
 		}
 }

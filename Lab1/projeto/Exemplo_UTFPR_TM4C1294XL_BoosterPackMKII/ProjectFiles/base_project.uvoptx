@@ -545,22 +545,6 @@
         <Bp>
           <Number>0</Number>
           <Type>0</Type>
-          <LineNumber>103</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>1678</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>C:\Users\mathe\Desktop\UTF\7Âº PerÃ­odo\Sistemas Embarcados\labs\sistemas-embarcados\Lab1\projeto\Exemplo_UTFPR_TM4C1294XL_BoosterPackMKII\ProjectFiles\exemploTIVA.c</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression>\\base_project\exemploTIVA.c\103</Expression>
-        </Bp>
-        <Bp>
-          <Number>1</Number>
-          <Type>0</Type>
           <LineNumber>143</LineNumber>
           <EnabledFlag>1</EnabledFlag>
           <Address>2392</Address>
@@ -573,22 +557,6 @@
           <Filename>&lt;1&gt;.\image.s</Filename>
           <ExecCommand></ExecCommand>
           <Expression>\\base_project\image.s\143</Expression>
-        </Bp>
-        <Bp>
-          <Number>2</Number>
-          <Type>0</Type>
-          <LineNumber>127</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>2334</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>&lt;1&gt;.\image.s</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression>\\base_project\image.s\127</Expression>
         </Bp>
       </Breakpoint>
       <WatchWindow1>
