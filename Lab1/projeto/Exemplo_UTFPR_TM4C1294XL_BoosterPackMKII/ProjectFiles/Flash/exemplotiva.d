@@ -11,6 +11,7 @@
 .\flash\exemplotiva.o: C:\Users\mathe\AppData\Local\Arm\Packs\Keil\TM4C_DFP\1.1.0\Device\Include\TM4C129\system_TM4C129.h
 .\flash\exemplotiva.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdbool.h
 .\flash\exemplotiva.o: ..\grlib/grlib.h
+.\flash\exemplotiva.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\math.h
 .\flash\exemplotiva.o: cfaf128x128x16.h
 .\flash\exemplotiva.o: buttons.h
 .\flash\exemplotiva.o: airplane.h

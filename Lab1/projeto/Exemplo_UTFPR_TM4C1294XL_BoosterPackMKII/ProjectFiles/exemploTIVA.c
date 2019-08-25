@@ -16,6 +16,8 @@
 #include <stdbool.h>
 #include "grlib/grlib.h"
 
+#include <math.h>
+
 /*----------------------------------------------------------------------------
  * include libraries from drivers
  *----------------------------------------------------------------------------*/
@@ -124,54 +126,33 @@ int main (void) {
 
 void resizeImage2(void)
 {
-		uint8_t row, col, copy;
-		static uint8_t resize_factor = 1;
-	
-		uint8_t i, j, h1 = 32, h2 = 2*32, w1 = 48, w2 = 2*48;
-		double px, py;
-    double x_ratio = w1/(double)w2 ;
-    double y_ratio = h1/(double)h2 ;
-	
-//		for (row = 0; row < IMAGE_HEIGHT; row++)
-//				for (col = 0; col < IMAGE_WIDTH; col++)
-//					for (copy = 0; copy < resize_factor; copy++)
-//							image.data[(row*IMAGE_WIDTH + col)*resize_factor + copy] = images[current_image][row*IMAGE_WIDTH + col];
-//	
-//		for (row = IMAGE_HEIGHT - 1; row >= 0; row--)
-//				for (col = 0; col < IMAGE_WIDTH; col++)
-//						for (copy = 0; copy < resize_factor; copy++)
-//								image.data[row*(IMAGE_WIDTH*resize_factor)*resize_factor]
-		
-//    for (row = 0; row < IMAGE_HEIGHT*resize_factor; row++)
-//		{
-//        for (col = 0; col < IMAGE_WIDTH*resize_factor; col++)
-//				{
-//            image.data[(row*IMAGE_WIDTH*resize_factor) + col] = images[current_image][(int) ((row*IMAGE_WIDTH/resize_factor) + col/resize_factor)] ;
-//        }
-//    }
+		static float resize_factor = 1;
+		int i, j, h1 = 32, h2 = h1*resize_factor, w1 = 48, w2 = 48*resize_factor;
+    double px, py;
+    double x_ratio = w1 / (double)w2;
+    double y_ratio = h1 / (double)h2;
 
-    for (i=0;i<h2;i++) {
-        for (j=0;j<w2;j++) {
-            px = (j*x_ratio) ;
-            py = (i*y_ratio) ;
-            image.data[(i*w2)+j] = images[current_image][(uint8_t)((py*w1)+px)] ;
+    for (i = 0; i < h2; i++)
+    {
+        for (j = 0; j < w2; j++)
+        {
+            px =  floor((j * x_ratio));
+            py =  floor((i * y_ratio));
+            image.data[(i * w2) + j] = images[current_image][(int) (py * w1 + px)];
         }
     }
 
-					
-//		image.height = IMAGE_HEIGHT * resize_factor;
-//		
-//		image.width = IMAGE_WIDTH * resize_factor;
+
 			image.height = h2;
-			image.height = h1;
+			image.width = w2;
 	
 		if (going_up)
-				resize_factor++;
+				resize_factor+=0.25;
 		else
-				resize_factor--;
-		if (resize_factor == 4)
+				resize_factor-=0.25;
+		if (resize_factor >= 3)
 				going_up = 0;
-		if (resize_factor == 0)
+		if (resize_factor <= 1)
 				going_up = 1;
 }
 
