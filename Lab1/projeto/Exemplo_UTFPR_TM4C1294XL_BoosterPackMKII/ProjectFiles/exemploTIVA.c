@@ -114,34 +114,65 @@ int main (void) {
 //					// Alternates between 0 and 1;
 //					current_image = 1 - current_image;
 //			
-//			SysTick_Wait1ms(2000);
+			SysTick_Wait1ms(2000);
 			
 
-		updateImageState();
+		//updateImageState();
 	}
 }
 
 
 void resizeImage2(void)
 {
-		uint8_t row, col, row_copy, col_copy, resize_factor = 3;
-		for (row = 0; row < IMAGE_HEIGHT; row++)
-		{
-				for (col = 0; col < IMAGE_WIDTH; col++)
-				{
-						for (row_copy = 0; row_copy < resize_factor; row_copy++)
-						{
-								for (col_copy = 0; col_copy < resize_factor; col_copy++)
-								{
-										image.data[(row*IMAGE_WIDTH+col)*resize_factor*resize_factor + row_copy*IMAGE_WIDTH + col_copy] = 
-									images[current_image][row*IMAGE_WIDTH + col];
-								}
-						}
-				}
-		}
+		uint8_t row, col, copy;
+		static uint8_t resize_factor = 1;
+	
+		uint8_t i, j, h1 = 32, h2 = 2*32, w1 = 48, w2 = 2*48;
+		double px, py;
+    double x_ratio = w1/(double)w2 ;
+    double y_ratio = h1/(double)h2 ;
+	
+//		for (row = 0; row < IMAGE_HEIGHT; row++)
+//				for (col = 0; col < IMAGE_WIDTH; col++)
+//					for (copy = 0; copy < resize_factor; copy++)
+//							image.data[(row*IMAGE_WIDTH + col)*resize_factor + copy] = images[current_image][row*IMAGE_WIDTH + col];
+//	
+//		for (row = IMAGE_HEIGHT - 1; row >= 0; row--)
+//				for (col = 0; col < IMAGE_WIDTH; col++)
+//						for (copy = 0; copy < resize_factor; copy++)
+//								image.data[row*(IMAGE_WIDTH*resize_factor)*resize_factor]
 		
-		image.height = 64;
-		image.width = 96;
+//    for (row = 0; row < IMAGE_HEIGHT*resize_factor; row++)
+//		{
+//        for (col = 0; col < IMAGE_WIDTH*resize_factor; col++)
+//				{
+//            image.data[(row*IMAGE_WIDTH*resize_factor) + col] = images[current_image][(int) ((row*IMAGE_WIDTH/resize_factor) + col/resize_factor)] ;
+//        }
+//    }
+
+    for (i=0;i<h2;i++) {
+        for (j=0;j<w2;j++) {
+            px = (j*x_ratio) ;
+            py = (i*y_ratio) ;
+            image.data[(i*w2)+j] = images[current_image][(uint8_t)((py*w1)+px)] ;
+        }
+    }
+
+					
+//		image.height = IMAGE_HEIGHT * resize_factor;
+//		
+//		image.width = IMAGE_WIDTH * resize_factor;
+			image.height = h2;
+			image.height = h1;
+	
+		if (going_up)
+				resize_factor++;
+		else
+				resize_factor--;
+		if (resize_factor == 4)
+				going_up = 0;
+		if (resize_factor == 0)
+				going_up = 1;
 }
 
 

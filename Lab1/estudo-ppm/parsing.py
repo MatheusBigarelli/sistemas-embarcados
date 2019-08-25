@@ -77,7 +77,7 @@ def print_image(f, w, h):
             except Exception as e:
                 print e
 
-    with open('reduced_images\\' + chosen_image + '.c', 'w') as dest_file:
+    with open(direc + chosen_image + '.c', 'w') as dest_file:
         dest_file.write("const unsigned char " + chosen_image + "_image[] = {\n")
     
         for i in range(int(h)):
@@ -99,9 +99,9 @@ def print_image(f, w, h):
 #   car.ppm
 
 images = ["airplane", "buffalo", "bus", "car"]
-
+direc = "images\\"
 for chosen_image in images:
-    fi = "reduced_images/" + chosen_image + ".ppm"
+    fi = direc + chosen_image + ".ppm"
 
     with open(fi, "rb") as image_file:
         print_file_type(image_file)
