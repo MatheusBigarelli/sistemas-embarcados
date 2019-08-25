@@ -3,7 +3,7 @@
 <title>Static Call Graph - [.\Flash\base_project.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image .\Flash\base_project.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060750: Last Updated: Sat Aug 24 12:14:21 2019
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060750: Last Updated: Sun Aug 25 12:52:26 2019
 <BR><P>
 <H3>Maximum Stack Usage =        144 bytes + Unknown(Functions without stacksize, Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -17,7 +17,6 @@ Functions with no stack information
  <LI><a href="#[146]">SysTick_Wait1ms</a>
  <LI><a href="#[147]">EnableInterrupts</a>
  <LI><a href="#[148]">DisableInterrupts</a>
- <LI><a href="#[be]">resizeImage</a>
  <LI><a href="#[e6]">__user_initial_stackheap</a>
 </UL>
 </UL>
@@ -535,11 +534,17 @@ Global Symbols
 <BR>[Called By]<UL><LI><a href="#[92]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
 
+<P><STRONG><a name="[be]"></a>resizeImage2</STRONG> (Thumb, 126 bytes, Stack size 36 bytes, exemplotiva.o(.text))
+<BR><BR>[Stack]<UL><LI>Max Depth = 36<LI>Call Chain = resizeImage2
+</UL>
+<BR>[Called By]<UL><LI><a href="#[92]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
+</UL>
+
 <P><STRONG><a name="[92]"></a>main</STRONG> (Thumb, 38 bytes, Stack size 0 bytes, exemplotiva.o(.text))
 <BR><BR>[Stack]<UL><LI>Max Depth = 136 + Unknown Stack Size
 <LI>Call Chain = main &rArr; init_all &rArr; cfaf128x128x16Init &rArr; cfaf128x128x16Clear &rArr; cfaf128x128x16ClearColor &rArr; cfaf128x128x16Rect &rArr; cfaf128x128x16SetWindow &rArr; cfaf128x128x16WriteData &rArr; cfaf128x128x16SsiTransfer
 </UL>
-<BR>[Calls]<UL><LI><a href="#[be]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;resizeImage
+<BR>[Calls]<UL><LI><a href="#[be]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;resizeImage2
 <LI><a href="#[bd]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;clearDisplay
 <LI><a href="#[bb]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;drawImage
 <LI><a href="#[bf]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;updateImageState
@@ -561,10 +566,6 @@ Global Symbols
 <P><STRONG><a name="[147]"></a>EnableInterrupts</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, utils.o(.text), UNUSED)
 
 <P><STRONG><a name="[148]"></a>DisableInterrupts</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, utils.o(.text), UNUSED)
-
-<P><STRONG><a name="[be]"></a>resizeImage</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, image.o(.text))
-<BR><BR>[Called By]<UL><LI><a href="#[92]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
-</UL>
 
 <P><STRONG><a name="[b6]"></a>button_init</STRONG> (Thumb, 42 bytes, Stack size 8 bytes, buttons.o(.text))
 <BR><BR>[Stack]<UL><LI>Max Depth = 44<LI>Call Chain = button_init &rArr; GPIOPinTypeGPIOInput &rArr; GPIOPadConfigSet

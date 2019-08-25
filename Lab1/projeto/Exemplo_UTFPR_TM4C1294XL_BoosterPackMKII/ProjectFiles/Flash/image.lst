@@ -11,9 +11,9 @@ ARM Macro Assembler    Page 1
     4 00000000         
     5 00000000         
     6 00000000                 IMPORT           IMAGE_WIDTH
-    7 00000000                 IMPORT           IMAGE_HEIGTH
+    7 00000000                 IMPORT           IMAGE_HEIGHT
     8 00000000                 IMPORT           DISPLAY_WIDTH
-    9 00000000                 IMPORT           DISPLAY_HEIGTH
+    9 00000000                 IMPORT           DISPLAY_HEIGHT
    10 00000000                 IMPORT           images
    11 00000000                 IMPORT           image       ; The current image
                                                              being displayed
@@ -37,339 +37,515 @@ ARM Macro Assembler    Page 1
    25 00000000         ; them to another region with the ratio based on the sta
                        tes
    26 00000000         ;
-   27 00000000         ; Variables:
-   28 00000000         ; - R0: Current byte being copied
-   29 00000000         ; - R1: Address of the current byte being copied from ba
-                       se image (offset in memory - iterator)
-   30 00000000         ; - R2: Address of the current image that will be filled
-                       
-   31 00000000         ; - R3: Number of total bytes copied
-   32 00000000         ; - R4: Number of total bytes that need to be copied
-   33 00000000         ; - R5: Resize factor
-   34 00000000         ; - R6: Reduction flag
-   35 00000000         ; - R7: Number of times that one byte (R1) was copied
-   36 00000000         ; - R8: Number of times one byte needs to be copied (k^2
-                        - R5^2)
-   37 00000000         ;  *  cannot become **
-   38 00000000         ;   needs to be **
-   39 00000000         ;      **
-   40 00000000         ;   to keep things squared
-   41 00000000         ;
-   42 00000000         ; If the number of bytes we should copy is less than the
-                        default,
-   43 00000000         ; we will skip some bytes accordingly
-   44 00000000         ;
-   45 00000000         resizeImage
-   46 00000000 B500            PUSH{LR}
-   47 00000002         
-   48 00000002 4954            LDR              R1, =images ; Loading base imag
+   27 00000000         ; Algorithm:
+   28 00000000         ;
+   29 00000000         ; If expanding:
+   30 00000000         ;  For each row in the base image:
+   31 00000000         ;  For each column in the row:
+   32 00000000         ;   Get byte from base image
+   33 00000000         ;   Copy the byte in the target image in img[base_row:ba
+                       se_row+k][base_col:base_col+k]
+   35 00000000         ;               /\       /\          /\       / ;      
+                                ||       ||          ||    ||
+   36 00000000         ;              Will need 2 FORs inside (row + column)
+   37 00000000         ;   These will get a slot and transform in k^2:       |
+   38 00000000         ;   k = 2 ->  *  ->   * *           |
+   39 00000000         ;         * *           |
+   40 00000000         ;                    |
+   41 00000000         ; Else (if shrinking):               |
+   42 00000000         ; For each row in the base image:            |
+   43 00000000         ;  For each column in the row:            |
+   44 00000000         ;   Get byte from base image           |
+   45 00000000         ;   For each copied row: <------------------------------
+                       -------------/
+   46 00000000         ;    For each copied column:
+   47 00000000         ;     Copy the byte
+   48 00000000         ;     Add k to column iterator 
+   49 00000000         ;   Add k to row iterator
+   50 00000000         ;
 
 
 
 ARM Macro Assembler    Page 2 
 
 
+   51 00000000         ; Registers:
+   52 00000000         ; * These will be kept constant
+   53 00000000         ; R4 - Address from base image
+   54 00000000         ; R5 - Address from target image
+   55 00000000         ;
+   56 00000000         ; Will leave R0 free to do calculations and store values
+                       
+   57 00000000         ; for later insertion in memory
+   58 00000000         ;
+   59 00000000         ; The rest of the registers will be used for intermediar
+                       y calculations
+   60 00000000         ;
+   61 00000000         ; Memory structure:
+   62 00000000         ; Some values are there for convenience
+   63 00000000         ; If it works
+   64 00000000         ; @TODO: optimize memory - alocate registers for iterato
+                       rs and often accessed values
+   65 00000000         ;  and remove them from stack
+   66 00000000         ;
+   67 00000000         ;  -----------------  <- Previous stack pointer
+   68 00000000         ; |       SP        |
+   69 00000000         ; |-----------------|
+   70 00000000         ; |     Padding     |
+   71 00000000         ; |-----------------| <- Current stack pointer
+   72 00000000         ; |  Base img addr  | -0x04
+   73 00000000         ; | Target img addr | -0x08
+   74 00000000         ; |  Row max  | -0x09
+   75 00000000         ; |   Column max    | -0x0A
+   76 00000000         ; |  Resize factor  | -0x0B
+   77 00000000         ; | Reduction flag  | -0x0C
+   78 00000000         ; |   Row iterator  | -0x0D
+   79 00000000         ; | Column iterator | -0x0E
+   80 00000000         ; | Row copy itera  | -0x0F
+   81 00000000         ; | Col copy itera  | -0x10
+   82 00000000         ; |     .        |
+   83 00000000         ; |     .        |
+   84 00000000         ; |      .        |
+   85 00000000         ;
+   86 00000000         ; All information will be stored and accessed as BYTES
+   87 00000000         ;
+   88 00000000         ;
+   89 00000000         resizeImage
+   90 00000000 B500            PUSH{LR}
+   91 00000002         
+   92 00000002         ; Creating new stack frame
+   93 00000002 4668            MOV              R0, SP
+   94 00000004 B401            PUSH{R0}
+   95 00000006 F020 000F       AND              R0, #0xFFFFFFF0 
+                                                            ; Padding memory
+   96 0000000A F1A0 0020       SUB              R0, #0x20   ; Creating frame of
+                                                             32 Bytes (extra in
+                                                             case needed)
+   97 0000000E 4685            MOV              SP, R0      ; Updating stack po
+                                                            inter
+   98 00000010         
+   99 00000010         ; Getting images addresses
+  100 00000010 4962            LDR              R1, =images ; Loading base imag
                                                             es array address
-   49 00000004 4854            LDR              R0, =current_image ; Loading ad
-                                                            dress of index from
-                                                             current image in i
-                                                            mages array
-   50 00000006 7800            LDRB             R0, [R0]    ; Loading index fro
-                                                            m current image
-   51 00000008 4401            ADD              R1, R1, R0  ; Calculating base 
-                                                            image address
-   52 0000000A 6809            LDR              R1, [R1]    ; Loading base imag
-                                                            e address
-   53 0000000C 4A53            LDR              R2, =image  ; Loading base addr
-                                                            ess that will be fi
-                                                            lled with the image
-                                                            
-   54 0000000E F102 0202       ADD              R2, R2, #2  ; Adding offset fro
-                                                            m 2 bytes (uint8_t 
-                                                            width, heigth)
-   55 00000012         
-   56 00000012         
-   57 00000012         
-   58 00000012         ; Computes the number of times one byte will be copied t
-                       o the image
-   59 00000012 4853            LDR              R0, =current_state
-   60 00000014 7800            LDRB             R0, [R0]
-   61 00000016 F04F 0900       MOV              R9, #0
-   62 0000001A 4548            CMP              R0, R9
-   63 0000001C BF04            ITT              EQ
-   64 0000001E 2520            MOVEQ            R5, #32     ; Resize factor is 
-                                                            32
-   65 00000020 2601            MOVEQ            R6, #01     ; Image is shrinkin
-                                                            g
-   66 00000022         
-   67 00000022 F04F 0901       MOV              R9, #1
-   68 00000026 4548            CMP              R0, R9
-   69 00000028 BF04            ITT              EQ
-   70 0000002A 2510            MOVEQ            R5, #16     ; Resize factor is 
-                                                            16
-   71 0000002C 2601            MOVEQ            R6, #01     ; Image is shrinkin
-                                                            g
-   72 0000002E         
-   73 0000002E F04F 0902       MOV              R9, #2
-   74 00000032 4548            CMP              R0, R9
-   75 00000034 BF04            ITT              EQ
-   76 00000036 2508            MOVEQ            R5, #08     ; Resize factor is 
-                                                            08
-   77 00000038 2601            MOVEQ            R6, #01     ; Image is shrinkin
-                                                            g
-   78 0000003A         
-   79 0000003A F04F 0903       MOV              R9, #3
-   80 0000003E 4548            CMP              R0, R9
-   81 00000040 BF04            ITT              EQ
-   82 00000042 2504            MOVEQ            R5, #04     ; Resize factor is 
-                                                            04
-   83 00000044 2601            MOVEQ            R6, #01     ; Image is shrinkin
-                                                            g
-   84 00000046         
-   85 00000046 F04F 0904       MOV              R9, #4
-   86 0000004A 4548            CMP              R0, R9
+  101 00000012 4863            LDR              R0, =current_image ; Loading ad
 
 
 
 ARM Macro Assembler    Page 3 
 
 
-   87 0000004C BF04            ITT              EQ
-   88 0000004E 2502            MOVEQ            R5, #02     ; Resize factor is 
-                                                            02
-   89 00000050 2601            MOVEQ            R6, #01     ; Image is shrinkin
-                                                            g
-   90 00000052         
-   91 00000052 F04F 0905       MOV              R9, #5
-   92 00000056 4548            CMP              R0, R9
-   93 00000058 BF04            ITT              EQ
-   94 0000005A 2501            MOVEQ            R5, #01     ; Resize factor is 
-                                                            01
-   95 0000005C 2600            MOVEQ            R6, #00     ; Image is "expandi
-                                                            ng" (1B will be cop
-                                                            ied)
-   96 0000005E         
-   97 0000005E         
-   98 0000005E F04F 0906       MOV              R9, #6
-   99 00000062 4548            CMP              R0, R9
-  100 00000064 BF04            ITT              EQ
-  101 00000066 2502            MOVEQ            R5, #02     ; Resize factor is 
-                                                            02
-  102 00000068 2600            MOVEQ            R6, #00     ; Image is expandin
-                                                            g
-  103 0000006A         
-  104 0000006A F04F 0907       MOV              R9, #7
-  105 0000006E 4548            CMP              R0, R9
-  106 00000070 BF04            ITT              EQ
-  107 00000072 2504            MOVEQ            R5, #04     ; Resize factor is 
-                                                            04
-  108 00000074 2600            MOVEQ            R6, #00     ; Image is expandin
-                                                            g
-  109 00000076         
-  110 00000076 F04F 0908       MOV              R9, #8
-  111 0000007A 4548            CMP              R0, R9
-  112 0000007C BF04            ITT              EQ
-  113 0000007E 2508            MOVEQ            R5, #08     ; Resize factor is 
-                                                            08
-  114 00000080 2600            MOVEQ            R6, #00     ; Image is expandin
-                                                            g
-  115 00000082         
-  116 00000082 F04F 0909       MOV              R9, #9
-  117 00000086 4548            CMP              R0, R9
-  118 00000088 BF04            ITT              EQ
-  119 0000008A 2510            MOVEQ            R5, #16     ; Resize factor is 
-                                                            16
-  120 0000008C 2600            MOVEQ            R6, #00     ; Image is expandin
-                                                            g
-  121 0000008E         
-  122 0000008E F04F 090A       MOV              R9, #10
-  123 00000092 4548            CMP              R0, R9
-  124 00000094 BF04            ITT              EQ
-  125 00000096 2520            MOVEQ            R5, #32     ; Resize factor is 
+                                                            dress of index from
+                                                             current image in i
+                                                            mages array
+  102 00000014 7800            LDRB             R0, [R0]    ; Loading index fro
+                                                            m current image
+  103 00000016 4401            ADD              R1, R1, R0  ; Calculating addre
+                                                            ss for base image a
+                                                            ddress
+  104 00000018 680C            LDR              R4, [R1]    ; Loading base imag
+                                                            e address
+  105 0000001A         
+  106 0000001A F84D 4C04       STR              R4, [SP, #-0x04] ; Storing base
+                                                             image address
+  107 0000001E         
+  108 0000001E 4A61            LDR              R2, =image  ; Loading address t
+                                                            hat will be filled 
+                                                            with the image
+  109 00000020 F102 0502       ADD              R5, R2, #2  ; Adding offset fro
+                                                            m 2 bytes (uint8_t 
+                                                            width, height)
+  110 00000024         
+  111 00000024 F84D 5C08       STR              R5, [SP, #-0x08] ; Storing targ
+                                                            et image address
+  112 00000028         
+  113 00000028         
+  114 00000028         ; Gets resize factor and shrinking flag
+  115 00000028 485F            LDR              R0, =current_state
+  116 0000002A 7800            LDRB             R0, [R0]
+  117 0000002C F04F 0100       MOV              R1, #0
+  118 00000030 4288            CMP              R0, R1
+  119 00000032 BF04            ITT              EQ
+  120 00000034 2220            MOVEQ            R2, #32     ; Resize factor is 
                                                             32
-  126 00000098 2600            MOVEQ            R6, #00     ; Image is expandin
+  121 00000036 2301            MOVEQ            R3, #01     ; Image is shrinkin
                                                             g
-  127 0000009A         
-  128 0000009A         
-  129 0000009A         
-  130 0000009A         ; Computing number of bytes that needs to be copied
+  122 00000038         
+  123 00000038 F04F 0101       MOV              R1, #1
+  124 0000003C 4288            CMP              R0, R1
+  125 0000003E BF04            ITT              EQ
+  126 00000040 2210            MOVEQ            R2, #16     ; Resize factor is 
+                                                            16
+  127 00000042 2301            MOVEQ            R3, #01     ; Image is shrinkin
+                                                            g
+  128 00000044         
+  129 00000044 F04F 0102       MOV              R1, #2
+  130 00000048 4288            CMP              R0, R1
+  131 0000004A BF04            ITT              EQ
+  132 0000004C 2208            MOVEQ            R2, #08     ; Resize factor is 
+                                                            08
+  133 0000004E 2301            MOVEQ            R3, #01     ; Image is shrinkin
+                                                            g
+  134 00000050         
+  135 00000050 F04F 0103       MOV              R1, #3
+  136 00000054 4288            CMP              R0, R1
+  137 00000056 BF04            ITT              EQ
+  138 00000058 2204            MOVEQ            R2, #04     ; Resize factor is 
+                                                            04
+  139 0000005A 2301            MOVEQ            R3, #01     ; Image is shrinkin
+                                                            g
 
 
 
 ARM Macro Assembler    Page 4 
 
 
-  131 0000009A F8DF 90C8       LDR              R9, =IMAGE_WIDTH
-  132 0000009E F899 9000       LDRB             R9, [R9]
-  133 000000A2 F8DF A0C4       LDR              R10, =IMAGE_HEIGTH
-  134 000000A6 F89A A000       LDRB             R10, [R10]
-  135 000000AA FB0A FA09       MUL              R10, R10, R9
-  136 000000AE FB05 F905       MUL              R9, R5, R5  ; Resize factor ^ 2
-                                                            
-  137 000000B2 FB0A F409       MUL              R4, R10, R9 ; Computing how man
-                                                            y bytes in total wi
-                                                            ll be copied
-  138 000000B6 F8DF 90B4       LDR              R9, =DISPLAY_WIDTH
-  139 000000BA F899 9000       LDRB             R9, [R9]
-  140 000000BE F8DF A0B0       LDR              R10, =DISPLAY_HEIGTH
-  141 000000C2 F89A A000       LDRB             R10, [R10]
-  142 000000C6 FB09 F90A       MUL              R9, R9, R10 ; Computing how man
-                                                            y bytes are there i
-                                                            n the display
-  143 000000CA 45A1            CMP              R9, R4
-  144 000000CC BFD8            IT               LE
-  145 000000CE 464C            MOVLE            R4, R9      ; If less, sets as 
-                                                            the maximum for the
-                                                             display
-  146 000000D0 F04F 0300       MOV              R3, #0      ; Total of bytes al
-                                                            ready copied
-  147 000000D4 FB05 F805       MUL              R8, R5, R5  ; Calculates how ma
-                                                            ny bytes needs to b
-                                                            e copied if expandi
-                                                            ng
-  148 000000D8         
-  149 000000D8         CopyLoop
-  150 000000D8 42A3            CMP              R3, R4      ; Checking if alrea
-                                                            dy copied all the b
-                                                            ytes
-  151 000000DA DA18            BGE              EEnd        ; Finisheds if so
-  152 000000DC F04F 0900       MOV              R9, #0
-  153 000000E0 7808            LDRB             R0, [R1]    ; Gets byte from ba
-                                                            se image
-  154 000000E2 454E            CMP              R6, R9      ; Checks if expandi
-                                                            ng
-  155 000000E4 D10E            BNE              Skip        ; If not, skip k by
-                                                            tes
-  156 000000E6         ; Copy k bytes
-  157 000000E6 F04F 0700       MOV              R7, #0      ; Initializes numbe
-                                                            r of times the byte
-                                                             was copied
-  158 000000EA         CopyRepeatLoop
-  159 000000EA 4547            CMP              R7, R8      ; Checks if copied 
-                                                            k bytes
-  160 000000EC D007            BEQ              CopyRepeatEnd ; Finishes with t
-                                                            he current byte and
-                                                             increment base ima
-                                                            ge address
-  161 000000EE 7010            STRB             R0, [R2]    ; Stores byte in de
-                                                            stination image
-  162 000000F0 F107 0701       ADD              R7, #1      ; Increment the num
-                                                            ber of times the by
-                                                            te was copied
-  163 000000F4 F103 0301       ADD              R3, #1      ; Increment the num
-                                                            ber of total copied
+  140 0000005C         
+  141 0000005C F04F 0104       MOV              R1, #4
+  142 00000060 4288            CMP              R0, R1
+  143 00000062 BF04            ITT              EQ
+  144 00000064 2202            MOVEQ            R2, #02     ; Resize factor is 
+                                                            02
+  145 00000066 2301            MOVEQ            R3, #01     ; Image is shrinkin
+                                                            g
+  146 00000068         
+  147 00000068 F04F 0105       MOV              R1, #5
+  148 0000006C 4288            CMP              R0, R1
+  149 0000006E BF04            ITT              EQ
+  150 00000070 2201            MOVEQ            R2, #01     ; Resize factor is 
+                                                            01
+  151 00000072 2300            MOVEQ            R3, #00     ; Image is "expandi
+                                                            ng" (1B will be cop
+                                                            ied)
+  152 00000074         
+  153 00000074         
+  154 00000074 F04F 0106       MOV              R1, #6
+  155 00000078 4288            CMP              R0, R1
+  156 0000007A BF04            ITT              EQ
+  157 0000007C 2202            MOVEQ            R2, #02     ; Resize factor is 
+                                                            02
+  158 0000007E 2300            MOVEQ            R3, #00     ; Image is expandin
+                                                            g
+  159 00000080         
+  160 00000080 F04F 0107       MOV              R1, #7
+  161 00000084 4288            CMP              R0, R1
+  162 00000086 BF04            ITT              EQ
+  163 00000088 2204            MOVEQ            R2, #04     ; Resize factor is 
+                                                            04
+  164 0000008A 2300            MOVEQ            R3, #00     ; Image is expandin
+                                                            g
+  165 0000008C         
+  166 0000008C F04F 0108       MOV              R1, #8
+  167 00000090 4288            CMP              R0, R1
+  168 00000092 BF04            ITT              EQ
+  169 00000094 2208            MOVEQ            R2, #08     ; Resize factor is 
+                                                            08
+  170 00000096 2300            MOVEQ            R3, #00     ; Image is expandin
+                                                            g
+  171 00000098         
+  172 00000098 F04F 0109       MOV              R1, #9
+  173 0000009C 4288            CMP              R0, R1
+  174 0000009E BF04            ITT              EQ
+  175 000000A0 2210            MOVEQ            R2, #16     ; Resize factor is 
+                                                            16
+  176 000000A2 2300            MOVEQ            R3, #00     ; Image is expandin
+                                                            g
+  177 000000A4         
+  178 000000A4 F04F 010A       MOV              R1, #10
+  179 000000A8 4288            CMP              R0, R1
+  180 000000AA BF04            ITT              EQ
+  181 000000AC 2220            MOVEQ            R2, #32     ; Resize factor is 
+                                                            32
+  182 000000AE 2300            MOVEQ            R3, #00     ; Image is expandin
+                                                            g
+  183 000000B0         
 
 
 
 ARM Macro Assembler    Page 5 
 
 
-                                                             bytes
-  164 000000F8 F101 0101       ADD              R1, #1      ; Incrementing targ
-                                                            et image address
-  165 000000FC E7F5            B                CopyRepeatLoop
-  166 000000FE         CopyRepeatEnd
-  167 000000FE         ; Needs to be here, because we want to copy the same byt
-                       e
-  168 000000FE         ; k (R5) times, and increment base address just by 1
-  169 000000FE F102 0201       ADD              R2, #1      ; Incrementing base
-                                                             image address
-  170 00000102 E7E9            B                CopyLoop
-  171 00000104         Skip
-  172 00000104 7010            STRB             R0, [R2]
-  173 00000106 442A            ADD              R2, R2, R5  ; Adding k to the a
-                                                            ddress (skipping k 
-                                                            bytes)
-  174 00000108 F103 0301       ADD              R3, R3, #1  ; Incrementing tota
-                                                            l of bytes copied
-  175 0000010C E7E4            B                CopyLoop
-  176 0000010E         
-  177 0000010E         EEnd
-  178 0000010E         
-  179 0000010E F85D EB04       POP{LR}
-  180 00000112 4770            BX               LR
-  181 00000114         
-  182 00000114         ; Function to compute the next byte that should be copie
-                       d
-  183 00000114         ; If image is being enlarged by a factor of 2, the byte 
-                       is copied 2 times
-  184 00000114         ; If image is being reduced by a factor of 2, we should 
-                       skip 1 byte (copy one
-  185 00000114         ; ignore one)
-  186 00000114         ; And so on
-  187 00000114         ;
-  188 00000114         ; Input:
-  189 00000114         ; - R3: Number of times the byte was already copied
-  190 00000114         ; - R4: Number of times the byte should be copied
-  191 00000114         ;
-  192 00000114         ; Variables:
-  193 00000114         ; We cannot mess with the registers being used in the ot
-                       her function,
-  194 00000114         ; so we'll use the ones above R7
-  195 00000114         ; - R8: Current state of the image (used to see which of
-                        the actions to take
-  196 00000114         ;
-  197 00000114         GetNextByte
-  198 00000114 F8DF 8048       LDR              R8, =current_state
-  199 00000118 F1B8 0F00       CMP              R8, #0
-  200 0000011C BF08            IT               EQ
-  201 0000011E 3120            ADDEQ            R1, R1, #32 ; Skips 32 bytes an
-                                                            d continue copying
-  202 00000120         
-  203 00000120 F1B8 0F01       CMP              R8, #1
-  204 00000124 BF08            IT               EQ
-  205 00000126 3110            ADDEQ            R1, R1, #16 ; Skips 32 bytes an
-                                                            d continue copying
-  206 00000128         
-  207 00000128 F1B8 0F02       CMP              R8, #2
-  208 0000012C BF08            IT               EQ
+  184 000000B0 F80D 2C0B       STRB             R2, [SP, #-0x0B] ; Storing resi
+                                                            ze factor
+  185 000000B4 F80D 3C0C       STRB             R3, [SP, #-0x0C] ; Storing shri
+                                                            nking flag
+  186 000000B8         
+  187 000000B8         
+  188 000000B8 493A            LDR              R1, =image
+  189 000000BA 7808            LDRB             R0, [R1]    ; Loading height (o
+                                                            ffset 0 inside stru
+                                                            ct - row max)
+  190 000000BC F80D 0C09       STRB             R0, [SP, #-0x09] 
+                                                            ; Storing max rows
+  191 000000C0         
+  192 000000C0 4938            LDR              R1, =image
+  193 000000C2 7848            LDRB             R0, [R1, #1] ; Loading width (c
+                                                            olumn max)
+  194 000000C4 F80D 0C0A       STRB             R0, [SP, #-0x0A] ; Storing max 
+                                                            columns
+  195 000000C8         
+  196 000000C8         ; Initializing iterators in memory
+  197 000000C8 F04F 0000       MOV              R0, #0      ; Initializing as 0
+                                                            
+  198 000000CC F80D 0C0D       STRB             R0, [SP, #-0x0D] ; Initializing
+                                                             row iterator
+  199 000000D0 F80D 0C0E       STRB             R0, [SP, #-0x0E] ; Initializing
+                                                             col iterator
+  200 000000D4 F80D 0C0F       STRB             R0, [SP, #-0x0F] ; Initializing
+                                                             row copy iterator
+  201 000000D8 F80D 0C10       STRB             R0, [SP, #-0x10] ; Initializing
+                                                             col copy iterator
+  202 000000DC         
+  203 000000DC         ForRow
+  204 000000DC         ; Must be done for when branching from code inside this 
+                       for
+  205 000000DC F81D 0C0D       LDRB             R0, [SP, #-0x0D] ; Loading row 
+                                                            iterator
+  206 000000E0 F81D 1C09       LDRB             R1, [SP, #-0x09] 
+                                                            ; Loading max rows
+  207 000000E4 4288            CMP              R0, R1      ; If finished with 
+                                                            rows
+  208 000000E6 DA53            BGE              EEnd        ; Return
+  209 000000E8         
+  210 000000E8         ForColumn
+  211 000000E8 F81D 0C0E       LDRB             R0, [SP, #-0x0E] ; Loading colu
+                                                            mn iterator
+  212 000000EC F81D 1C0A       LDRB             R1, [SP, #-0x0A] ; Loading max 
+                                                            columns
+  213 000000F0 4288            CMP              R0, R1      ; If finished with 
+                                                            columns
+  214 000000F2 DB06            BLT              ForColumnCont
+  215 000000F4         ForColumnEnd
+  216 000000F4 F81D 0C0D       LDRB             R0, [SP, #-0x0D] ; Loading row 
+                                                            iterator
+  217 000000F8 F100 0001       ADD              R0, R0, #1  ; Incrementing
+  218 000000FC F80D 0C0D       STRB             R0, [SP, #-0x0D] ; Storing back
+                                                            
+  219 00000100 E7EC            B                ForRow      ; Go to next row
+  220 00000102         ForColumnCont
+  221 00000102 F81D 0C0C       LDRB             R0, [SP, #-0x0C] ; Loading redu
 
 
 
 ARM Macro Assembler    Page 6 
 
 
-  209 0000012E 3108            ADDEQ            R1, R1, #8  ; Skips 32 bytes an
-                                                            d continue copying
-  210 00000130         
-  211 00000130 F1B8 0F03       CMP              R8, #3
-  212 00000134 BF08            IT               EQ
-  213 00000136 1D09            ADDEQ            R1, R1, #4  ; Skips 32 bytes an
-                                                            d continue copying
-  214 00000138         
-  215 00000138 F1B8 0F04       CMP              R8, #4
-  216 0000013C BF08            IT               EQ
-  217 0000013E 1C89            ADDEQ            R1, R1, #2  ; Skips 32 bytes an
-                                                            d continue copying
-  218 00000140         
-  219 00000140         ; Now it gets more complicated
-  220 00000140         ; If the image is getting bigger
-  221 00000140         ; we need to make sure the byte is copied more X times
-  222 00000140         ; We can use this code segment to everyone
-  223 00000140 42A3            CMP              R3, R4      ; Checks if the byt
-                                                            e was copied the ri
-                                                            ght
-  224 00000142         ; ammount of times
-  225 00000142 D103            BNE              CopyEnd     ; Skips if not
-  226 00000144 BF08 1C49       ADDEQ            R1, R1, #1  ; Increments the by
-                                                            te address
-  227 00000148 F04F 0300       MOV              R3, #0      ; Restarts the numb
-                                                            er of times the byt
-                                                            e was copied
-  228 0000014C         
-  229 0000014C         
-  230 0000014C         CopyEnd
-  231 0000014C BF08 6808       LDREQ            R0, [R1]    ; Loads next byte t
-                                                            o be copied in R0
-  232 00000150 4770            BX               LR
-  233 00000152         
-  234 00000152         
-  235 00000152 00 00           ALIGN
-  236 00000154                 END
-              00000000 
-              00000000 
-              00000000 
-              00000000 
+                                                            ction flag
+  222 00000106 2801            CMP              R0, #1      ; Checks if is redu
+                                                            cing the size
+  223 00000108 D03F            BEQ              SkipBytes
+  224 0000010A         
+  225 0000010A F04F 0000       MOV              R0, #0      ; Initializing row 
+                                                            copy iterator
+  226 0000010E F80D 0C0F       STRB             R0, [SP, #-0xF] ; Must be done 
+                                                            every time it enter
+                                                            s this scope
+  227 00000112         
+  228 00000112         ; Starting new copy cycle
+  229 00000112         CopyForRow
+  230 00000112 F81D 0C0F       LDRB             R0, [SP, #-0x0F] ; Loading row 
+                                                            copy iterator
+  231 00000116 F81D 1C0B       LDRB             R1, [SP, #-0x0B] ; Loading resi
+                                                            ze factor
+  232 0000011A 4288            CMP              R0, R1      ; If finished with 
+                                                            copying the rows
+  233 0000011C DB06            BLT              CopyForRowCont
+  234 0000011E         
+  235 0000011E         CopyForRowEnd
+  236 0000011E F81D 0C0E       LDRB             R0, [SP, #-0x0E] ; Loading colu
+                                                            mn iterator
+  237 00000122 F100 0001       ADD              R0, #1      ; Incrementing it
+  238 00000126 F80D 0C0E       STRB             R0, [SP, #-0x0E] ; Storing back
+                                                            
+  239 0000012A E7DD            B                ForColumn   ; Continuing with o
+                                                            uter column loop
+  240 0000012C         
+  241 0000012C         CopyForRowCont
+  242 0000012C F04F 0000       MOV              R0, #0      ; Initializing colu
+                                                            mn copy iterator
+  243 00000130 F80D 0C10       STRB             R0, [SP, #-0x10] ; Storing to b
+                                                            e accesses inside c
+                                                            opy column label
+  244 00000134         
+  245 00000134         ; Copying row of bytes
+  246 00000134         CopyForColumn
+  247 00000134 F81D 0C10       LDRB             R0, [SP, #-0x10] ; Loading colu
+                                                            mn copy iterator
+  248 00000138 F81D 1C0B       LDRB             R1, [SP, #-0x0B] ; Loading resi
+                                                            ze factor
+  249 0000013C         
+  250 0000013C 4288            CMP              R0, R1      ; If finished copyi
+                                                            ng columns
+  251 0000013E DB06            BLT              CopyForColumnCont
+  252 00000140         
+  253 00000140         CopyForColumnEnd
+  254 00000140 F81D 0C0F       LDRB             R0, [SP, #-0x0F] ; Loading row 
+                                                            copy iterator
+  255 00000144 F100 0001       ADD              R0, #1      ; Incrementing it
+  256 00000148 F80D 0C0F       STRB             R0, [SP, #-0x0F] ; Storing back
+                                                            
+  257 0000014C E7E1            B                CopyForRow  ; Continuing with n
+                                                            ext row
+  258 0000014E         
+  259 0000014E         CopyForColumnCont
+  260 0000014E         ; Computing address in target image for byte
+
+
+
+ARM Macro Assembler    Page 7 
+
+
+  261 0000014E F85D 2C0F       LDR              R2, [SP, #-0x0F] ; Loading row 
+                                                            copy iterator
+  262 00000152 4603            MOV              R3, R0      ; Moving col copy i
+                                                            terator
+  263 00000154         ; Resize factor is in r1
+  264 00000154 FB02 F201       MUL              R2, R2, R1  ; R2 = resize_facto
+                                                            r * row_copy_iter
+  265 00000158 441A            ADD              R2, R2, R3  ; R2 = resize_facto
+                                                            r * row_copy_iter +
+                                                             col_copy_iter
+  266 0000015A F85D 1C08       LDR              R1, [SP, #-0x08] ; Loading targ
+                                                            et image base addre
+                                                            ss
+  267 0000015E 4411            ADD              R1, R1, R2  ; R1 = row + col + 
+                                                            resize_factor * row
+                                                            _copy_iter + col_co
+                                                            py_iter
+  268 00000160         ; Address of the target byte is in R1
+  269 00000160 F85D 2C04       LDR              R2, [SP, #-0x04] ; Loading base
+                                                             image base address
+                                                             - base_image[0][0]
+                                                            
+  270 00000164         ; We should copy image[row][column]
+  271 00000164         ; image[row*col_max + column]
+  272 00000164         ; address = base + row*col_max + column
+  273 00000164 F81D 3C0D       LDRB             R3, [SP, #-0x0D] ; Loading row 
+                                                            iterator
+  274 00000168 F81D 4C0E       LDRB             R4, [SP, #-0x0E] ; Loading colu
+                                                            mn iterator
+  275 0000016C F81D 5C0A       LDRB             R5, [SP, #-0x0A] 
+                                                            ; Loading col_max
+  276 00000170 FB03 F305       MUL              R3, R3, R5  ; R3 = row*col_max
+  277 00000174 4423            ADD              R3, R3, R4  ; R3 = row*col_max 
+                                                            + column
+  278 00000176 441A            ADD              R2, R2, R3  ; R2 = base_image_a
+                                                            ddress + row*col_ma
+                                                            x + column
+  279 00000178 7810            LDRB             R0, [R2]    ; Loading byte to b
+                                                            e copied
+  280 0000017A 7008            STRB             R0, [R1]    ; Storing copied by
+                                                            te
+  281 0000017C         
+  282 0000017C         ; Incrementing col_copy_iter
+  283 0000017C F81D 0C10       LDRB             R0, [SP, #-0x10]
+  284 00000180 F100 0001       ADD              R0, #1
+  285 00000184 F80D 0C10       STRB             R0, [SP, #-0x10]
+  286 00000188 E7D4            B                CopyForColumn
+  287 0000018A         
+  288 0000018A         ; @TODO: Finish skip bytes function
+  289 0000018A         SkipBytes
+  290 0000018A E001            B                EEnd
+  291 0000018C E7AC            B                ForColumn
+  292 0000018E         
+  293 0000018E         
+  294 0000018E         
+  295 0000018E         
+  296 0000018E         
+  297 0000018E         
+  298 0000018E         
+
+
+
+ARM Macro Assembler    Page 8 
+
+
+  299 0000018E         
+  300 0000018E         
+  301 0000018E         
+  302 0000018E         
+  303 0000018E         
+  304 0000018E         
+  305 0000018E         
+  306 0000018E E7FF            B                EEnd
+  307 00000190         
+  308 00000190         
+  309 00000190         
+  310 00000190         
+  311 00000190         ;Old 
+  312 00000190         ;  ; Computing number of bytes that needs to be copied
+  313 00000190         ;  LDR R9, =IMAGE_WIDTH
+  314 00000190         ;  LDRB R9, [R9]
+  315 00000190         ;  LDR R10, =IMAGE_HEIGHT
+  316 00000190         ;  LDRB R10, [R10]
+  317 00000190         ;  MUL R10, R10, R9
+  318 00000190         ;  MUL R9, R5, R5   ; Resize factor ^ 2
+  319 00000190         ;  MUL R4, R10, R9   ; Computing how many bytes in total
+                        will be copied
+  320 00000190         ;  LDR R9, =DISPLAY_WIDTH
+  321 00000190         ;  LDRB R9, [R9]
+  322 00000190         ;  LDR R10, =DISPLAY_HEIGHT
+  323 00000190         ;  LDRB R10, [R10]
+  324 00000190         ;  MUL R9, R9, R10  ; Computing how many bytes are there
+                        in the display
+  325 00000190         ;  CMP R9, R4
+  326 00000190         ;  IT LE
+  327 00000190         ;   MOVLE R4, R9  ; If less, sets as the maximum for the
+                        display
+  328 00000190         ;  MOV R3, #0    ; Total of bytes already copied
+  329 00000190         ;  MUL R8, R5, R5   ; Calculates how many bytes needs to
+                        be copied if expanding
+  330 00000190         
+  331 00000190         ;CopyLoop
+  332 00000190         ;  CMP R3, R4    ; Checking if already copied all the by
+                       tes
+  333 00000190         ;  BGE EEnd    ; Finisheds if so
+  334 00000190         ;  MOV R9, #0
+  335 00000190         ;  LDRB R0, [R1]   ; Gets byte from base image
+  336 00000190         ;  CMP R6, R9    ; Checks if expanding
+  337 00000190         ;  BNE Skip    ; If not, skip k bytes
+  338 00000190         ;  ; Copy k bytes
+  339 00000190         ;  MOV R7, #0    ; Initializes number of times the byte 
+                       was copied
+  340 00000190         ;CopyRepeatLoop
+  341 00000190         ;  CMP R7, R8    ; Checks if copied k bytes
+  342 00000190         ;  BEQ CopyRepeatEnd  ; Finishes with the current byte a
+                       nd increment base image address
+  343 00000190         ;  STRB R0, [R2]   ; Stores byte in destination image
+  344 00000190         ;  ADD R7, #1    ; Increment the number of times the byt
+                       e was copied
+  345 00000190         ;  ADD R3, #1    ; Increment the number of total copied 
+                       bytes
+  346 00000190         ;  ADD R1, #1    ; Incrementing target image address
+  347 00000190         ;  B CopyRepeatLoop
+  348 00000190         ;CopyRepeatEnd
+
+
+
+ARM Macro Assembler    Page 9 
+
+
+  349 00000190         ;  ; Needs to be here, because we want to copy the same 
+                       byte
+  350 00000190         ;  ; k (R5) times, and increment base address just by 1
+  351 00000190         ;  ADD R2, #1    ; Incrementing base image address
+  352 00000190         ;  B CopyLoop
+  353 00000190         ;Skip
+  354 00000190         ;  STRB R0, [R2]
+  355 00000190         ;  ADD R2, R2, R5   ; Adding k to the address (skipping 
+                       k bytes)
+  356 00000190         ;  ADD R3, R3, #1   ; Incrementing total of bytes copied
+                       
+  357 00000190         ;  B CopyLoop
+  358 00000190         
+  359 00000190         EEnd
+  360 00000190 BC01            POP{R0}
+  361 00000192 4685            MOV              SP, R0
+  362 00000194 F85D EB04       POP{LR}
+  363 00000198 4770            BX               LR
+  364 0000019A         
+  365 0000019A         
+  366 0000019A 00 00           ALIGN
+  367 0000019C                 END
               00000000 
               00000000 
               00000000 
@@ -396,123 +572,165 @@ Symbol: .text
    Uses
       None
 Comment: .text unused
-CopyEnd 0000014C
+CopyForColumn 00000134
 
-Symbol: CopyEnd
+Symbol: CopyForColumn
    Definitions
-      At line 230 in file image.s
+      At line 246 in file image.s
    Uses
-      At line 225 in file image.s
-Comment: CopyEnd used once
-CopyLoop 000000D8
+      At line 286 in file image.s
+Comment: CopyForColumn used once
+CopyForColumnCont 0000014E
 
-Symbol: CopyLoop
+Symbol: CopyForColumnCont
    Definitions
-      At line 149 in file image.s
+      At line 259 in file image.s
    Uses
-      At line 170 in file image.s
-      At line 175 in file image.s
+      At line 251 in file image.s
+Comment: CopyForColumnCont used once
+CopyForColumnEnd 00000140
 
-CopyRepeatEnd 000000FE
-
-Symbol: CopyRepeatEnd
+Symbol: CopyForColumnEnd
    Definitions
-      At line 166 in file image.s
-   Uses
-      At line 160 in file image.s
-Comment: CopyRepeatEnd used once
-CopyRepeatLoop 000000EA
-
-Symbol: CopyRepeatLoop
-   Definitions
-      At line 158 in file image.s
-   Uses
-      At line 165 in file image.s
-Comment: CopyRepeatLoop used once
-EEnd 0000010E
-
-Symbol: EEnd
-   Definitions
-      At line 177 in file image.s
-   Uses
-      At line 151 in file image.s
-Comment: EEnd used once
-GetNextByte 00000114
-
-Symbol: GetNextByte
-   Definitions
-      At line 197 in file image.s
+      At line 253 in file image.s
    Uses
       None
-Comment: GetNextByte unused
-Skip 00000104
+Comment: CopyForColumnEnd unused
+CopyForRow 00000112
 
+Symbol: CopyForRow
+   Definitions
+      At line 229 in file image.s
+   Uses
+      At line 257 in file image.s
+Comment: CopyForRow used once
+CopyForRowCont 0000012C
+
+Symbol: CopyForRowCont
+   Definitions
+      At line 241 in file image.s
+   Uses
+      At line 233 in file image.s
+Comment: CopyForRowCont used once
+CopyForRowEnd 0000011E
+
+Symbol: CopyForRowEnd
+   Definitions
+      At line 235 in file image.s
+   Uses
+      None
+Comment: CopyForRowEnd unused
+EEnd 00000190
+
+Symbol: EEnd
 
 
 
 ARM Macro Assembler    Page 2 Alphabetic symbol ordering
 Relocatable symbols
 
-Symbol: Skip
    Definitions
-      At line 171 in file image.s
+      At line 359 in file image.s
    Uses
-      At line 155 in file image.s
-Comment: Skip used once
+      At line 208 in file image.s
+      At line 290 in file image.s
+      At line 306 in file image.s
+
+ForColumn 000000E8
+
+Symbol: ForColumn
+   Definitions
+      At line 210 in file image.s
+   Uses
+      At line 239 in file image.s
+      At line 291 in file image.s
+
+ForColumnCont 00000102
+
+Symbol: ForColumnCont
+   Definitions
+      At line 220 in file image.s
+   Uses
+      At line 214 in file image.s
+Comment: ForColumnCont used once
+ForColumnEnd 000000F4
+
+Symbol: ForColumnEnd
+   Definitions
+      At line 215 in file image.s
+   Uses
+      None
+Comment: ForColumnEnd unused
+ForRow 000000DC
+
+Symbol: ForRow
+   Definitions
+      At line 203 in file image.s
+   Uses
+      At line 219 in file image.s
+Comment: ForRow used once
+SkipBytes 0000018A
+
+Symbol: SkipBytes
+   Definitions
+      At line 289 in file image.s
+   Uses
+      At line 223 in file image.s
+Comment: SkipBytes used once
 resizeImage 00000000
 
 Symbol: resizeImage
    Definitions
-      At line 45 in file image.s
+      At line 89 in file image.s
    Uses
       At line 15 in file image.s
 Comment: resizeImage used once
-9 symbols
+14 symbols
 
 
 
 ARM Macro Assembler    Page 1 Alphabetic symbol ordering
 External symbols
 
-DISPLAY_HEIGTH 00000000
+DISPLAY_HEIGHT 00000000
 
-Symbol: DISPLAY_HEIGTH
+Symbol: DISPLAY_HEIGHT
    Definitions
       At line 9 in file image.s
    Uses
-      At line 140 in file image.s
-Comment: DISPLAY_HEIGTH used once
+      None
+Comment: DISPLAY_HEIGHT unused
 DISPLAY_WIDTH 00000000
 
 Symbol: DISPLAY_WIDTH
    Definitions
       At line 8 in file image.s
    Uses
-      At line 138 in file image.s
-Comment: DISPLAY_WIDTH used once
-IMAGE_HEIGTH 00000000
+      None
+Comment: DISPLAY_WIDTH unused
+IMAGE_HEIGHT 00000000
 
-Symbol: IMAGE_HEIGTH
+Symbol: IMAGE_HEIGHT
    Definitions
       At line 7 in file image.s
    Uses
-      At line 133 in file image.s
-Comment: IMAGE_HEIGTH used once
+      None
+Comment: IMAGE_HEIGHT unused
 IMAGE_WIDTH 00000000
 
 Symbol: IMAGE_WIDTH
    Definitions
       At line 6 in file image.s
    Uses
-      At line 131 in file image.s
-Comment: IMAGE_WIDTH used once
+      None
+Comment: IMAGE_WIDTH unused
 current_image 00000000
 
 Symbol: current_image
    Definitions
       At line 12 in file image.s
    Uses
-      At line 49 in file image.s
+      At line 101 in file image.s
 Comment: current_image used once
 current_state 00000000
 
@@ -520,30 +738,31 @@ Symbol: current_state
    Definitions
       At line 13 in file image.s
    Uses
-      At line 59 in file image.s
-      At line 198 in file image.s
-
+      At line 115 in file image.s
+Comment: current_state used once
 image 00000000
 
 Symbol: image
    Definitions
       At line 11 in file image.s
    Uses
-      At line 53 in file image.s
-Comment: image used once
-images 00000000
+      At line 108 in file image.s
+      At line 188 in file image.s
+      At line 192 in file image.s
 
+images 00000000
 
 
 
 ARM Macro Assembler    Page 2 Alphabetic symbol ordering
 External symbols
 
+
 Symbol: images
    Definitions
       At line 10 in file image.s
    Uses
-      At line 48 in file image.s
+      At line 100 in file image.s
 Comment: images used once
 8 symbols
-355 symbols in table
+360 symbols in table

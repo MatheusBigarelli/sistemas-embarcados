@@ -29,9 +29,9 @@
 
 
 const uint8_t DISPLAY_WIDTH = 128;
-const uint8_t DISPLAY_HEIGTH = 128;
+const uint8_t DISPLAY_HEIGHT = 128;
 const uint8_t IMAGE_WIDTH = 48;
-const uint8_t IMAGE_HEIGTH = 32;
+const uint8_t IMAGE_HEIGHT = 32;
 
 
 extern void SysTick_Init(void);
@@ -45,9 +45,9 @@ unsigned char* images[] = {airplane_image, car_image};
 uint8_t current_image = 0;
 typedef struct
 {
-		uint8_t heigth;
+		uint8_t height;
 		uint8_t width;
-		unsigned char data[DISPLAY_WIDTH*DISPLAY_HEIGTH];
+		unsigned char data[DISPLAY_WIDTH*DISPLAY_HEIGHT];
 } Image;
 
 // States:
@@ -66,6 +66,7 @@ void clearDisplay(void);
 
 
 extern void resizeImage(void);
+void resizeImage2(void);
 
 /*----------------------------------------------------------------------------
  *    Initializations
@@ -97,11 +98,11 @@ int main (void) {
 	init_all();
 	// Sidelong menu creation
 	init_sidelong_menu();
-	image.heigth = 32;
+	image.height = 32;
 	image.width = 48;
 
   while(1){
-			resizeImage();
+			resizeImage2();
 			clearDisplay();
 			drawImage();
 			
@@ -121,11 +122,33 @@ int main (void) {
 }
 
 
+void resizeImage2(void)
+{
+		uint8_t row, col, row_copy, col_copy, resize_factor = 3;
+		for (row = 0; row < IMAGE_HEIGHT; row++)
+		{
+				for (col = 0; col < IMAGE_WIDTH; col++)
+				{
+						for (row_copy = 0; row_copy < resize_factor; row_copy++)
+						{
+								for (col_copy = 0; col_copy < resize_factor; col_copy++)
+								{
+										image.data[(row*IMAGE_WIDTH+col)*resize_factor*resize_factor + row_copy*IMAGE_WIDTH + col_copy] = 
+									images[current_image][row*IMAGE_WIDTH + col];
+								}
+						}
+				}
+		}
+		
+		image.height = 64;
+		image.width = 96;
+}
+
 
 void drawImage(void)
 {
 		uint8_t x, y;
-		for (y = 0; y < image.heigth; y++)
+		for (y = 0; y < image.height; y++)
 		{
 				for (x = 0; x < image.width	; x++)
 				{
@@ -162,10 +185,10 @@ void updateImageState(void)
 						going_up = 0;
 					
 						image.width *= 2;
-						image.heigth *= 2;
+						image.height *= 2;
 						
-						if (image.heigth > 128)
-							image.heigth = 128;
+						if (image.height > 128)
+							image.height = 128;
 						if (image.width > 128)
 							image.width = 128;
 				}
@@ -174,10 +197,10 @@ void updateImageState(void)
 				{
 						current_state++;
 						image.width *= 2;
-						image.heigth *= 2;
+						image.height *= 2;
 						
-						if (image.heigth > 128)
-							image.heigth = 128;
+						if (image.height > 128)
+							image.height = 128;
 						if (image.width > 128)
 							image.width = 128;
 					
@@ -195,13 +218,13 @@ void updateImageState(void)
 						going_up = 1;
 					
 						
-						image.heigth /= 2;
+						image.height /= 2;
 						image.width /= 2;
 						
 						// Needs to be at least 1, because we will
 						// multiply only, then it will get bigger again
-						if (image.heigth == 0)
-							image.heigth = 1;
+						if (image.height == 0)
+							image.height = 1;
 						if (image.width == 0)
 							image.width = 1;
 					
@@ -210,13 +233,13 @@ void updateImageState(void)
 		
 				else
 				{
-						image.heigth /= 2;
+						image.height /= 2;
 						image.width /= 2;
 						
 						// Needs to be at least 1, because we will
 						// multiply only, then it will get bigger again
-						if (image.heigth == 0)
-							image.heigth = 1;
+						if (image.height == 0)
+							image.height = 1;
 						if (image.width == 0)
 							image.width = 1;
 						
@@ -233,7 +256,7 @@ void clearDisplay(void)
 		// Need to invert colors, because GrPixelDraw()
 		// draws pixel with the foreground color
 		invertColors();
-		for (y = 0; y < DISPLAY_HEIGTH; y++)
+		for (y = 0; y < DISPLAY_HEIGHT; y++)
 		{
 				for (x = 0; x < DISPLAY_WIDTH; x++)
 				{
