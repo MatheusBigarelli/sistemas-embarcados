@@ -17,15 +17,11 @@ COL_ITER_OFFSET		EQU		-0x30
 
 		AREA |.text|, READONLY, CODE, ALIGN=2
 			
-			
-		IMPORT IMAGE_WIDTH
-		IMPORT IMAGE_HEIGHT
-		IMPORT DISPLAY_WIDTH
-		IMPORT DISPLAY_HEIGHT
 		IMPORT images
+		IMPORT image				; The current image being displayed
 		IMPORT current_image		; Index of the current image being displayed
 
-		EXPORT resizeImage
+		EXPORT resizeImageASM
 
 
 ; Function to resize the current image acording to the image state
@@ -71,16 +67,16 @@ COL_ITER_OFFSET		EQU		-0x30
 ; All information will be stored and accessed as WORDS (32 Bits)
 ;
 ;
-resizeImage
-		POP{R5}
+resizeImageASM
 		; Creating new stack frame
-		MOV R4, SP
-		MOV R5, R4
-		AND R4, #0xFFFFFFF0					; Padding memory
-		ADD R4, #0xA000						; Creating frame of 64 Bytes (extra in case needed)
-		MOV SP, R4							; Updating stack pointer
-		PUSH{R5}
-		PUSH{LR}
+		
+		MOV R5, SP
+		MOV R6, SP
+		AND R5, #0xFFFFFFF0					; Padding memory
+		SUB R5, #0x40						; Creating frame of 64 Bytes (extra in case needed)
+		MOV SP, R5							; Updating stack pointer
+		PUSH{R6}
+		PUSH{R4}
 		
 		; Storing parameters
 		STR R0, [SP, #H1_OFFSET]			; Storing h1
@@ -92,6 +88,8 @@ resizeImage
 		LDR R1, =images						; Loading base images array address
 		LDR R0, =current_image				; Loading address of index from current image in images array
 		LDR R0, [R0]						; Loading index from current image
+		MOV R2, #4
+		MUL R0, R0, R2						; Multiplying image index to match bytes
 		ADD R1, R1, R0						; Calculating address for base image address
 		LDR R4, [R1]						; Loading base image address
 		
@@ -187,10 +185,11 @@ ForColumnCont
 		B ForColumn
 	
 EEnd
-		POP{LR}
-		POP{R0}
 
+		POP{R4}
+		POP{R0}
 		MOV SP, R0
+		
 		
 		BX LR
 

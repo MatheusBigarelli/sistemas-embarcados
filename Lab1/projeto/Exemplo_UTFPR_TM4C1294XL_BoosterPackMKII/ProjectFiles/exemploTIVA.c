@@ -49,29 +49,36 @@ typedef struct
 {
 		int height;
 		int width;
-		unsigned char data[DISPLAY_WIDTH*DISPLAY_HEIGHT];
+		unsigned char data[16384];
 } Image;
+
+// States:
+//  0     1     2    3    4   5  6  7  8   9  10
+// 1/32  1/16  1/8  1/4  1/2  1  2  4  8  16  32
+int going_up = 1;
+
+Image image;
 
 
 void invertColors(void);
-void drawImage(Image image);
+void drawImage(void);
+void updateImageState(void);
 void clearDisplay(void);
 
-
-extern void resizeImage(int h1, int w1, int h2, int w2);
-void resizeImage2(Image* image, int* going_up, float* resizing_factor);
+extern int Test(void);
+extern void resizeImageASM(int h1, int w1, int h2, int w2);
+void resizeImage(void);
+//void resizeImage3(int h1, int w1, int h2, int w2);
 
 /*----------------------------------------------------------------------------
  *    Initializations
  *---------------------------------------------------------------------------*/
 
-void init_all(){
+void init(){
 	cfaf128x128x16Init();
 	button_init();
 	SysTick_Init();
-}
-
-void init_sidelong_menu(){
+	
 	GrContextInit(&sContext, &g_sCfaf128x128x16);
 	
 	GrFlush(&sContext);
@@ -81,28 +88,21 @@ void init_sidelong_menu(){
 	GrContextBackgroundSet(&sContext, ClrBlack);
 }
 
-
 /*----------------------------------------------------------------------------
  *      Main
  *---------------------------------------------------------------------------*/
 int main (void) {
 	
-	int going_up = 1;
-	float resize_factor = 1;
-	Image image;
-
-	
-	// Initializing all peripherals
-	init_all();
+	// Initializing buttons, display and SysTick
+	init();
 	// Sidelong menu creation
-	init_sidelong_menu();
 	image.height = 32;
 	image.width = 48;
 
   while(1){
-			resizeImage2(&image, &going_up, &resize_factor);
+			resizeImage();
 			clearDisplay();
-			drawImage(image);
+			drawImage();
 			
 			if (button_read_s1())
 					current_image = 1 - current_image;
@@ -114,40 +114,50 @@ int main (void) {
 }
 
 
-void resizeImage2(Image* image, int* going_up, float* resize_factor)
+void resizeImage(void)
 {
-		int i, j, h1 = 32, h2 = h1* (*resize_factor), w1 = 48, w2 = 48* (*resize_factor);
+		static float resize_factor = 1;
+		int h1 = 32, h2 = h1*resize_factor, w1 = 48, w2 = 48*resize_factor;
 	
-		int x_ratio = (int)((w1<<16)/w2) +1;
-    int y_ratio = (int)((h1<<16)/h2) +1;
-    int x2, y2 ;
 	
-//		resizeImage(h1, w1, h2, w2, image);
-    for (i=0;i<h2;i++)
-		{
-        for (j=0;j<w2;j++)
-				{
-            x2 = ((j*x_ratio)>>16) ;
-            y2 = ((i*y_ratio)>>16) ;
-            image->data[(i*w2)+j] = images[current_image][(y2*w1)+x2] ;
-        }                
-    }
+		image.height = h2;
+		image.width = w2;
+	
+		resizeImageASM(h1, w1, h2, w2);
+		//resizeImage3(h1, w1, h2, w2);
 
-		image->height = h2;
-		image->width = w2;
+
 	
 		if (going_up)
-				*resize_factor+=0.25;
+				resize_factor+=0.25;
 		else
-				*resize_factor-=0.25;
-		if (*resize_factor >= 3)
-				*going_up = 0;
-		if (*resize_factor <= 0.50)
-				*going_up = 1;
+				resize_factor-=0.25;
+		if (resize_factor >= 3)
+				going_up = 0;
+		if (resize_factor <= 0.50)
+				going_up = 1;
 }
 
+//void resizeImage3(int h1, int w1, int h2, int w2)
+//{
+//		int i, j;
+//		int x_ratio = (int)((w1<<16)/w2) +1;
+//    int y_ratio = (int)((h1<<16)/h2) +1;
+//    int x2, y2 ;
+//	
+//    for (i=0;i<h2;i++)
+//		{
+//        for (j=0;j<w2;j++)
+//				{
+//            x2 = ((j*x_ratio)>>16) ;
+//            y2 = ((i*y_ratio)>>16) ;
+//            image.data[(i*w2)+j] = images[current_image][(y2*w1)+x2] ;
+//        }                
+//    }
+//}
 
-void drawImage(Image image)
+
+void drawImage(void)
 {
 		uint8_t x, y;
 		for (y = 0; y < image.height; y++)

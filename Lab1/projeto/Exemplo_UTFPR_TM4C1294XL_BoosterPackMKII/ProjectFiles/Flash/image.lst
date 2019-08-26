@@ -44,300 +44,302 @@ ARM Macro Assembler    Page 1
    18 00000000                 AREA             |.text|, READONLY, CODE, ALIGN=
 2
    19 00000000         
-   20 00000000         
-   21 00000000                 IMPORT           IMAGE_WIDTH
-   22 00000000                 IMPORT           IMAGE_HEIGHT
-   23 00000000                 IMPORT           DISPLAY_WIDTH
-   24 00000000                 IMPORT           DISPLAY_HEIGHT
-   25 00000000                 IMPORT           images
-   26 00000000                 IMPORT           current_image ; Index of the cu
+   20 00000000                 IMPORT           images
+   21 00000000                 IMPORT           image       ; The current image
+                                                             being displayed
+   22 00000000                 IMPORT           current_image ; Index of the cu
                                                             rrent image being d
                                                             isplayed
-   27 00000000         
-   28 00000000                 EXPORT           resizeImage
-   29 00000000         
-   30 00000000         
-   31 00000000         ; Function to resize the current image acording to the i
+   23 00000000         
+   24 00000000                 EXPORT           resizeImageASM
+   25 00000000         
+   26 00000000         
+   27 00000000         ; Function to resize the current image acording to the i
                        mage state
-   32 00000000         ;
-   33 00000000         ;
-   34 00000000         ; This function will take the bytes of the image in memo
+   28 00000000         ;
+   29 00000000         ;
+   30 00000000         ; This function will take the bytes of the image in memo
                        ry and copy
+   31 00000000         ; them to another region with the ratio based on the sta
+                       tes
+   32 00000000         ;
 
 
 
 ARM Macro Assembler    Page 2 
 
 
-   35 00000000         ; them to another region with the ratio based on the sta
-                       tes
-   36 00000000         ;
-   37 00000000         ;
-   38 00000000         ; Registers:
-   39 00000000         ; * These will be kept constant
-   40 00000000         ; R4 - Address from base image
-   41 00000000         ; R5 - Address from target image
-   42 00000000         ;
-   43 00000000         ; Will leave R0 free to do calculations and store values
+   33 00000000         ;
+   34 00000000         ; Registers:
+   35 00000000         ; * These will be kept constant
+   36 00000000         ; R4 - Address from base image
+   37 00000000         ; R5 - Address from target image
+   38 00000000         ;
+   39 00000000         ; Will leave R0 free to do calculations and store values
                        
-   44 00000000         ; for later insertion in memory
-   45 00000000         ;
-   46 00000000         ; The rest of the registers will be used for intermediar
+   40 00000000         ; for later insertion in memory
+   41 00000000         ;
+   42 00000000         ; The rest of the registers will be used for intermediar
                        y calculations
-   47 00000000         ;
-   48 00000000         ; Memory structure:
-   49 00000000         ; Some values are there for convenience
-   50 00000000         ; If it works
-   51 00000000         ; @TODO: optimize memory - alocate registers for iterato
+   43 00000000         ;
+   44 00000000         ; Memory structure:
+   45 00000000         ; Some values are there for convenience
+   46 00000000         ; If it works
+   47 00000000         ; @TODO: optimize memory - alocate registers for iterato
                        rs and often accessed values
-   52 00000000         ;  and remove them from stack
-   53 00000000         ;
-   54 00000000         ; |-----------------| <- Current stack pointer
-   55 00000000         ; |  Prev stack ptr | -0x04
-   56 00000000         ; |  Return address | -0x08
-   57 00000000         ; |  Base img addr  | -0x0C
-   58 00000000         ; | Target img addr | -0x10
-   59 00000000         ; |    h1  | -0x14
-   60 00000000         ; |    w1  | -0x18
-   61 00000000         ; |    h2  | -0x1C
-   62 00000000         ; |    w2  | -0x20
-   63 00000000         ; |     X ratio     | -0x24
-   64 00000000         ; |     Y ratio     | -0x28
-   65 00000000         ; |   Row iterator  | -0x2C
-   66 00000000         ; | Column iterator | -0x30
-   67 00000000         ; |     .        |
-   68 00000000         ; |     .        |
-   69 00000000         ; |      .        |
-   70 00000000         ;
-   71 00000000         ; All information will be stored and accessed as WORDS (
+   48 00000000         ;  and remove them from stack
+   49 00000000         ;
+   50 00000000         ; |-----------------| <- Current stack pointer
+   51 00000000         ; |  Prev stack ptr | -0x04
+   52 00000000         ; |  Return address | -0x08
+   53 00000000         ; |  Base img addr  | -0x0C
+   54 00000000         ; | Target img addr | -0x10
+   55 00000000         ; |    h1  | -0x14
+   56 00000000         ; |    w1  | -0x18
+   57 00000000         ; |    h2  | -0x1C
+   58 00000000         ; |    w2  | -0x20
+   59 00000000         ; |     X ratio     | -0x24
+   60 00000000         ; |     Y ratio     | -0x28
+   61 00000000         ; |   Row iterator  | -0x2C
+   62 00000000         ; | Column iterator | -0x30
+   63 00000000         ; |     .        |
+   64 00000000         ; |     .        |
+   65 00000000         ; |      .        |
+   66 00000000         ;
+   67 00000000         ; All information will be stored and accessed as WORDS (
                        32 Bits)
-   72 00000000         ;
-   73 00000000         ;
-   74 00000000         resizeImage
-   75 00000000 BC20            POP{R5}
-   76 00000002         ; Creating new stack frame
-   77 00000002 466C            MOV              R4, SP
-   78 00000004 4625            MOV              R5, R4
-   79 00000006 F024 040F       AND              R4, #0xFFFFFFF0 
+   68 00000000         ;
+   69 00000000         ;
+   70 00000000         resizeImageASM
+   71 00000000         ; Creating new stack frame
+   72 00000000         
+   73 00000000 466D            MOV              R5, SP
+   74 00000002 466E            MOV              R6, SP
+   75 00000004 F025 050F       AND              R5, #0xFFFFFFF0 
                                                             ; Padding memory
-   80 0000000A F504 4420       ADD              R4, #0xA000 ; Creating frame of
+   76 00000008 F1A5 0540       SUB              R5, #0x40   ; Creating frame of
                                                              64 Bytes (extra in
                                                              case needed)
-   81 0000000E 46A5            MOV              SP, R4      ; Updating stack po
+   77 0000000C 46AD            MOV              SP, R5      ; Updating stack po
                                                             inter
-   82 00000010 B420            PUSH{R5}
-   83 00000012 B500            PUSH{LR}
-   84 00000014         
+   78 0000000E B440            PUSH{R6}
+   79 00000010 B410            PUSH{R4}
+   80 00000012         
+   81 00000012         ; Storing parameters
+   82 00000012 F84D 0C14       STR              R0, [SP, #H1_OFFSET] 
+                                                            ; Storing h1
 
 
 
 ARM Macro Assembler    Page 3 
 
 
-   85 00000014         ; Storing parameters
-   86 00000014 F84D 0C14       STR              R0, [SP, #H1_OFFSET] 
-                                                            ; Storing h1
-   87 00000018 F84D 1C18       STR              R1, [SP, #W1_OFFSET] 
+   83 00000016 F84D 1C18       STR              R1, [SP, #W1_OFFSET] 
                                                             ; Storing w1
-   88 0000001C F84D 2C1C       STR              R2, [SP, #H2_OFFSET] 
+   84 0000001A F84D 2C1C       STR              R2, [SP, #H2_OFFSET] 
                                                             ; Storing h2
-   89 00000020 F84D 3C20       STR              R3, [SP, #W2_OFFSET] 
+   85 0000001E F84D 3C20       STR              R3, [SP, #W2_OFFSET] 
                                                             ; Storing w2
-   90 00000024         
-   91 00000024         ; Getting images addresses
-   92 00000024 493A            LDR              R1, =images ; Loading base imag
+   86 00000022         
+   87 00000022         ; Getting images addresses
+   88 00000022 493C            LDR              R1, =images ; Loading base imag
                                                             es array address
-   93 00000026 483B            LDR              R0, =current_image ; Loading ad
+   89 00000024 483C            LDR              R0, =current_image ; Loading ad
                                                             dress of index from
                                                              current image in i
                                                             mages array
-   94 00000028 6800            LDR              R0, [R0]    ; Loading index fro
+   90 00000026 6800            LDR              R0, [R0]    ; Loading index fro
                                                             m current image
-   95 0000002A 4401            ADD              R1, R1, R0  ; Calculating addre
+   91 00000028 F04F 0204       MOV              R2, #4
+   92 0000002C FB00 F002       MUL              R0, R0, R2  ; Multiplying image
+                                                             index to match byt
+                                                            es
+   93 00000030 4401            ADD              R1, R1, R0  ; Calculating addre
                                                             ss for base image a
                                                             ddress
-   96 0000002C 680C            LDR              R4, [R1]    ; Loading base imag
+   94 00000032 680C            LDR              R4, [R1]    ; Loading base imag
                                                             e address
-   97 0000002E         
-   98 0000002E F84D 4C0C       STR              R4, [SP, #BASE_IMG_OFFSET] ; St
+   95 00000034         
+   96 00000034 F84D 4C0C       STR              R4, [SP, #BASE_IMG_OFFSET] ; St
                                                             oring base image ad
                                                             dress
-   99 00000032         
-  100 00000032 4A39            LDR              R2, =image  ; Loading address t
+   97 00000038         
+   98 00000038 4A38            LDR              R2, =image  ; Loading address t
                                                             hat will be filled 
                                                             with the image
-  101 00000034 F102 0508       ADD              R5, R2, #8  ; Adding offset of 
+   99 0000003A F102 0508       ADD              R5, R2, #8  ; Adding offset of 
                                                             8 bytes (int width,
                                                              height)
-  102 00000038         
-  103 00000038 F84D 5C10       STR              R5, [SP, #TGT_IMG_OFFSET] ; Sto
+  100 0000003E         
+  101 0000003E F84D 5C10       STR              R5, [SP, #TGT_IMG_OFFSET] ; Sto
                                                             ring target image a
                                                             ddress
-  104 0000003C         
-  105 0000003C         
-  106 0000003C         ; Calculates x and y ratios
-  107 0000003C F85D 0C18       LDR              R0, [SP, #W1_OFFSET] ; Loading 
+  102 00000042         
+  103 00000042         
+  104 00000042         ; Calculates x and y ratios
+  105 00000042 F85D 0C18       LDR              R0, [SP, #W1_OFFSET] ; Loading 
                                                             previous width
-  108 00000040 F85D 1C20       LDR              R1, [SP, #W2_OFFSET] ; Loading 
+  106 00000046 F85D 1C20       LDR              R1, [SP, #W2_OFFSET] ; Loading 
                                                             next width
-  109 00000044 EA4F 4000       LSL              R0, #16     ; R0 = w1 << 16
-  110 00000048 FBB0 F0F1       UDIV             R0, R0, R1  ; R0 = (w1 << 16) /
+  107 0000004A EA4F 4000       LSL              R0, #16     ; R0 = w1 << 16
+  108 0000004E FBB0 F0F1       UDIV             R0, R0, R1  ; R0 = (w1 << 16) /
                                                              w2
-  111 0000004C F100 0001       ADD              R0, #1      ; R0 = (w1 << 16) /
+  109 00000052 F100 0001       ADD              R0, #1      ; R0 = (w1 << 16) /
                                                              w2 + 1
-  112 00000050 F84D 0C24       STR              R0, [SP, #X_RATIO_OFFSET] 
+  110 00000056 F84D 0C24       STR              R0, [SP, #X_RATIO_OFFSET] 
                                                             ; Storing x_ratio
-  113 00000054         
-  114 00000054 F85D 0C14       LDR              R0, [SP, #H1_OFFSET] ; Loading 
+  111 0000005A         
+  112 0000005A F85D 0C14       LDR              R0, [SP, #H1_OFFSET] ; Loading 
                                                             previous width
-  115 00000058 F85D 1C1C       LDR              R1, [SP, #H2_OFFSET] ; Loading 
+  113 0000005E F85D 1C1C       LDR              R1, [SP, #H2_OFFSET] ; Loading 
                                                             next width
-  116 0000005C EA4F 4000       LSL              R0, #16     ; R0 = w1 << 16
 
 
 
 ARM Macro Assembler    Page 4 
 
 
-  117 00000060 FBB0 F0F1       UDIV             R0, R0, R1  ; R0 = (w1 << 16) /
+  114 00000062 EA4F 4000       LSL              R0, #16     ; R0 = w1 << 16
+  115 00000066 FBB0 F0F1       UDIV             R0, R0, R1  ; R0 = (w1 << 16) /
                                                              w2
-  118 00000064 F100 0001       ADD              R0, #1      ; R0 = (w1 << 16) /
+  116 0000006A F100 0001       ADD              R0, #1      ; R0 = (w1 << 16) /
                                                              w2 + 1
-  119 00000068 F84D 0C28       STR              R0, [SP, #Y_RATIO_OFFSET] 
+  117 0000006E F84D 0C28       STR              R0, [SP, #Y_RATIO_OFFSET] 
                                                             ; Storing x_ratio
-  120 0000006C         
-  121 0000006C         
-  122 0000006C         ; Initializing iterators in memory
-  123 0000006C F04F 0000       MOV              R0, #0      ; Initializing as 0
+  118 00000072         
+  119 00000072         
+  120 00000072         ; Initializing iterators in memory
+  121 00000072 F04F 0000       MOV              R0, #0      ; Initializing as 0
                                                             
-  124 00000070 F84D 0C2C       STR              R0, [SP, #ROW_ITER_OFFSET] ; In
+  122 00000076 F84D 0C2C       STR              R0, [SP, #ROW_ITER_OFFSET] ; In
                                                             itializing row iter
                                                             ator
-  125 00000074 F84D 0C30       STR              R0, [SP, #COL_ITER_OFFSET] ; In
+  123 0000007A F84D 0C30       STR              R0, [SP, #COL_ITER_OFFSET] ; In
                                                             itializing col iter
                                                             ator
-  126 00000078         
-  127 00000078         ForRow
-  128 00000078         ; Must be done for when branching from code inside this 
+  124 0000007E         
+  125 0000007E         ForRow
+  126 0000007E         ; Must be done for when branching from code inside this 
                        for
-  129 00000078 F85D 0C2C       LDR              R0, [SP, #ROW_ITER_OFFSET] ; Lo
+  127 0000007E F85D 0C2C       LDR              R0, [SP, #ROW_ITER_OFFSET] ; Lo
                                                             ading row iterator
-  130 0000007C F85D 1C1C       LDR              R1, [SP, #H2_OFFSET] 
+  128 00000082 F85D 1C1C       LDR              R1, [SP, #H2_OFFSET] 
                                                             ; Loading max rows
-  131 00000080 4288            CMP              R0, R1      ; If not finished
-  132 00000082 DB00            BLT              ForRowCont  ; Continue with row
+  129 00000086 4288            CMP              R0, R1      ; If not finished
+  130 00000088 DB00            BLT              ForRowCont  ; Continue with row
                                                             
-  133 00000084         ForRowEnd
-  134 00000084 E03F            B                EEnd
-  135 00000086         ForRowCont
-  136 00000086 F04F 0000       MOV              R0, #0      ; Restarting col it
+  131 0000008A         ForRowEnd
+  132 0000008A E03F            B                EEnd
+  133 0000008C         ForRowCont
+  134 0000008C F04F 0000       MOV              R0, #0      ; Restarting col it
                                                             erator
-  137 0000008A F84D 0C30       STR              R0, [SP, #COL_ITER_OFFSET] 
+  135 00000090 F84D 0C30       STR              R0, [SP, #COL_ITER_OFFSET] 
                                                             ; Storing
-  138 0000008E         
-  139 0000008E         ForColumn
-  140 0000008E F85D 0C30       LDR              R0, [SP, #COL_ITER_OFFSET] ; Lo
+  136 00000094         
+  137 00000094         ForColumn
+  138 00000094 F85D 0C30       LDR              R0, [SP, #COL_ITER_OFFSET] ; Lo
                                                             ading column iterat
                                                             or
-  141 00000092 F85D 1C20       LDR              R1, [SP, #W2_OFFSET] ; Loading 
+  139 00000098 F85D 1C20       LDR              R1, [SP, #W2_OFFSET] ; Loading 
                                                             max columns
-  142 00000096 4288            CMP              R0, R1      ; If not finished w
+  140 0000009C 4288            CMP              R0, R1      ; If not finished w
                                                             ith columns
-  143 00000098 DB06            BLT              ForColumnCont ; Continue
-  144 0000009A         ForColumnEnd
-  145 0000009A F85D 0C2C       LDR              R0, [SP, #ROW_ITER_OFFSET] ; Lo
+  141 0000009E DB06            BLT              ForColumnCont ; Continue
+  142 000000A0         ForColumnEnd
+  143 000000A0 F85D 0C2C       LDR              R0, [SP, #ROW_ITER_OFFSET] ; Lo
                                                             ading row iterator
-  146 0000009E F100 0001       ADD              R0, R0, #1  ; Incrementing
-  147 000000A2 F84D 0C2C       STR              R0, [SP, #ROW_ITER_OFFSET] 
+  144 000000A4 F100 0001       ADD              R0, R0, #1  ; Incrementing
+  145 000000A8 F84D 0C2C       STR              R0, [SP, #ROW_ITER_OFFSET] 
                                                             ; Storing back
-  148 000000A6 E7E7            B                ForRow      ; Go to next row
-  149 000000A8         ForColumnCont
-  150 000000A8 F85D 0C30       LDR              R0, [SP, #COL_ITER_OFFSET] 
+  146 000000AC E7E7            B                ForRow      ; Go to next row
+  147 000000AE         ForColumnCont
+  148 000000AE F85D 0C30       LDR              R0, [SP, #COL_ITER_OFFSET] 
                                                             ; Loading j
-  151 000000AC F85D 1C24       LDR              R1, [SP, #X_RATIO_OFFSET] 
+  149 000000B2 F85D 1C24       LDR              R1, [SP, #X_RATIO_OFFSET] 
                                                             ; Loading x_ratio
-  152 000000B0 FB00 F001       MUL              R0, R0, R1  ; R0 = j * x_ratio
-  153 000000B4 EA4F 4010       LSR              R0, #16     ; R0 = (j * x_ratio
+  150 000000B6 FB00 F001       MUL              R0, R0, R1  ; R0 = j * x_ratio
 
 
 
 ARM Macro Assembler    Page 5 
 
 
+  151 000000BA EA4F 4010       LSR              R0, #16     ; R0 = (j * x_ratio
                                                             ) >> 16
-  154 000000B8 4602            MOV              R2, R0      ; R2 = x2
-  155 000000BA         
-  156 000000BA         ; Calculating base image offset to byte
-  157 000000BA F85D 0C2C       LDR              R0, [SP, #ROW_ITER_OFFSET] 
+  152 000000BE 4602            MOV              R2, R0      ; R2 = x2
+  153 000000C0         
+  154 000000C0         ; Calculating base image offset to byte
+  155 000000C0 F85D 0C2C       LDR              R0, [SP, #ROW_ITER_OFFSET] 
                                                             ; Loading i
-  158 000000BE F85D 1C28       LDR              R1, [SP, #Y_RATIO_OFFSET] 
+  156 000000C4 F85D 1C28       LDR              R1, [SP, #Y_RATIO_OFFSET] 
                                                             ; Loading y_ratio
-  159 000000C2 FB00 F001       MUL              R0, R0, R1  ; R0 = i * y_ratio
-  160 000000C6 EA4F 4010       LSR              R0, #16     ; R0 = (i * y_ratio
+  157 000000C8 FB00 F001       MUL              R0, R0, R1  ; R0 = i * y_ratio
+  158 000000CC EA4F 4010       LSR              R0, #16     ; R0 = (i * y_ratio
                                                             ) >> 16
-  161 000000CA 4603            MOV              R3, R0      ; R3 = y2
-  162 000000CC         
-  163 000000CC         ; Loading byte from base image
-  164 000000CC F85D 0C0C       LDR              R0, [SP, #BASE_IMG_OFFSET] ; Lo
+  159 000000D0 4603            MOV              R3, R0      ; R3 = y2
+  160 000000D2         
+  161 000000D2         ; Loading byte from base image
+  162 000000D2 F85D 0C0C       LDR              R0, [SP, #BASE_IMG_OFFSET] ; Lo
                                                             ading base image ba
                                                             se address
-  165 000000D0 F85D 1C18       LDR              R1, [SP, #W1_OFFSET] 
+  163 000000D6 F85D 1C18       LDR              R1, [SP, #W1_OFFSET] 
                                                             ; Loading w1
-  166 000000D4 FB01 F103       MUL              R1, R1, R3  ; R1 = y2 * w1
-  167 000000D8 4411            ADD              R1, R1, R2  ; R1 = y2 * w1 + x2
+  164 000000DA FB01 F103       MUL              R1, R1, R3  ; R1 = y2 * w1
+  165 000000DE 4411            ADD              R1, R1, R2  ; R1 = y2 * w1 + x2
                                                             
-  168 000000DA 4408            ADD              R0, R0, R1  ; R0 = base_img_add
+  166 000000E0 4408            ADD              R0, R0, R1  ; R0 = base_img_add
                                                             ress + (y2*w1) + x2
                                                             
-  169 000000DC 7806            LDRB             R6, [R0]    ; R6 = images[curre
+  167 000000E2 7806            LDRB             R6, [R0]    ; R6 = images[curre
                                                             nt_image][(y2*w1)+x
                                                             2]
-  170 000000DE         
-  171 000000DE         ; Calculating target image offset to byte
-  172 000000DE F85D 0C2C       LDR              R0, [SP, #ROW_ITER_OFFSET] 
+  168 000000E4         
+  169 000000E4         ; Calculating target image offset to byte
+  170 000000E4 F85D 0C2C       LDR              R0, [SP, #ROW_ITER_OFFSET] 
                                                             ; Loading i
-  173 000000E2 F85D 1C20       LDR              R1, [SP, #W2_OFFSET] 
+  171 000000E8 F85D 1C20       LDR              R1, [SP, #W2_OFFSET] 
                                                             ; Loading w2
-  174 000000E6 FB00 F001       MUL              R0, R0, R1  ; R0 = i * w2
-  175 000000EA F85D 1C30       LDR              R1, [SP, #COL_ITER_OFFSET] 
+  172 000000EC FB00 F001       MUL              R0, R0, R1  ; R0 = i * w2
+  173 000000F0 F85D 1C30       LDR              R1, [SP, #COL_ITER_OFFSET] 
                                                             ; Loading j
-  176 000000EE 4408            ADD              R0, R0, R1  ; R0 = (i*w2) + j
-  177 000000F0 F85D 1C10       LDR              R1, [SP, #TGT_IMG_OFFSET] ; R1 
+  174 000000F4 4408            ADD              R0, R0, R1  ; R0 = (i*w2) + j
+  175 000000F6 F85D 1C10       LDR              R1, [SP, #TGT_IMG_OFFSET] ; R1 
                                                             = tgt_img_offset
-  178 000000F4 4408            ADD              R0, R0, R1  ; R0 = tgt_img_offs
+  176 000000FA 4408            ADD              R0, R0, R1  ; R0 = tgt_img_offs
                                                             et + (i*w2) + j
-  179 000000F6         
-  180 000000F6         ; Storing byte in target image
-  181 000000F6 7006            STRB             R6, [R0]    ;image.data[(i*w2)+
+  177 000000FC         
+  178 000000FC         ; Storing byte in target image
+  179 000000FC 7006            STRB             R6, [R0]    ;image.data[(i*w2)+
                                                             j] = images[current
                                                             _image][(y2*w1)+x2]
                                                             
-  182 000000F8         
-  183 000000F8         ; Continuing with loop
-  184 000000F8 F85D 0C30       LDR              R0, [SP, #COL_ITER_OFFSET] 
+  180 000000FE         
+  181 000000FE         ; Continuing with loop
+  182 000000FE F85D 0C30       LDR              R0, [SP, #COL_ITER_OFFSET] 
                                                             ; Loading j
-  185 000000FC F100 0001       ADD              R0, #1      ; Incrementing
-  186 00000100 F84D 0C30       STR              R0, [SP, #COL_ITER_OFFSET] 
+  183 00000102 F100 0001       ADD              R0, #1      ; Incrementing
+  184 00000106 F84D 0C30       STR              R0, [SP, #COL_ITER_OFFSET] 
                                                             ; Storing back
-  187 00000104 E7C3            B                ForColumn
-  188 00000106         
-  189 00000106         EEnd
-  190 00000106 F85D EB04       POP{LR}
+  185 0000010A E7C3            B                ForColumn
+  186 0000010C         
+  187 0000010C         EEnd
 
 
 
 ARM Macro Assembler    Page 6 
 
 
-  191 0000010A BC01            POP{R0}
-  192 0000010C         
-  193 0000010C 4685            MOV              SP, R0
-  194 0000010E         
-  195 0000010E 4770            BX               LR
-  196 00000110         
-  197 00000110         
-  198 00000110                 ALIGN
-  199 00000110                 END
+  188 0000010C         
+  189 0000010C BC10            POP{R4}
+  190 0000010E BC01            POP{R0}
+  191 00000110 4685            MOV              SP, R0
+  192 00000112         
+  193 00000112         
+  194 00000112 4770            BX               LR
+  195 00000114         
+  196 00000114         
+  197 00000114                 ALIGN
+  198 00000114                 END
               00000000 
               00000000 
               00000000 
@@ -349,3 +351,236 @@ athe\AppData\Local\Arm\Packs\Keil\TM4C_DFP\1.1.0\Device\Include\TM4C129 --prede
 fine="__RTX SETA 1" --predefine="__EVAL SETA 1" --predefine="__UVISION_VERSION 
 SETA 528" --predefine="_RTE_ SETA 1" --predefine="TM4C1294NCPDT SETA 1" --list=
 .\flash\image.lst image.s
+
+
+
+ARM Macro Assembler    Page 1 Alphabetic symbol ordering
+Relocatable symbols
+
+.text 00000000
+
+Symbol: .text
+   Definitions
+      At line 18 in file image.s
+   Uses
+      None
+Comment: .text unused
+EEnd 0000010C
+
+Symbol: EEnd
+   Definitions
+      At line 187 in file image.s
+   Uses
+      At line 132 in file image.s
+Comment: EEnd used once
+ForColumn 00000094
+
+Symbol: ForColumn
+   Definitions
+      At line 137 in file image.s
+   Uses
+      At line 185 in file image.s
+Comment: ForColumn used once
+ForColumnCont 000000AE
+
+Symbol: ForColumnCont
+   Definitions
+      At line 147 in file image.s
+   Uses
+      At line 141 in file image.s
+Comment: ForColumnCont used once
+ForColumnEnd 000000A0
+
+Symbol: ForColumnEnd
+   Definitions
+      At line 142 in file image.s
+   Uses
+      None
+Comment: ForColumnEnd unused
+ForRow 0000007E
+
+Symbol: ForRow
+   Definitions
+      At line 125 in file image.s
+   Uses
+      At line 146 in file image.s
+Comment: ForRow used once
+ForRowCont 0000008C
+
+Symbol: ForRowCont
+   Definitions
+      At line 133 in file image.s
+   Uses
+      At line 130 in file image.s
+Comment: ForRowCont used once
+ForRowEnd 0000008A
+
+Symbol: ForRowEnd
+
+
+
+ARM Macro Assembler    Page 2 Alphabetic symbol ordering
+Relocatable symbols
+
+   Definitions
+      At line 131 in file image.s
+   Uses
+      None
+Comment: ForRowEnd unused
+resizeImageASM 00000000
+
+Symbol: resizeImageASM
+   Definitions
+      At line 70 in file image.s
+   Uses
+      At line 24 in file image.s
+Comment: resizeImageASM used once
+9 symbols
+
+
+
+ARM Macro Assembler    Page 1 Alphabetic symbol ordering
+Absolute symbols
+
+BASE_IMG_OFFSET FFFFFFF4
+
+Symbol: BASE_IMG_OFFSET
+   Definitions
+      At line 3 in file image.s
+   Uses
+      At line 96 in file image.s
+      At line 162 in file image.s
+
+COL_ITER_OFFSET FFFFFFD0
+
+Symbol: COL_ITER_OFFSET
+   Definitions
+      At line 15 in file image.s
+   Uses
+      At line 123 in file image.s
+      At line 135 in file image.s
+      At line 138 in file image.s
+      At line 148 in file image.s
+      At line 173 in file image.s
+      At line 182 in file image.s
+      At line 184 in file image.s
+
+H1_OFFSET FFFFFFEC
+
+Symbol: H1_OFFSET
+   Definitions
+      At line 6 in file image.s
+   Uses
+      At line 82 in file image.s
+      At line 112 in file image.s
+
+H2_OFFSET FFFFFFE4
+
+Symbol: H2_OFFSET
+   Definitions
+      At line 8 in file image.s
+   Uses
+      At line 84 in file image.s
+      At line 113 in file image.s
+      At line 128 in file image.s
+
+ROW_ITER_OFFSET FFFFFFD4
+
+Symbol: ROW_ITER_OFFSET
+   Definitions
+      At line 14 in file image.s
+   Uses
+      At line 122 in file image.s
+      At line 127 in file image.s
+      At line 143 in file image.s
+      At line 145 in file image.s
+      At line 155 in file image.s
+      At line 170 in file image.s
+
+TGT_IMG_OFFSET FFFFFFF0
+
+Symbol: TGT_IMG_OFFSET
+   Definitions
+
+
+
+ARM Macro Assembler    Page 2 Alphabetic symbol ordering
+Absolute symbols
+
+      At line 4 in file image.s
+   Uses
+      At line 101 in file image.s
+      At line 175 in file image.s
+
+W1_OFFSET FFFFFFE8
+
+Symbol: W1_OFFSET
+   Definitions
+      At line 7 in file image.s
+   Uses
+      At line 83 in file image.s
+      At line 105 in file image.s
+      At line 163 in file image.s
+
+W2_OFFSET FFFFFFE0
+
+Symbol: W2_OFFSET
+   Definitions
+      At line 9 in file image.s
+   Uses
+      At line 85 in file image.s
+      At line 106 in file image.s
+      At line 139 in file image.s
+      At line 171 in file image.s
+
+X_RATIO_OFFSET FFFFFFDC
+
+Symbol: X_RATIO_OFFSET
+   Definitions
+      At line 11 in file image.s
+   Uses
+      At line 110 in file image.s
+      At line 149 in file image.s
+
+Y_RATIO_OFFSET FFFFFFD8
+
+Symbol: Y_RATIO_OFFSET
+   Definitions
+      At line 12 in file image.s
+   Uses
+      At line 117 in file image.s
+      At line 156 in file image.s
+
+10 symbols
+
+
+
+ARM Macro Assembler    Page 1 Alphabetic symbol ordering
+External symbols
+
+current_image 00000000
+
+Symbol: current_image
+   Definitions
+      At line 22 in file image.s
+   Uses
+      At line 89 in file image.s
+Comment: current_image used once
+image 00000000
+
+Symbol: image
+   Definitions
+      At line 21 in file image.s
+   Uses
+      At line 98 in file image.s
+Comment: image used once
+images 00000000
+
+Symbol: images
+   Definitions
+      At line 20 in file image.s
+   Uses
+      At line 88 in file image.s
+Comment: images used once
+3 symbols
+360 symbols in table

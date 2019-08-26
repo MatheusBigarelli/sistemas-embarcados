@@ -36,13 +36,13 @@ C:\Users\mathe\Desktop\UTF\7º Período\Sistemas Embarcados\labs\sistemas-embarcad
   extern bool button_read_s2();
 C:\Users\mathe\Desktop\UTF\7º Período\Sistemas Embarcados\labs\sistemas-embarcados\Lab1\projeto\Exemplo_UTFPR_TM4C1294XL_BoosterPackMKII\ProjectFiles\buttons.h(9): warning:  #1-D: last line of file ends without a newline
   #endif //__BUTTONS_H
-C:\Users\mathe\Desktop\UTF\7º Período\Sistemas Embarcados\labs\sistemas-embarcados\Lab1\projeto\Exemplo_UTFPR_TM4C1294XL_BoosterPackMKII\ProjectFiles\exemploTIVA.c(140): warning:  #1035-D: single-precision operand implicitly converted to double-precision
-                                *resize_factor+=0.25;
-C:\Users\mathe\Desktop\UTF\7º Período\Sistemas Embarcados\labs\sistemas-embarcados\Lab1\projeto\Exemplo_UTFPR_TM4C1294XL_BoosterPackMKII\ProjectFiles\exemploTIVA.c(142): warning:  #1035-D: single-precision operand implicitly converted to double-precision
-                                *resize_factor-=0.25;
-C:\Users\mathe\Desktop\UTF\7º Período\Sistemas Embarcados\labs\sistemas-embarcados\Lab1\projeto\Exemplo_UTFPR_TM4C1294XL_BoosterPackMKII\ProjectFiles\exemploTIVA.c(145): warning:  #1035-D: single-precision operand implicitly converted to double-precision
-                if (*resize_factor <= 0.50)
-C:\Users\mathe\Desktop\UTF\7º Período\Sistemas Embarcados\labs\sistemas-embarcados\Lab1\projeto\Exemplo_UTFPR_TM4C1294XL_BoosterPackMKII\ProjectFiles\exemploTIVA.c(193): warning:  #1-D: last line of file ends without a newline
+C:\Users\mathe\Desktop\UTF\7º Período\Sistemas Embarcados\labs\sistemas-embarcados\Lab1\projeto\Exemplo_UTFPR_TM4C1294XL_BoosterPackMKII\ProjectFiles\exemploTIVA.c(144): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+                                resize_factor+=0.25;
+C:\Users\mathe\Desktop\UTF\7º Período\Sistemas Embarcados\labs\sistemas-embarcados\Lab1\projeto\Exemplo_UTFPR_TM4C1294XL_BoosterPackMKII\ProjectFiles\exemploTIVA.c(146): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+                                resize_factor-=0.25;
+C:\Users\mathe\Desktop\UTF\7º Período\Sistemas Embarcados\labs\sistemas-embarcados\Lab1\projeto\Exemplo_UTFPR_TM4C1294XL_BoosterPackMKII\ProjectFiles\exemploTIVA.c(149): warning:  #1035-D: single-precision operand implicitly converted to double-precision
+                if (resize_factor <= 0.50)
+C:\Users\mathe\Desktop\UTF\7º Período\Sistemas Embarcados\labs\sistemas-embarcados\Lab1\projeto\Exemplo_UTFPR_TM4C1294XL_BoosterPackMKII\ProjectFiles\exemploTIVA.c(215): warning:  #1-D: last line of file ends without a newline
   }
 exemploTIVA.c: 8 warnings, 0 errors
 compiling airplane.c...
@@ -55,7 +55,6 @@ C:\Users\mathe\Desktop\UTF\7º Período\Sistemas Embarcados\labs\sistemas-embarcad
 car.c: 1 warning, 0 errors
 assembling utils.s...
 assembling image.s...
-C:\Users\mathe\Desktop\UTF\7º Período\Sistemas Embarcados\labs\sistemas-embarcados\Lab1\projeto\Exemplo_UTFPR_TM4C1294XL_BoosterPackMKII\ProjectFiles\image.s(100): error: A1516E: Bad symbol 'image', not defined or external
 compiling buttons.c...
 C:\Users\mathe\Desktop\UTF\7º Período\Sistemas Embarcados\labs\sistemas-embarcados\Lab1\projeto\Exemplo_UTFPR_TM4C1294XL_BoosterPackMKII\ProjectFiles\buttons.h(5): warning:  #1295-D: Deprecated declaration button_init - give arg types
   extern void button_init();
@@ -108,9 +107,8 @@ compiling RTX_Conf_CM.c...
 assembling startup_TM4C129.s...
 compiling system_TM4C129.c...
 linking...
-.\Flash\base_project.axf: error: L6002U: Could not open file .\flash\image.o: No such file or directory
-Finished: 0 information, 0 warning, 0 error and 1 fatal error messages.
-".\Flash\base_project.axf" - 2 Error(s), 30 Warning(s).
+Program Size: Code=13198 RO-data=5326 RW-data=96 ZI-data=26272  
+".\Flash\base_project.axf" - 0 Error(s), 30 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -159,7 +157,6 @@ Package Vendor: Keil
       Source file:   Device\Source\system_TM4C129.c
       Source file:   Device\Source\ARM\startup_TM4C129.s
       Include file:  Device\Include\TM4C129\TM4C129.h
-Target not created.
 Build Time Elapsed:  00:00:06
 </pre>
 </body>
