@@ -44,31 +44,22 @@ tContext sContext;
 uint32_t background = ClrBlack;
 
 unsigned char* images[] = {airplane_image, car_image};
-uint8_t current_image = 0;
+int current_image = 0;
 typedef struct
 {
-		uint8_t height;
-		uint8_t width;
+		int height;
+		int width;
 		unsigned char data[DISPLAY_WIDTH*DISPLAY_HEIGHT];
 } Image;
 
-// States:
-//  0     1     2    3    4   5  6  7  8   9  10
-// 1/32  1/16  1/8  1/4  1/2  1  2  4  8  16  32
-uint8_t current_state = 5;
-uint8_t going_up = 1;
-
-Image image;
-
 
 void invertColors(void);
-void drawImage(void);
-void updateImageState(void);
+void drawImage(Image image);
 void clearDisplay(void);
 
 
-extern void resizeImage(void);
-void resizeImage2(void);
+extern void resizeImage(int h1, int w1, int h2, int w2);
+void resizeImage2(Image* image, int* going_up, float* resizing_factor);
 
 /*----------------------------------------------------------------------------
  *    Initializations
@@ -96,6 +87,11 @@ void init_sidelong_menu(){
  *---------------------------------------------------------------------------*/
 int main (void) {
 	
+	int going_up = 1;
+	float resize_factor = 1;
+	Image image;
+
+	
 	// Initializing all peripherals
 	init_all();
 	// Sidelong menu creation
@@ -104,60 +100,54 @@ int main (void) {
 	image.width = 48;
 
   while(1){
-			resizeImage2();
+			resizeImage2(&image, &going_up, &resize_factor);
 			clearDisplay();
-			drawImage();
+			drawImage(image);
 			
-//			if (button_read_s1())
-//					invertColors();
-//			
-//			if (button_read_s2())
-//					// Change image
-//					// Alternates between 0 and 1;
-//					current_image = 1 - current_image;
-//			
-			SysTick_Wait1ms(2000);
-			
-
-		//updateImageState();
+			if (button_read_s1())
+					current_image = 1 - current_image;
+			if (button_read_s2())
+					invertColors();
+		
+			SysTick_Wait1ms(500);
 	}
 }
 
 
-void resizeImage2(void)
+void resizeImage2(Image* image, int* going_up, float* resize_factor)
 {
-		static float resize_factor = 1;
-		int i, j, h1 = 32, h2 = h1*resize_factor, w1 = 48, w2 = 48*resize_factor;
-    double px, py;
-    double x_ratio = w1 / (double)w2;
-    double y_ratio = h1 / (double)h2;
-
-    for (i = 0; i < h2; i++)
-    {
-        for (j = 0; j < w2; j++)
-        {
-            px =  floor((j * x_ratio));
-            py =  floor((i * y_ratio));
-            image.data[(i * w2) + j] = images[current_image][(int) (py * w1 + px)];
-        }
+		int i, j, h1 = 32, h2 = h1* (*resize_factor), w1 = 48, w2 = 48* (*resize_factor);
+	
+		int x_ratio = (int)((w1<<16)/w2) +1;
+    int y_ratio = (int)((h1<<16)/h2) +1;
+    int x2, y2 ;
+	
+//		resizeImage(h1, w1, h2, w2, image);
+    for (i=0;i<h2;i++)
+		{
+        for (j=0;j<w2;j++)
+				{
+            x2 = ((j*x_ratio)>>16) ;
+            y2 = ((i*y_ratio)>>16) ;
+            image->data[(i*w2)+j] = images[current_image][(y2*w1)+x2] ;
+        }                
     }
 
-
-			image.height = h2;
-			image.width = w2;
+		image->height = h2;
+		image->width = w2;
 	
 		if (going_up)
-				resize_factor+=0.25;
+				*resize_factor+=0.25;
 		else
-				resize_factor-=0.25;
-		if (resize_factor >= 3)
-				going_up = 0;
-		if (resize_factor <= 1)
-				going_up = 1;
+				*resize_factor-=0.25;
+		if (*resize_factor >= 3)
+				*going_up = 0;
+		if (*resize_factor <= 0.50)
+				*going_up = 1;
 }
 
 
-void drawImage(void)
+void drawImage(Image image)
 {
 		uint8_t x, y;
 		for (y = 0; y < image.height; y++)
@@ -182,83 +172,6 @@ void invertColors(void)
 		GrContextForegroundSet(&sContext, background);
 		background = ~background & 0x00FFFFFF;
 		GrContextBackgroundSet(&sContext, background);
-}
-
-
-void updateImageState(void)
-{
-		if (going_up)
-		{
-			
-				// Reached enlarging limit
-				if (current_state == 10)
-				{
-						current_state = 9;
-						going_up = 0;
-					
-						image.width *= 2;
-						image.height *= 2;
-						
-						if (image.height > 128)
-							image.height = 128;
-						if (image.width > 128)
-							image.width = 128;
-				}
-		
-				else
-				{
-						current_state++;
-						image.width *= 2;
-						image.height *= 2;
-						
-						if (image.height > 128)
-							image.height = 128;
-						if (image.width > 128)
-							image.width = 128;
-					
-						return;
-				}
-		}
-		
-		// Image is shrinking
-		else
-		{
-				// Reached shrinking limit
-				if (current_state == 0)
-				{
-						current_image = 1;
-						going_up = 1;
-					
-						
-						image.height /= 2;
-						image.width /= 2;
-						
-						// Needs to be at least 1, because we will
-						// multiply only, then it will get bigger again
-						if (image.height == 0)
-							image.height = 1;
-						if (image.width == 0)
-							image.width = 1;
-					
-						return;
-				}
-		
-				else
-				{
-						image.height /= 2;
-						image.width /= 2;
-						
-						// Needs to be at least 1, because we will
-						// multiply only, then it will get bigger again
-						if (image.height == 0)
-							image.height = 1;
-						if (image.width == 0)
-							image.width = 1;
-						
-						// Image being shrinked
-						current_state--;
-				}
-		}
 }
 
 
