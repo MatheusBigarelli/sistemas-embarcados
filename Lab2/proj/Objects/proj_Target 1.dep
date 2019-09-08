@@ -1,0 +1,47 @@
+Dependencies for Project 'proj', Target 'Target 1': (DO NOT MODIFY !)
+F (.\main.c)(0x5D73EF40)(--c99 --gnu -c --cpu Cortex-M4.fp -D__RTX -D__EVAL -g -O0 --apcs=interwork --split_sections-I.\RTE\_Target_1-IC:\Users\mathe\AppData\Local\Arm\Packs\ARM\CMSIS\5.6.0\CMSIS\Core\Include-IC:\Users\mathe\AppData\Local\Arm\Packs\ARM\CMSIS\5.6.0\CMSIS\RTOS\RTX\INC-IC:\Users\mathe\AppData\Local\Arm\Packs\Keil\TM4C_DFP\1.1.0\Device\Include\TM4C129-D__UVISION_VERSION="528" -D_RTE_ -DTM4C1294NCPDT-o .\objects\main.o --omf_browse .\objects\main.crf --depend .\objects\main.d)
+I (C:\Users\mathe\AppData\Local\Arm\Packs\Keil\TM4C_DFP\1.1.0\Device\Include\TM4C129\TM4C129.h)(0x530F3946)
+I (C:\Users\mathe\AppData\Local\Arm\Packs\Keil\TM4C_DFP\1.1.0\Device\Include\TM4C129\TM4C1294NCPDT.h)(0x530F3946)
+I (C:\Users\mathe\AppData\Local\Arm\Packs\ARM\CMSIS\5.6.0\CMSIS\Core\Include\core_cm4.h)(0x5D262B66)
+I (C:\Keil_v5\ARM\ARMCC\include\stdint.h)(0x5CEC1492)
+I (C:\Users\mathe\AppData\Local\Arm\Packs\ARM\CMSIS\5.6.0\CMSIS\Core\Include\cmsis_version.h)(0x5D262B66)
+I (C:\Users\mathe\AppData\Local\Arm\Packs\ARM\CMSIS\5.6.0\CMSIS\Core\Include\cmsis_compiler.h)(0x5D262B66)
+I (C:\Users\mathe\AppData\Local\Arm\Packs\ARM\CMSIS\5.6.0\CMSIS\Core\Include\cmsis_armcc.h)(0x5D262B66)
+I (C:\Users\mathe\AppData\Local\Arm\Packs\Keil\TM4C_DFP\1.1.0\Device\Include\TM4C129\system_TM4C129.h)(0x51C0453A)
+I (C:\Users\mathe\AppData\Local\Arm\Packs\ARM\CMSIS\5.6.0\CMSIS\RTOS\RTX\INC\cmsis_os.h)(0x5C8ABF2C)
+I (C:\Keil_v5\ARM\ARMCC\include\stddef.h)(0x5CEC1492)
+I (decode.h)(0x5D73EF08)
+I (C:\Keil_v5\ARM\ARMCC\include\string.h)(0x5CEC1492)
+I (primes.h)(0x5D73EF22)
+I (messages.h)(0x5D73EF1A)
+F (.\decode.c)(0x5D74EB3E)(--c99 --gnu -c --cpu Cortex-M4.fp -D__RTX -D__EVAL -g -O0 --apcs=interwork --split_sections-I.\RTE\_Target_1-IC:\Users\mathe\AppData\Local\Arm\Packs\ARM\CMSIS\5.6.0\CMSIS\Core\Include-IC:\Users\mathe\AppData\Local\Arm\Packs\ARM\CMSIS\5.6.0\CMSIS\RTOS\RTX\INC-IC:\Users\mathe\AppData\Local\Arm\Packs\Keil\TM4C_DFP\1.1.0\Device\Include\TM4C129-D__UVISION_VERSION="528" -D_RTE_ -DTM4C1294NCPDT-o .\objects\decode.o --omf_browse .\objects\decode.crf --depend .\objects\decode.d)
+I (decode.h)(0x5D73EF08)
+I (C:\Keil_v5\ARM\ARMCC\include\string.h)(0x5CEC1492)
+I (C:\Keil_v5\ARM\ARMCC\include\stdint.h)(0x5CEC1492)
+I (primes.h)(0x5D73EF22)
+I (messages.h)(0x5D73EF1A)
+F (.\decode.h)(0x5D73EF08)()
+F (.\primes.h)(0x5D73EF22)()
+F (.\messages.h)(0x5D73EF1A)()
+F (.\messages.c)(0x5D73EF59)(--c99 --gnu -c --cpu Cortex-M4.fp -D__RTX -D__EVAL -g -O0 --apcs=interwork --split_sections-I.\RTE\_Target_1-IC:\Users\mathe\AppData\Local\Arm\Packs\ARM\CMSIS\5.6.0\CMSIS\Core\Include-IC:\Users\mathe\AppData\Local\Arm\Packs\ARM\CMSIS\5.6.0\CMSIS\RTOS\RTX\INC-IC:\Users\mathe\AppData\Local\Arm\Packs\Keil\TM4C_DFP\1.1.0\Device\Include\TM4C129-D__UVISION_VERSION="528" -D_RTE_ -DTM4C1294NCPDT-o .\objects\messages.o --omf_browse .\objects\messages.crf --depend .\objects\messages.d)
+I (messages.h)(0x5D73EF1A)
+I (C:\Keil_v5\ARM\ARMCC\include\stdint.h)(0x5CEC1492)
+F (.\primes.c)(0x5D74EB57)(--c99 --gnu -c --cpu Cortex-M4.fp -D__RTX -D__EVAL -g -O0 --apcs=interwork --split_sections-I.\RTE\_Target_1-IC:\Users\mathe\AppData\Local\Arm\Packs\ARM\CMSIS\5.6.0\CMSIS\Core\Include-IC:\Users\mathe\AppData\Local\Arm\Packs\ARM\CMSIS\5.6.0\CMSIS\RTOS\RTX\INC-IC:\Users\mathe\AppData\Local\Arm\Packs\Keil\TM4C_DFP\1.1.0\Device\Include\TM4C129-D__UVISION_VERSION="528" -D_RTE_ -DTM4C1294NCPDT-o .\objects\primes.o --omf_browse .\objects\primes.crf --depend .\objects\primes.d)
+I (primes.h)(0x5D73EF22)
+I (C:\Keil_v5\ARM\ARMCC\include\stdint.h)(0x5CEC1492)
+F (C:\Users\mathe\AppData\Local\Arm\Packs\ARM\CMSIS\5.6.0\CMSIS\RTOS\RTX\LIB\ARM\RTX_CM4.lib)(0x5D262B68)()
+F (RTE\CMSIS\RTX_Conf_CM.c)(0x5C8ABF2C)(--c99 --gnu -c --cpu Cortex-M4.fp -D__RTX -D__EVAL -g -O0 --apcs=interwork --split_sections-I.\RTE\_Target_1-IC:\Users\mathe\AppData\Local\Arm\Packs\ARM\CMSIS\5.6.0\CMSIS\Core\Include-IC:\Users\mathe\AppData\Local\Arm\Packs\ARM\CMSIS\5.6.0\CMSIS\RTOS\RTX\INC-IC:\Users\mathe\AppData\Local\Arm\Packs\Keil\TM4C_DFP\1.1.0\Device\Include\TM4C129-D__UVISION_VERSION="528" -D_RTE_ -DTM4C1294NCPDT-o .\objects\rtx_conf_cm.o --omf_browse .\objects\rtx_conf_cm.crf --depend .\objects\rtx_conf_cm.d)
+I (C:\Users\mathe\AppData\Local\Arm\Packs\ARM\CMSIS\5.6.0\CMSIS\RTOS\RTX\INC\cmsis_os.h)(0x5C8ABF2C)
+I (C:\Keil_v5\ARM\ARMCC\include\stdint.h)(0x5CEC1492)
+I (C:\Keil_v5\ARM\ARMCC\include\stddef.h)(0x5CEC1492)
+I (C:\Users\mathe\AppData\Local\Arm\Packs\ARM\CMSIS\5.6.0\CMSIS\RTOS\RTX\INC\RTX_CM_lib.h)(0x5D262B68)
+F (RTE\Device\TM4C1294NCPDT\startup_TM4C129.s)(0x51C0453A)(--cpu Cortex-M4.fp --pd "__RTX SETA 1" --pd "__EVAL SETA 1" -g --apcs=interwork -I.\RTE\_Target_1-IC:\Users\mathe\AppData\Local\Arm\Packs\ARM\CMSIS\5.6.0\CMSIS\Core\Include-IC:\Users\mathe\AppData\Local\Arm\Packs\ARM\CMSIS\5.6.0\CMSIS\RTOS\RTX\INC-IC:\Users\mathe\AppData\Local\Arm\Packs\Keil\TM4C_DFP\1.1.0\Device\Include\TM4C129--pd "__UVISION_VERSION SETA 528" --pd "_RTE_ SETA 1" --pd "TM4C1294NCPDT SETA 1"--list .\listings\startup_tm4c129.lst --xref -o .\objects\startup_tm4c129.o --depend .\objects\startup_tm4c129.d)
+F (RTE\Device\TM4C1294NCPDT\system_TM4C129.c)(0x5253F274)(--c99 --gnu -c --cpu Cortex-M4.fp -D__RTX -D__EVAL -g -O0 --apcs=interwork --split_sections-I.\RTE\_Target_1-IC:\Users\mathe\AppData\Local\Arm\Packs\ARM\CMSIS\5.6.0\CMSIS\Core\Include-IC:\Users\mathe\AppData\Local\Arm\Packs\ARM\CMSIS\5.6.0\CMSIS\RTOS\RTX\INC-IC:\Users\mathe\AppData\Local\Arm\Packs\Keil\TM4C_DFP\1.1.0\Device\Include\TM4C129-D__UVISION_VERSION="528" -D_RTE_ -DTM4C1294NCPDT-o .\objects\system_tm4c129.o --omf_browse .\objects\system_tm4c129.crf --depend .\objects\system_tm4c129.d)
+I (C:\Keil_v5\ARM\ARMCC\include\stdint.h)(0x5CEC1492)
+I (C:\Users\mathe\AppData\Local\Arm\Packs\Keil\TM4C_DFP\1.1.0\Device\Include\TM4C129\TM4C129.h)(0x530F3946)
+I (C:\Users\mathe\AppData\Local\Arm\Packs\Keil\TM4C_DFP\1.1.0\Device\Include\TM4C129\TM4C1294NCPDT.h)(0x530F3946)
+I (C:\Users\mathe\AppData\Local\Arm\Packs\ARM\CMSIS\5.6.0\CMSIS\Core\Include\core_cm4.h)(0x5D262B66)
+I (C:\Users\mathe\AppData\Local\Arm\Packs\ARM\CMSIS\5.6.0\CMSIS\Core\Include\cmsis_version.h)(0x5D262B66)
+I (C:\Users\mathe\AppData\Local\Arm\Packs\ARM\CMSIS\5.6.0\CMSIS\Core\Include\cmsis_compiler.h)(0x5D262B66)
+I (C:\Users\mathe\AppData\Local\Arm\Packs\ARM\CMSIS\5.6.0\CMSIS\Core\Include\cmsis_armcc.h)(0x5D262B66)
+I (C:\Users\mathe\AppData\Local\Arm\Packs\Keil\TM4C_DFP\1.1.0\Device\Include\TM4C129\system_TM4C129.h)(0x51C0453A)

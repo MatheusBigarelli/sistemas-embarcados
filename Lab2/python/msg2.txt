@@ -1,0 +1,3 @@
+a6 00 5c fb d0 00 14 fb dc 00 50 fb d8 00 44 fb e4 00 2c fe e6 00 80 fe 98 00 14 fb e6
+00 90 fa c2 00 80 fe 40 00 80 fe 40 00 80 fe 40 00 80 fe 40 00 80 fe 62 00 54 fd 72 00
+9c fd a5 e9 b5 0a e3 0c b3 0a
