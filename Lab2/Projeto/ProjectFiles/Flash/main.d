@@ -1,0 +1,17 @@
+.\flash\main.o: main.cpp
+.\flash\main.o: C:\Users\Victor\AppData\Local\Arm\Packs\Keil\TM4C_DFP\1.1.0\Device\Include\TM4C129\TM4C129.h
+.\flash\main.o: C:\Users\Victor\AppData\Local\Arm\Packs\Keil\TM4C_DFP\1.1.0\Device\Include\TM4C129\TM4C1294NCPDT.h
+.\flash\main.o: C:\Users\Victor\AppData\Local\Arm\Packs\ARM\CMSIS\5.5.1\CMSIS\Core\Include\core_cm4.h
+.\flash\main.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdint.h
+.\flash\main.o: C:\Users\Victor\AppData\Local\Arm\Packs\ARM\CMSIS\5.5.1\CMSIS\Core\Include\cmsis_version.h
+.\flash\main.o: C:\Users\Victor\AppData\Local\Arm\Packs\ARM\CMSIS\5.5.1\CMSIS\Core\Include\cmsis_compiler.h
+.\flash\main.o: C:\Users\Victor\AppData\Local\Arm\Packs\ARM\CMSIS\5.5.1\CMSIS\Core\Include\cmsis_armcc.h
+.\flash\main.o: C:\Users\Victor\AppData\Local\Arm\Packs\Keil\TM4C_DFP\1.1.0\Device\Include\TM4C129\system_TM4C129.h
+.\flash\main.o: C:\Users\Victor\AppData\Local\Arm\Packs\ARM\CMSIS\5.5.1\CMSIS\RTOS\RTX\INC\cmsis_os.h
+.\flash\main.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stddef.h
+.\flash\main.o: thread.h
+.\flash\main.o: gpio.h
+.\flash\main.o: ..\driverlib/gpio.h
+.\flash\main.o: tm4c1294ncpdt.h
+.\flash\main.o: uart.h
+.\flash\main.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\string.h
