@@ -10,6 +10,11 @@
 .\objects\main.o: C:\Users\mathe\AppData\Local\Arm\Packs\ARM\CMSIS\5.6.0\CMSIS\RTOS\RTX\INC\cmsis_os.h
 .\objects\main.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stddef.h
 .\objects\main.o: decode.h
+.\objects\main.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h
 .\objects\main.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\string.h
 .\objects\main.o: primes.h
 .\objects\main.o: messages.h
+.\objects\main.o: uart.h
+.\objects\main.o: tm4c1294ncpdt.h
+.\objects\main.o: util.h
+.\objects\main.o: gpio.h

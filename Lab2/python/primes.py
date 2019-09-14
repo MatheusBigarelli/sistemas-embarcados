@@ -652,4 +652,7 @@ primes = [
 65393, 65407, 65413, 65419, 65423, 65437, 65447, 65449, 65479, 65497,
 65519, 65521
 ]
-print(hex(primes.index(761)))
+
+print(primes.index(761))
+print(primes.index(13399))
+print(primes.index(48341))

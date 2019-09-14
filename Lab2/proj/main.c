@@ -2,18 +2,62 @@
 #include "cmsis_os.h"                   // ARM::CMSIS:RTOS:Keil RTX
 
 #include "decode.h"
+#include "uart.h"
+#include "util.h"
+#include "gpio.h"
 
-extern void decodeMessage(uint8_t* message, uint8_t* buffer);
-extern uint8_t messages[NUMBER_OF_MESSAGES][MESSAGE_LENGTH];
+uint8_t current_state;
+
+
+
+osThreadId tid_primesGenerator;
+osThreadDef(primesGenerator, osPriorityNormal, 1, 0);
+
+osThreadId tid_decoder;
+osThreadDef(decoder, osPriorityNormal, 1, 0);
+
+osThreadId tid_test1Validator;
+osThreadDef(test1Validator, osPriorityNormal, 1, 0);
+
+osThreadId tid_test2Validator;
+osThreadDef(test2Validator, osPriorityNormal, 1, 0);
+
+osThreadId tid_printer;
+osThreadDef(printer, osPriorityNormal, 1, 0);
+
+
+
+
+void threadInit(void)
+{
+	osThreadCreate(osThread(primesGenerator), NULL);
+	osThreadCreate(osThread(decoder), NULL);
+	osThreadCreate(osThread(test1Validator), NULL);
+	osThreadCreate(osThread(test2Validator), NULL);
+	osThreadCreate(osThread(printer), NULL);
+}
+
+
 
 int main()
 {
-	uint8_t cur_msg = 0;
-	uint8_t buffer[MESSAGE_LENGTH];
-	while (1)
-	{
-		decodeMessage(messages[cur_msg], (uint8_t*)buffer);
-	}
+	osKernelInitialize();
+	
+	//PLL_Init();
+	//SysTick_Init();
+	//GPIO_Init();	
+	//UART_Init();
+	
+	threadInit();
+	
+	//if (!osKernelRunning())
+		//return 1;
+	
+	current_state = GENERATING;
+	
+	osKernelStart();
 	
 	return 0;
 }
+
+
