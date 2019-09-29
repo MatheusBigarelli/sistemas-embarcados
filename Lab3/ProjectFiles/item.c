@@ -1,5 +1,3 @@
-
-
 #include "item.h"
 
 const uint8_t item[] = {
@@ -12,12 +10,11 @@ const uint8_t item[] = {
 ,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x04,0x00,0x00,0x38,0x1c,0x34,0x78,0x3c,0x6c,0x2c,0x14,0x28,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00
 }; 
 
-void drawItem(tContext sContext, int16_t x, int16_t y)
+void drawItem(tContext sContext, int16_t x, int16_t y, int16_t last_x, int16_t last_y)
 {
     int i, j;
 	int numberOfPixels;
     uint32_t itemOneChannel[90];
-	static int16_t last_x, last_y;
 
 	numberOfPixels = sizeof(item)/sizeof(unsigned char);
 
@@ -38,7 +35,7 @@ void drawItem(tContext sContext, int16_t x, int16_t y)
 	{
 		for (j = 0; j < 13; j++)
 		{
-			GrPixelDraw(&sContext,j+last_x,i+last_y);
+			GrPixelDraw(&sContext,(j+last_x)%128,(i+last_y)%128);
 		}
 	}
 	
@@ -47,10 +44,29 @@ void drawItem(tContext sContext, int16_t x, int16_t y)
         for (j = 0; j < 13; j++)
         {
             GrContextForegroundSet(&sContext, itemOneChannel[i*13 + j]);
-            GrPixelDraw(&sContext,j+x,i+y);
+            GrPixelDraw(&sContext,(j+x)%128,(i+y)%128);
         }
     }
+}
+
+
+void Item(tContext sContext)
+{
+	uint8_t i;
+	static int16_t dx[] = {1, -1, 1};
+	static uint16_t x[] = {20,80,50} , y[] = {80,30,100}, last_x[] = {20,80,50}, last_y[] = {80, 30, 100};
+//	static uint16_t last_x[] = {20,80,50}, last_y[] = {80, 30, 100};
 	
-	last_x = x;
-	last_y = y;
+	
+	for (i = 0; i < 3; i++)
+	{
+		drawItem(sContext, x[i], y[i], last_x[i], last_y[i]);
+		last_x[i] = x[i];
+		last_y[i] = y[i];
+		x[i] += dx[i];	
+		if (x[i] > 128 && dx[i] == 1)
+			x[i] = 0;
+		if (x[i] == 0 && dx[i] == -1)
+			x[i] = 128;
+	}
 }

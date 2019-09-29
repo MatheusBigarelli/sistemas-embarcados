@@ -40,3 +40,8 @@ void drawName(tContext sContext)
         }
     }
 }
+
+void Name(tContext sContext)
+{
+	drawName(sContext);
+}

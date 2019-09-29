@@ -1,5 +1,5 @@
-#ifndef __ITEM__H
-#define __ITEM__H
+#ifndef __ENEMY__H
+#define __ENEMY__H
 
 #include "TM4C129.h"                    // Device header
 #include <stdbool.h>
@@ -9,7 +9,8 @@
 #include "cfaf128x128x16.h"
 
 
-void drawItem(tContext sContext, int16_t x, int16_t y, int16_t last_x, int16_t last_y);
-void Item(tContext sContext);
+void drawEnemy(tContext sContext, int16_t x, int16_t y);
+void Enemy(tContext sContext);
+
 
 #endif

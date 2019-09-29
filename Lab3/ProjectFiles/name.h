@@ -9,5 +9,6 @@
 #include "cfaf128x128x16.h"
 
 void drawName(tContext sContext);
+void Name(tContext sContext);
 
 #endif

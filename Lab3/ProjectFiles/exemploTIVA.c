@@ -23,12 +23,32 @@
 #include "rgb.h"
 #include "cfaf128x128x16.h"
 #include "buttons.h"
-#include "buzzer.h"
 #include "joy.h"
+#include "buzzer.h"
+
+#include "eddie.h"
+#include "painel.h"
 
 
 //To print on the screen
 tContext sContext;
+
+//// Floors
+//uint16_t floors_x[] = {0, 0, 0, 0, 0}, floors_y[] = {127-FLOOR_HEIGHT};
+
+//// Ladders
+//uint16_t ladders_x[] = {}, ladders_y[] = {};
+
+//// Enemies
+//uint16_t enemies_x[] = {}, enemies_y[] = {};
+
+//// Itens
+//uint16_t itens_x[] = {20,80,50}, itens_y[] = {80,30,100};
+
+//// Eddie
+//uint16_t eddie_x = 64, eddie_y = 64;
+
+
 
 /*----------------------------------------------------------------------------
  *    Initializations
@@ -57,39 +77,15 @@ void init_display(){
  *      Main
  *---------------------------------------------------------------------------*/
 int main (void) {
-	char pbufx[10], pbufy[10], pbufz[10];
-	bool s1_press, s2_press;
-	uint16_t x, y;
-	uint16_t x_item, y_item;
-	int16_t dx_item = 2;
-	//Initializing all peripherals
 	init_all();
-	//Sidelong menu creation
 	init_display();
 	
-	drawName(sContext);
-	
-	x_item = 64;
-	y_item = 64;
-	
-	x = 0;
-	y = 0;
 	while(1){
-/*  Joystick		*/
-			x = joy_read_x();
-			y = joy_read_y();
-
-			drawEddie(sContext, x*200/0xFFF-100, y*200/0xFFF-100);			
-			drawLatter(sContext);
-			drawItem(sContext, x_item, y_item);
-			x_item += dx_item;
-			if (x_item > 110)
-				dx_item *= -1;
-			if (x_item < 20)
-				dx_item *= -1;
-//
-/*	Botoes 	*/			
-//			s1_press = button_read_s1();
-//			s2_press = button_read_s2();
+		Eddie(sContext);
+	
+		PainelDeInstrumentos(sContext);
+		
+		Enemy(sContext);
+		Item(sContext);
 	}	
 }

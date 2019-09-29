@@ -24,7 +24,7 @@ void drawEddie(tContext sContext, int16_t x, int16_t y)
 	int numberOfPixels;
     uint32_t eddieOneChannel[90];
 	int16_t dx, dy;
-	static int pos_x = 64, pos_y = 64, drawn = 0;
+	static int pos_x = 64, pos_y = 64;
 
 	numberOfPixels = sizeof(eddie)/sizeof(unsigned char);
 
@@ -39,8 +39,6 @@ void drawEddie(tContext sContext, int16_t x, int16_t y)
     
     GrContextBackgroundSet(&sContext, ClrBlack);
     
-	if ((abs(x) < 50 && abs(y) < 50) && drawn == 1)
-		return;
 	
 	dx = 0;
 	if (x > 50)
@@ -54,11 +52,6 @@ void drawEddie(tContext sContext, int16_t x, int16_t y)
 	if (y > 50)
 		dy = -2;
 	
-	if (!drawn)
-	{
-		dx = 0;
-		dy = 0;
-	}
 	
 	GrContextForegroundSet(&sContext, ClrBlack);
 	for (i = 0; i < 15; i++)
@@ -76,9 +69,17 @@ void drawEddie(tContext sContext, int16_t x, int16_t y)
     {
         for (j = 0; j < 6; j++)
         {
-            GrContextForegroundSet(&sContext, eddieOneChannel[i*6 + j]);
+			GrContextForegroundSet(&sContext, eddieOneChannel[i*6 + j]);
             GrPixelDraw(&sContext,j+pos_x,i+pos_y);
         }
     }
-	drawn = 1;
+}
+
+
+void Eddie(tContext sContext)
+{
+	uint16_t x, y;
+	x = joy_read_x();
+	y = joy_read_y();
+	drawEddie(sContext, x*200/0xFFF-100, y*200/0xFFF-100);
 }

@@ -393,11 +393,6 @@
               <FilePath>.\eddie.c</FilePath>
             </File>
             <File>
-              <FileName>latter.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\latter.c</FilePath>
-            </File>
-            <File>
               <FileName>name.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\name.c</FilePath>
@@ -406,6 +401,26 @@
               <FileName>item.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\item.c</FilePath>
+            </File>
+            <File>
+              <FileName>floor.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\floor.c</FilePath>
+            </File>
+            <File>
+              <FileName>enemy.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\enemy.c</FilePath>
+            </File>
+            <File>
+              <FileName>painel.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\painel.c</FilePath>
+            </File>
+            <File>
+              <FileName>ladder.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\ladder.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -892,11 +907,6 @@
               <FilePath>.\eddie.c</FilePath>
             </File>
             <File>
-              <FileName>latter.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\latter.c</FilePath>
-            </File>
-            <File>
               <FileName>name.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\name.c</FilePath>
@@ -905,6 +915,26 @@
               <FileName>item.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\item.c</FilePath>
+            </File>
+            <File>
+              <FileName>floor.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\floor.c</FilePath>
+            </File>
+            <File>
+              <FileName>enemy.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\enemy.c</FilePath>
+            </File>
+            <File>
+              <FileName>painel.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\painel.c</FilePath>
+            </File>
+            <File>
+              <FileName>ladder.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\ladder.c</FilePath>
             </File>
           </Files>
         </Group>
