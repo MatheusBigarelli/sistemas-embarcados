@@ -1,6 +1,6 @@
 #include "eddie.h"
 
-unsigned char eddie[] = {
+const uint8_t eddie[] = {
  0x00,0x00,0x00,0x00,0x00,0x00,0x20,0x28,0x44,0x24,0x2c,0x4c,0x10,0x10,0x20,0x00,0x00,0x00
 ,0x00,0x00,0x00,0x38,0x3c,0x6c,0x84,0x90,0xe4,0x88,0x98,0xf0,0x64,0x70,0xb8,0x10,0x14,0x20
 ,0x00,0x00,0x00,0x0c,0x10,0x10,0xd0,0xd0,0x54,0xe4,0xe4,0x58,0x98,0x98,0x40,0x14,0x14,0x08
@@ -18,13 +18,18 @@ unsigned char eddie[] = {
 ,0x00,0x00,0x00,0x04,0x04,0x04,0xc0,0xc0,0x3c,0xd0,0xd4,0x40,0xcc,0xd0,0x40,0xc4,0xc4,0x3c};
  
 
-void drawEddie(tContext sContext, int x, int y)
+void drawEddie(tContext sContext, int16_t x, int16_t y)
 {
     int i, j;
 	int numberOfPixels;
     uint32_t eddieOneChannel[90];
+	int16_t dx, dy;
+	static int pos_x = 64, pos_y = 64, drawn = 0;
 
 	numberOfPixels = sizeof(eddie)/sizeof(unsigned char);
+
+	
+	
 	j = 0;
     for (i = 0; i < numberOfPixels - 3; i+=3)
     {
@@ -34,13 +39,46 @@ void drawEddie(tContext sContext, int x, int y)
     
     GrContextBackgroundSet(&sContext, ClrBlack);
     
+	if ((abs(x) < 50 && abs(y) < 50) && drawn == 1)
+		return;
+	
+	dx = 0;
+	if (x > 50)
+		dx = 2;
+	if (x < -50)
+		dx = -2;
+	
+	dy = 0;
+	if (y < -50)
+		dy = 2;
+	if (y > 50)
+		dy = -2;
+	
+	if (!drawn)
+	{
+		dx = 0;
+		dy = 0;
+	}
+	
+	GrContextForegroundSet(&sContext, ClrBlack);
+	for (i = 0; i < 15; i++)
+	{
+		for (j = 0; j < 6; j++)
+		{
+			GrPixelDraw(&sContext,j+pos_x,i+pos_y);
+		}
+	}
+	
+	pos_x += dx;
+	pos_y += dy;
 	
     for (i = 0; i < 15; i++)
     {
         for (j = 0; j < 6; j++)
         {
             GrContextForegroundSet(&sContext, eddieOneChannel[i*6 + j]);
-            GrPixelDraw(&sContext,j+x+64,i-y+64);
+            GrPixelDraw(&sContext,j+pos_x,i+pos_y);
         }
     }
+	drawn = 1;
 }

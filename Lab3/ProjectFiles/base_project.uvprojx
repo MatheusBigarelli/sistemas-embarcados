@@ -397,6 +397,11 @@
               <FileType>1</FileType>
               <FilePath>.\latter.c</FilePath>
             </File>
+            <File>
+              <FileName>name.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\name.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -885,6 +890,11 @@
               <FileName>latter.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\latter.c</FilePath>
+            </File>
+            <File>
+              <FileName>name.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\name.c</FilePath>
             </File>
           </Files>
         </Group>

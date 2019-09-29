@@ -9,7 +9,7 @@
 #include "cfaf128x128x16.h"
 
 
-void drawEddie(tContext sContext, int x, int y);
+void drawEddie(tContext sContext, int16_t x, int16_t y);
 
 
 #endif

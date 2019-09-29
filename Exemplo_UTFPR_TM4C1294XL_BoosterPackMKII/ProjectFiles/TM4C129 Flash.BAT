@@ -1,4 +1,7 @@
-SET PATH=C:\Keil_v5\ARM\ARMCC\Bin;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Windows\System32\OpenSSH\;C:\Program Files\Git\cmd;C:\MinGW\bin\;C:\MinGW\*;C:\Python27;C:\Users\mathe\AppData\Local\Microsoft\WindowsApps;;C:\Users\mathe\AppData\Local\Programs\Microsoft VS Code\bin
+SET PATH=C:\Keil_v5\ARM\ARMCC\Bin;C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Windows\System32\OpenSSH\;C:\Program Files\Git\cmd;C:\MinGW\bin\;C:\MinGW\*;C:\Python27;C:\Program Files\nodejs\;C:\Program Files\PuTTY\;C:\Users\mathe\AppData\Local\Programs\Python\Python37-32\Scripts\;C:\Users\mathe\AppData\Local\Programs\Python\Python37-32\;C:\Users\mathe\AppData\Local\Microsoft\WindowsApps;;C:\Users\mathe\AppData\Local\Programs\Microsoft VS Code\bin;C:\Program Files\JetBrains\IntelliJ IDEA Community Edition 2019.2.1\bin;;C:\Users\mathe\AppData\Roaming\npm
+SET ARMCC5_ASMOPT=--diag_suppress=9931
+SET ARMCC5_CCOPT=--diag_suppress=9931
+SET ARMCC5_LINKOPT=--diag_suppress=9931
 SET CPU_TYPE=TM4C1294NCPDT
 SET CPU_VENDOR=Texas Instruments
 SET UV2_TARGET=TM4C129 Flash

@@ -49,6 +49,7 @@ tools/openocd.git
 # Generated output files
 /Listings/*
 /Objects/*
+/Flash/*
 
 # Debugger files
 # define exception below if needed
@@ -79,3 +80,4 @@ tools/openocd.git
 *.l1p
 *.l2p
 *.iex
+*.crf
