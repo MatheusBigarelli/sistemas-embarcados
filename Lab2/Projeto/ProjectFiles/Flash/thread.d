@@ -1,0 +1,12 @@
+.\flash\thread.o: thread.cpp
+.\flash\thread.o: thread.h
+.\flash\thread.o: C:\Users\Victor\AppData\Local\Arm\Packs\ARM\CMSIS\5.5.1\CMSIS\RTOS\RTX\INC\cmsis_os.h
+.\flash\thread.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdint.h
+.\flash\thread.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stddef.h
+.\flash\thread.o: primes.h
+.\flash\thread.o: messages.h
+.\flash\thread.o: gpio.h
+.\flash\thread.o: ..\driverlib/gpio.h
+.\flash\thread.o: tm4c1294ncpdt.h
+.\flash\thread.o: uart.h
+.\flash\thread.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\string.h
