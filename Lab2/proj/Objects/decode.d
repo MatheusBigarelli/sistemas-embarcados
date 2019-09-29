@@ -3,6 +3,8 @@
 .\objects\decode.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h
 .\objects\decode.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\string.h
 .\objects\decode.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdint.h
+.\objects\decode.o: C:\Users\mathe\AppData\Local\Arm\Packs\ARM\CMSIS\5.6.0\CMSIS\RTOS\RTX\INC\cmsis_os.h
+.\objects\decode.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stddef.h
 .\objects\decode.o: primes.h
 .\objects\decode.o: messages.h
 .\objects\decode.o: uart.h

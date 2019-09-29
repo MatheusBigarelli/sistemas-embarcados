@@ -653,6 +653,10 @@ primes = [
 65519, 65521
 ]
 
-print(primes.index(761))
-print(primes.index(13399))
-print(primes.index(48341))
+print(primes.index(761), end='->')
+print(hex(primes.index(761)))
+print(primes.index(13399), end='->')
+print(hex(primes.index(13399)))
+print(primes.index(48341), end='->')
+print(hex(primes.index(48341)))
+print(len(primes))

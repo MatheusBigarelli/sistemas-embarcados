@@ -1,6 +1,5 @@
 import os
 import math
-# import matplotlib.pyplot as plt
 
 from primes import primes
 
@@ -125,11 +124,12 @@ if __name__ == "__main__":
         msg_bytes = msg_bytes[:last_byte]
         
         # for key_index, key in enumerate(primes):
-        count = 1
+        count = 0
         while True:
             try:
                 key_index, key = get_next_key(count, 1)
             except Exception as e:
+                print("Exception")
                 print(e)
                 print(count)
                 break
@@ -137,21 +137,16 @@ if __name__ == "__main__":
             decoded_msg = decode(msg_bytes, key_index)
             calc_conf_sec_to_last = primes[key_index] * primes[key_index+1]
             calc_conf_last = primes[key_index] * primes[key_index-1]
+            
             if  (calc_conf_sec_to_last == expected_conf_sec_to_last and  
                     calc_conf_last == expected_conf_last):
                 os.system('cls')
+
                 print("Decrypted message " + str(i))
-                print("Key: {}".format(key))
+                print("Key: {}\nKey index: {} ({})".format(key, key_index, hex(key_index)))
                 print("Decoded message: " + " ".join(decoded_msg))
                 print("Decoded string: " + to_string(decoded_msg))
                 print('\n\n')
                 
-                # print("Expected conf: " + hex(expected_conf_sec_to_last))
-                # print("Calculated conf: " + hex(calc_conf_sec_to_last))
-                # print('ok')
                 garbage = input()
-                data.append(count)
                 break
-
-    # plt.plot()
-    # plt.show()

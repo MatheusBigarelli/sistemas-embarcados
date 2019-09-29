@@ -43,19 +43,18 @@ int main()
 {
 	osKernelInitialize();
 	
-	//PLL_Init();
-	//SysTick_Init();
-	//GPIO_Init();	
-	//UART_Init();
+	PLL_Init();
+	SysTick_Init();
+	GPIO_Init();	
+	UART_Init();
 	
 	threadInit();
-	
-	//if (!osKernelRunning())
-		//return 1;
 	
 	current_state = GENERATING;
 	
 	osKernelStart();
+	
+	osDelay(osWaitForever);
 	
 	return 0;
 }
