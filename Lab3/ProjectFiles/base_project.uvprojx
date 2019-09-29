@@ -402,6 +402,11 @@
               <FileType>1</FileType>
               <FilePath>.\name.c</FilePath>
             </File>
+            <File>
+              <FileName>item.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\item.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -895,6 +900,11 @@
               <FileName>name.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\name.c</FilePath>
+            </File>
+            <File>
+              <FileName>item.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\item.c</FilePath>
             </File>
           </Files>
         </Group>
