@@ -11,7 +11,7 @@
 #include "joy.h"
 
 
-void drawEddie(tContext sContext, int16_t x, int16_t y);
+void drawEddie(tContext sContext, int16_t x, int16_t y, uint16_t last_x, uint16_t last_y);
 void Eddie(tContext sContext);
 
 #endif

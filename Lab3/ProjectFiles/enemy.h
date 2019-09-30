@@ -9,7 +9,7 @@
 #include "cfaf128x128x16.h"
 
 
-void drawEnemy(tContext sContext, int16_t x, int16_t y);
+void drawEnemy(tContext sContext, int16_t x, int16_t y, int16_t last_x, int16_t last_y);
 void Enemy(tContext sContext);
 
 

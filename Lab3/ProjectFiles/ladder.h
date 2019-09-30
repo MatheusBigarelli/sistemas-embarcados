@@ -8,6 +8,12 @@
 
 #include "cfaf128x128x16.h"
 
+#define LADDER_WIDTH 12
+#define LADDER_HEIGHT 17
+
+#define LADDER_PIXELS LADDER_WIDTH*LADDER_HEIGHT*3
+#define NUM_LADDERS 3
+
 void drawLadder(tContext sContext, uint16_t x, uint16_t y);
 void Ladder(tContext sContext);
 

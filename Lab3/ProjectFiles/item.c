@@ -31,11 +31,20 @@ void drawItem(tContext sContext, int16_t x, int16_t y, int16_t last_x, int16_t l
     
 	
 	GrContextForegroundSet(&sContext, ClrBlack);
-	for (i = 0; i < 7; i++)
+	
+	if (last_x < x)
 	{
-		for (j = 0; j < 13; j++)
+		for (i = 0; i < 7; i++)
 		{
-			GrPixelDraw(&sContext,(j+last_x)%128,(i+last_y)%128);
+			GrPixelDraw(&sContext,(last_x)%128,(i+last_y)%128);
+		}
+	}
+	
+	else
+	{
+		for (i = 0; i < 7; i++)
+		{
+			GrPixelDraw(&sContext,(12+last_x)%128,(i+last_y)%128);
 		}
 	}
 	
@@ -49,24 +58,24 @@ void drawItem(tContext sContext, int16_t x, int16_t y, int16_t last_x, int16_t l
     }
 }
 
+extern uint16_t itens_x[], itens_y[];
 
 void Item(tContext sContext)
 {
 	uint8_t i;
-	static int16_t dx[] = {1, -1, 1};
-	static uint16_t x[] = {20,80,50} , y[] = {80,30,100}, last_x[] = {20,80,50}, last_y[] = {80, 30, 100};
-//	static uint16_t last_x[] = {20,80,50}, last_y[] = {80, 30, 100};
+	static int16_t dx[] = {1, 1, -1};
+	static uint16_t last_x[] = {20,80,50}, last_y[] = {80, 30, 100};
 	
 	
 	for (i = 0; i < 3; i++)
 	{
-		drawItem(sContext, x[i], y[i], last_x[i], last_y[i]);
-		last_x[i] = x[i];
-		last_y[i] = y[i];
-		x[i] += dx[i];	
-		if (x[i] > 128 && dx[i] == 1)
-			x[i] = 0;
-		if (x[i] == 0 && dx[i] == -1)
-			x[i] = 128;
+		drawItem(sContext, itens_x[i], itens_y[i], last_x[i], last_y[i]);
+		last_x[i] = itens_x[i];
+		last_y[i] = itens_y[i];
+		itens_x[i] += dx[i];	
+		if (itens_x[i] > 128 && dx[i] == 1)
+			itens_x[i] = 0;
+		if (itens_x[i] == 0 && dx[i] == -1)
+			itens_x[i] = 128;
 	}
 }

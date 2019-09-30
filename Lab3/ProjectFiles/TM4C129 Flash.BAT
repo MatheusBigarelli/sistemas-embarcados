@@ -26,3 +26,4 @@ SET CPU_CLOCK=0x07270E00
 "C:\Keil_v5\ARM\ARMCC\Bin\ArmAsm" --Via ".\flash\startup_tm4c129._ia"
 "C:\Keil_v5\ARM\ARMCC\Bin\ArmCC" --Via ".\flash\system_tm4c129.__i"
 "C:\Keil_v5\ARM\ARMCC\Bin\ArmLink" --Via ".\Flash\base_project.lnp"
+"C:\Keil_v5\ARM\ARMCC\Bin\fromelf.exe" ".\Flash\base_project.axf" --i32combined --output ".\Flash\base_project.hex"

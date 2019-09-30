@@ -1,5 +1,7 @@
 #include "eddie.h"
 
+extern uint16_t eddie_x, eddie_y;
+
 const uint8_t eddie[] = {
  0x00,0x00,0x00,0x00,0x00,0x00,0x20,0x28,0x44,0x24,0x2c,0x4c,0x10,0x10,0x20,0x00,0x00,0x00
 ,0x00,0x00,0x00,0x38,0x3c,0x6c,0x84,0x90,0xe4,0x88,0x98,0xf0,0x64,0x70,0xb8,0x10,0x14,0x20
@@ -18,13 +20,11 @@ const uint8_t eddie[] = {
 ,0x00,0x00,0x00,0x04,0x04,0x04,0xc0,0xc0,0x3c,0xd0,0xd4,0x40,0xcc,0xd0,0x40,0xc4,0xc4,0x3c};
  
 
-void drawEddie(tContext sContext, int16_t x, int16_t y)
+void drawEddie(tContext sContext, int16_t x, int16_t y, uint16_t last_x, uint16_t last_y)
 {
     int i, j;
 	int numberOfPixels;
     uint32_t eddieOneChannel[90];
-	int16_t dx, dy;
-	static int pos_x = 64, pos_y = 64;
 
 	numberOfPixels = sizeof(eddie)/sizeof(unsigned char);
 
@@ -38,39 +38,35 @@ void drawEddie(tContext sContext, int16_t x, int16_t y)
     }
     
     GrContextBackgroundSet(&sContext, ClrBlack);
-    
-	
-	dx = 0;
-	if (x > 50)
-		dx = 2;
-	if (x < -50)
-		dx = -2;
-	
-	dy = 0;
-	if (y < -50)
-		dy = 2;
-	if (y > 50)
-		dy = -2;
 	
 	
 	GrContextForegroundSet(&sContext, ClrBlack);
-	for (i = 0; i < 15; i++)
+	
+	if (last_x < x)
 	{
-		for (j = 0; j < 6; j++)
+		for (i = 0; i < 15; i++)
 		{
-			GrPixelDraw(&sContext,j+pos_x,i+pos_y);
+			GrPixelDraw(&sContext, last_x, i+last_y);
+			GrPixelDraw(&sContext, last_x+1, i+last_y);
 		}
 	}
 	
-	pos_x += dx;
-	pos_y += dy;
+	if (last_x > x)
+	{
+		for (i = 0; i < 15; i++)
+		{
+			GrPixelDraw(&sContext, 5+last_x, i+last_y);
+			GrPixelDraw(&sContext, 4+last_x, i+last_y);
+		}
+	}
+
 	
     for (i = 0; i < 15; i++)
     {
         for (j = 0; j < 6; j++)
         {
 			GrContextForegroundSet(&sContext, eddieOneChannel[i*6 + j]);
-            GrPixelDraw(&sContext,j+pos_x,i+pos_y);
+            GrPixelDraw(&sContext,j+x,i+y);
         }
     }
 }
@@ -78,8 +74,50 @@ void drawEddie(tContext sContext, int16_t x, int16_t y)
 
 void Eddie(tContext sContext)
 {
-	uint16_t x, y;
+	int16_t x, y;
+	uint16_t dx, dy;
+	static bool jump;
+	static uint8_t air_time = 6;
+	static uint16_t last_x = 64, last_y = 64;
+
+	drawEddie(sContext, eddie_x, eddie_y, last_x, last_y);
+
+
 	x = joy_read_x();
 	y = joy_read_y();
-	drawEddie(sContext, x*200/0xFFF-100, y*200/0xFFF-100);
+	jump = button_read_s2();
+	x = x*200/0xFFF-100;
+	y = y*200/0xFFF-100;
+	
+	dx = 0;
+	if (x > 50)
+		dx = 2;
+	if (x < -50)
+		dx = -2;
+	dy = 0;
+//	if (y < -50)
+//		dy = 2;
+//	if (y > 50)
+//		dy = -2;
+	
+	if (jump)
+	{
+		if (air_time == 10)
+			dy = -10;
+		air_time--;
+	}
+	if (air_time == 0)
+	{
+		jump = false;
+		air_time = 10;
+		dy = 10;
+	}
+	
+	last_x = eddie_x;
+	last_y = eddie_y;
+	
+	eddie_x += dx;
+	eddie_y += dy;
+
+
 }

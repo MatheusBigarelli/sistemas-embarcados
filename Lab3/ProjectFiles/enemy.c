@@ -1,5 +1,7 @@
 #include "enemy.h"
 
+extern uint16_t enemies_x[], enemies_y[];
+
 const uint8_t enemy[] = {
  0x08,0x10,0x18,0x2c,0x50,0x7c,0x40,0x70,0xac,0x4c,0x80,0xc4,0x50,0x8c,0xd4,0x50,0x88,0xd4,0x48,0x7c,0xc0,0x3c,0x68,0x9c,0x24,0x3c,0x5c,0x04,0x0c,0x10
 ,0x48,0x7c,0xc0,0x50,0x88,0xd0,0x20,0x38,0x58,0x20,0x3c,0x5c,0x50,0x8c,0xd4,0x4c,0x84,0xcc,0x10,0x1c,0x2c,0x34,0x5c,0x90,0x4c,0x88,0xd0,0x3c,0x68,0xa4
@@ -10,12 +12,11 @@ const uint8_t enemy[] = {
 
 }; 
 
-void drawEnemy(tContext sContext, int16_t x, int16_t y)
+void drawEnemy(tContext sContext, int16_t x, int16_t y, int16_t last_x, int16_t last_y)
 {
     int i, j, height, width;
 	int numberOfPixels;
     uint32_t enemyOneChannel[180];
-	static int16_t last_x, last_y;
 
 	numberOfPixels = sizeof(enemy)/sizeof(unsigned char);
 
@@ -34,11 +35,23 @@ void drawEnemy(tContext sContext, int16_t x, int16_t y)
     
 	
 	GrContextForegroundSet(&sContext, ClrBlack);
-	for (i = 0; i < height; i++)
+	
+	
+	if (last_x < x)
 	{
-		for (j = 0; j < width; j++)
+		for (i = 0; i < height; i++)
 		{
-			GrPixelDraw(&sContext,j+last_x,i+last_y);
+			GrPixelDraw(&sContext, last_x, i+last_y);
+			GrPixelDraw(&sContext, last_x+1, i+last_y);
+		}
+	}
+	
+	else
+	{
+		for (i = 0; i < height; i++)
+		{
+			GrPixelDraw(&sContext, last_x+width-1, i+last_y);
+			GrPixelDraw(&sContext, last_x+width-2, i+last_y);
 		}
 	}
 	
@@ -50,24 +63,23 @@ void drawEnemy(tContext sContext, int16_t x, int16_t y)
             GrPixelDraw(&sContext,j+x,i+y);
         }
     }
-	
-	last_x = x;
-	last_y = y;
 }
 
 
 void Enemy(tContext sContext)
 {
-	static int16_t dx = 2;
-	static int16_t x = 20, y = 100;
+	uint8_t i;
+	static int16_t dx[] = {2, 2}, last_x[] = {20, 65}, last_y[] = {80, 45};
 
-	drawEnemy(sContext, x, y);
-	
-	x += dx;
-	
-	if (x > 110)
-		dx *= -1;
-	if (x < 20)
-		dx *= -1;
-
+	for (i = 0; i < 2; i++)
+	{
+		drawEnemy(sContext, enemies_x[i], enemies_y[i], last_x[i], last_y[i]);
+		last_x[i] = enemies_x[i];
+		last_y[i] = enemies_y[i];
+		enemies_x[i] += dx[i];
+		if (enemies_x[i] > 110)
+			dx[i] *= -1;
+		if (enemies_x[i] < 20)
+			dx[i] *= -1;
+	}
 }

@@ -33,20 +33,20 @@
 //To print on the screen
 tContext sContext;
 
-//// Floors
-//uint16_t floors_x[] = {0, 0, 0, 0, 0}, floors_y[] = {127-FLOOR_HEIGHT};
+// Floors
+//uint16_t floors_x[] = {0, 0, 0, 0, 0}, floors_y[] = {127-FLOOR_HEIGHT,};
 
-//// Ladders
+// Ladders
 //uint16_t ladders_x[] = {}, ladders_y[] = {};
 
-//// Enemies
-//uint16_t enemies_x[] = {}, enemies_y[] = {};
+// Enemies
+uint16_t enemies_x[] = {20, 65}, enemies_y[] = {80, 45};
 
-//// Itens
-//uint16_t itens_x[] = {20,80,50}, itens_y[] = {80,30,100};
+// Itens
+uint16_t itens_x[] = {20,80,50}, itens_y[] = {80,30,100};
 
-//// Eddie
-//uint16_t eddie_x = 64, eddie_y = 64;
+// Eddie
+uint16_t eddie_x = 64, eddie_y = 64;
 
 
 
