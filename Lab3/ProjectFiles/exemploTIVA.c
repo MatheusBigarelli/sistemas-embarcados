@@ -54,13 +54,13 @@ void init_display(){
 	GrContextBackgroundSet(&sContext, ClrBlack);
 }
 
-
+#include <stdlib.h>
 /*----------------------------------------------------------------------------
  *      Main
  *---------------------------------------------------------------------------*/
 int main (void) {
-	int x,y;
-	int i=0;
+	int x,y,counter=0;
+	int i=0;		
 	init_all();
 	init_display();
 	initMap();	
@@ -68,8 +68,18 @@ int main (void) {
 	while(1){
 		Floor(sContext);
 		Ladder(sContext);
-		Eddie(sContext,20,3);		
-		Sneaker(sContext,30,1);
-
+		Score(sContext);
+		
+		Eddie(sContext,30,3);
+		Sneaker(sContext,0,0);
+		Sneaker(sContext,70,3);
+		Boss(sContext,20,4);
+			
+		
+		Item(sContext, 40, 1,counter);
+		counter++;
+		if(counter == 5)
+			counter = 0;
+		
 	}	
 }

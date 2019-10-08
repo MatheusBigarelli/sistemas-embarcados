@@ -407,6 +407,16 @@
               <FileType>5</FileType>
               <FilePath>.\move.h</FilePath>
             </File>
+            <File>
+              <FileName>util.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\util.c</FilePath>
+            </File>
+            <File>
+              <FileName>util.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\util.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -526,11 +536,6 @@
               <FileName>item.h</FileName>
               <FileType>5</FileType>
               <FilePath>.\item.h</FilePath>
-            </File>
-            <File>
-              <FileName>map.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\map.h</FilePath>
             </File>
           </Files>
         </Group>
@@ -946,6 +951,16 @@
               <FileType>5</FileType>
               <FilePath>.\move.h</FilePath>
             </File>
+            <File>
+              <FileName>util.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\util.c</FilePath>
+            </File>
+            <File>
+              <FileName>util.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\util.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -1065,11 +1080,6 @@
               <FileName>item.h</FileName>
               <FileType>5</FileType>
               <FilePath>.\item.h</FilePath>
-            </File>
-            <File>
-              <FileName>map.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\map.h</FilePath>
             </File>
           </Files>
         </Group>

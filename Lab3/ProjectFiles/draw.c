@@ -31,7 +31,7 @@ void draw(tContext sContext, const uint32_t oneChannel[], const uint16_t height,
 	{
 			for (j = 0; j < width; j++)
 			{
-					if( oneChannel[i*width + j] != ClrBlack)
+					if( oneChannel[i*width + j] > 0x20)
 					{
 						map_prio = map[i+offset_i][offset_j + j];
 						// as coordenadas i,j sao relativas à imagem e nao ao mapa por isso considera o offset(para ter coordenadas absolutas)
@@ -45,15 +45,16 @@ void draw(tContext sContext, const uint32_t oneChannel[], const uint16_t height,
 					
 			}
 	}
-	
 }
+
+
 void Ladder(tContext sContext)
 {
 	int i,j=0;
 	 
 	int numberOfAreas = 4;
 	int numberOfLaddersInArea = 2;
-	uint32_t oneChannel[204];
+	uint32_t oneChannel[LADDER_NUMBER_PIXELS];
 	
 	int ladderStarts[4][2] = {
 	{10, 70},
@@ -62,7 +63,7 @@ void Ladder(tContext sContext)
 	{100, 20}
 	};
 	
-	for(i = 0; i < 204*3 - 3; i+=3)
+	for(i = 0; i < LADDER_NUMBER_PIXELS*3 - 3; i+=3)
 	{
 		oneChannel[j] = (ladder[i]<<16) + (ladder[i+1]<<8) + (ladder[i+2]);
 		j++;
@@ -75,49 +76,110 @@ void Ladder(tContext sContext)
 	}
 
 }
+
 void Sneaker(tContext sContext, uint16_t xOffset, uint8_t areaOffset)
 {
-	int i,j=0;
-	uint32_t oneChannel[60];
+	drawSneaker(sContext, xOffset, areaOffset, 0);
+}
+void Boss(tContext sContext, uint16_t xOffset, uint8_t areaOffset)
+{
+	drawSneaker(sContext, xOffset, areaOffset, 5);
+}
+
+void drawSneaker(tContext sContext, uint16_t xOffset, uint8_t areaOffset, uint8_t extraHeight)
+{
+	int i,j=0,sneakerHeight,headTopOffset;
+	uint32_t oneChannelHead[HEAD_NUMBER_PIXELS],oneChannelLegs[LEGS_NUMBER_PIXELS],oneChannelLegsExtra[LEGS_EXTRA_NUMBER_PIXELS];
 	
-	for(i = 0; i < 60*3 - 3; i+=3)
+	for(i = 0; i < HEAD_NUMBER_PIXELS*3 - 3; i+=3)
 	{
-		oneChannel[j] = (sneaker[i]<<16) + (sneaker[i+1]<<8) + (sneaker[i+2]);
+		oneChannelHead[j] = (head[i]<<16) + (head[i+1]<<8) + (head[i+2]);
 		j++;
 	}
-	draw(sContext, oneChannel, SNEAKER_HEIGHT, SNEAKER_WIDTH, xOffset, (127 - FLOOR_HEIGHT) - SNEAKER_HEIGHT - (LADDER_HEIGHT + FLOOR_HEIGHT)*(areaOffset), PRIORITY_SNEAKER);
+	j=0;
+	for(i = 0; i < LEGS_NUMBER_PIXELS*3 - 3; i+=3)
+	{
+		oneChannelLegs[j] = (legs[i]<<16) + (legs[i+1]<<8) + (legs[i+2]);
+		j++;
+	}
+	j=0;
+	for(i = 0; i < LEGS_EXTRA_NUMBER_PIXELS*3 - 3; i+=3)
+	{
+		oneChannelLegsExtra[j] = (legsExtra[i]<<16) + (legsExtra[i+1]<<8) + (legsExtra[i+2]);
+		j++;
+	}
+	
+	sneakerHeight = HEAD_HEIGHT + LEGS_HEIGHT + extraHeight;
+	headTopOffset = (127 - FLOOR_HEIGHT) - sneakerHeight - (LADDER_HEIGHT + FLOOR_HEIGHT)*(areaOffset);
+	
+	draw(sContext, oneChannelHead, HEAD_HEIGHT, HEAD_WIDTH, xOffset, headTopOffset , PRIORITY_SNEAKER);
+	for(i=0;i<extraHeight;i++)
+	{		
+		draw(sContext, oneChannelLegsExtra, LEGS_EXTRA_HEIGHT, LEGS_EXTRA_WIDTH, xOffset, headTopOffset + HEAD_HEIGHT + i, PRIORITY_SNEAKER);
+	}
+	draw(sContext, oneChannelLegs, LEGS_HEIGHT, LEGS_WIDTH, xOffset, headTopOffset + HEAD_HEIGHT + extraHeight, PRIORITY_SNEAKER);
 }
+
 
 void Eddie(tContext sContext, uint16_t xOffset, uint8_t areaOffset)
 {
-	int i,j=0;
-	uint32_t oneChannel[90];
+	int i,j=0,eddieTopOffset;
+	uint32_t oneChannel[EDDIE_NUMBER_PIXELS];
 	int initialXPosition = 0;
 	
-	for(i = 0; i < 90*3 - 3; i+=3)
+	for(i = 0; i < EDDIE_NUMBER_PIXELS*3 - 3; i+=3)
 	{
 		oneChannel[j] = (eddie[i]<<16) + (eddie[i+1]<<8) + (eddie[i+2]);
 		j++;
 	}
-	if(xOffset > 0)
+//	flipVert(oneChannel, EDDIE_HEIGHT, EDDIE_WIDTH);
+	eddieTopOffset = (127 - FLOOR_HEIGHT) - EDDIE_HEIGHT - (LADDER_HEIGHT + FLOOR_HEIGHT)*(areaOffset);
+	draw(sContext, oneChannel, EDDIE_HEIGHT, EDDIE_WIDTH, initialXPosition + xOffset, eddieTopOffset, PRIORIY_EDDIE);
+}
+
+
+void Item(tContext sContext, uint16_t xOffset, uint8_t areaOffset, uint8_t colorIndex)
+{
+	int i,j=0,itemTopOffset;
+	uint32_t oneChannel[ITEM_NUMBER_PIXELS];
+	uint32_t colors[] = {ClrMagenta,ClrPink,ClrYellow,ClrYellowGreen,ClrGreen};
+	for(i = 0; i < ITEM_NUMBER_PIXELS*3 - 3; i+=3)
 	{
-		xOffset = 1;
+		oneChannel[j] = (item[i]<<16) + (item[i+1]<<8) + (item[i+2]);
+		if(oneChannel[j] != ClrBlack)
+		{
+			oneChannel[j] = colors[colorIndex];
+		}
+		j++;
 	}
-	else if(xOffset < 0)
+	itemTopOffset = (127 - FLOOR_HEIGHT - LADDER_HEIGHT) - (LADDER_HEIGHT + FLOOR_HEIGHT)*(areaOffset) + 1;
+	draw(sContext, oneChannel, ITEM_HEIGHT, ITEM_WIDTH, xOffset, itemTopOffset, PRIORITY_ITEM);
+}
+
+void Score(tContext sContext)
+{
+	int i,j,lifes = 3;
+	int lifeIndicatorLenght = 8;
+	int start;
+	
+	GrStringDrawCentered(&sContext,"00000", -1, 64, (sContext.psFont->ui8Height)/2, true);	
+	for(i=0;i<lifes;i++)
 	{
-		xOffset = -1;
+		start = 48 + i*(lifeIndicatorLenght + 3);
+		for(j=0;j<lifeIndicatorLenght;j++)
+		{
+			GrPixelDraw(&sContext,start + j,(sContext.psFont->ui8Height) + 2);
+		}
 	}
-	xOffset = 20;
-	draw(sContext, oneChannel, EDDIE_HEIGHT, EDDIE_WIDTH, initialXPosition + xOffset,(127 - FLOOR_HEIGHT) - EDDIE_HEIGHT - (LADDER_HEIGHT + FLOOR_HEIGHT)*(areaOffset), PRIORIY_EDDIE);
 }
 
 void Floor(tContext sContext)
 {
 	int i,j=0;
-	uint32_t oneChannel[384];
+	uint32_t oneChannel[FLOOR_NUMBER_PIXELS];
 	int numberOfFloors = 5;
 	
-	for(i = 0; i < 384*3 - 3; i+=3)
+	for(i = 0; i < FLOOR_NUMBER_PIXELS*3 - 3; i+=3)
 	{
 		oneChannel[j] = (floor_[i]<<16) + (floor_[i+1]<<8) + (floor_[i+2]);
 		j++;
@@ -129,3 +191,4 @@ void Floor(tContext sContext)
 			draw(sContext, oneChannel, FLOOR_HEIGHT, FLOOR_WIDTH, 0, (127 - FLOOR_HEIGHT) - i*(FLOOR_HEIGHT + LADDER_HEIGHT), PRIORIY_BACKGROUND);
 	}
 }
+
