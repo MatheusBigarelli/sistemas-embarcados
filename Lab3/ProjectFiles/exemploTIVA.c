@@ -32,23 +32,6 @@
 //To print on the screen
 tContext sContext;
 
-// Floors
-//uint16_t floors_x[] = {0, 0, 0, 0, 0}, floors_y[] = {127-FLOOR_HEIGHT,};
-
-// Ladders
-//uint16_t ladders_x[] = {}, ladders_y[] = {};
-
-// Enemies
-uint16_t enemies_x[] = {20, 65}, enemies_y[] = {80, 45};
-
-// Itens
-uint16_t itens_x[] = {20,80,50}, itens_y[] = {80,30,100};
-
-// Eddie
-uint16_t eddie_x = 64, eddie_y = 64;
-
-
-
 /*----------------------------------------------------------------------------
  *    Initializations
  *---------------------------------------------------------------------------*/
@@ -80,13 +63,12 @@ int main (void) {
 	int i=0;
 	init_all();
 	init_display();
-		Floor(sContext);
-		Ladder(sContext);
+	initMap();	
 	
 	while(1){
-		
-			Eddie(sContext,i,3);
-		
+		Floor(sContext);
+		Ladder(sContext);
+		Eddie(sContext,20,3);		
 		Sneaker(sContext,30,1);
 
 	}	
