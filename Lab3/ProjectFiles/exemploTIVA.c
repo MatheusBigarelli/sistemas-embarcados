@@ -26,8 +26,7 @@
 #include "joy.h"
 #include "buzzer.h"
 
-#include "eddie.h"
-#include "painel.h"
+#include "draw.h"
 
 
 //To print on the screen
@@ -77,15 +76,18 @@ void init_display(){
  *      Main
  *---------------------------------------------------------------------------*/
 int main (void) {
+	int x,y;
+	int i=0;
 	init_all();
 	init_display();
+		Floor(sContext);
+		Ladder(sContext);
 	
 	while(1){
-		Eddie(sContext);
-	
-		PainelDeInstrumentos(sContext);
 		
-		Enemy(sContext);
-		Item(sContext);
+			Eddie(sContext,i,3);
+		
+		Sneaker(sContext,30,1);
+
 	}	
 }
