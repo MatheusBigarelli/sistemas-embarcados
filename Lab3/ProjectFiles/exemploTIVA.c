@@ -30,6 +30,12 @@
 #include "painel.h"
 
 
+
+extern void Eddie(void const *args);
+extern void PainelDeInstrumentos(void const *args);
+extern void Enemy(void const *args);
+extern void Item(void const *args);
+
 //To print on the screen
 tContext sContext;
 
@@ -40,21 +46,32 @@ tContext sContext;
 //uint16_t ladders_x[] = {}, ladders_y[] = {};
 
 // Enemies
-uint16_t enemies_x[] = {20, 65}, enemies_y[] = {80, 45};
+int16_t enemies_x[] = {20, 65}, enemies_y[] = {80, 45};
 
 // Itens
-uint16_t itens_x[] = {20,80,50}, itens_y[] = {80,30,100};
+int16_t itens_x[] = {20,80,50}, itens_y[] = {80,30,100};
 
 // Eddie
-uint16_t eddie_x = 64, eddie_y = 64;
+int16_t eddie_x = 64, eddie_y = 64;
 
+
+// Segurança de recursos compartilhados
+osMutexId context_mutex;
+osMutexDef(context_mutex);
+
+
+
+osThreadDef(Eddie, osPriorityNormal, 1, 0);
+osThreadDef(PainelDeInstrumentos, osPriorityNormal, 1, 0);
+osThreadDef(Enemy, osPriorityNormal, 1, 0);
+osThreadDef(Item, osPriorityNormal, 1, 0);
 
 
 /*----------------------------------------------------------------------------
  *    Initializations
  *---------------------------------------------------------------------------*/
 
-void init_all(){
+void init_all(void){
 	cfaf128x128x16Init();
 	joy_init();
 	buzzer_init(); 
@@ -62,7 +79,7 @@ void init_all(){
 	rgb_init();
 }
 
-void init_display(){
+void init_display(void){
 	GrContextInit(&sContext, &g_sCfaf128x128x16);
 	
 	GrFlush(&sContext);
@@ -73,19 +90,31 @@ void init_display(){
 }
 
 
+void createThreads(void)
+{
+	osThreadCreate(osThread(Eddie), NULL);
+	osThreadCreate(osThread(PainelDeInstrumentos), NULL);
+	osThreadCreate(osThread(Enemy), NULL);
+	osThreadCreate(osThread(Item), NULL);
+}
+
+void createMutex(void)
+{
+	context_mutex = osMutexCreate(osMutex(context_mutex));
+}
+
 /*----------------------------------------------------------------------------
  *      Main
  *---------------------------------------------------------------------------*/
 int main (void) {
+	osKernelInitialize();
+	
 	init_all();
-	init_display();
+	init_display();	
 	
-	while(1){
-		Eddie(sContext);
+	createThreads();
+	createMutex();
 	
-		PainelDeInstrumentos(sContext);
-		
-		Enemy(sContext);
-		Item(sContext);
-	}	
+	osKernelStart();
+	osWait(osWaitForever);
 }

@@ -1,9 +1,15 @@
 #include "painel.h"
 
+extern osMutexId context_mutex;
+extern tContext sContext;
 
-void PainelDeInstrumentos(tContext sContext)
+extern void Name(void);
+extern void Ladder(void);
+extern void Floor(void);
+
+void PainelDeInstrumentos(void const *args)
 {
-	Name(sContext);
-	Ladder(sContext);
-	Floor(sContext);
+	Name();
+	Ladder();	
+	Floor();
 }

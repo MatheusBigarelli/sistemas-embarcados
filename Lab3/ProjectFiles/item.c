@@ -1,5 +1,9 @@
 #include "item.h"
 
+extern uint16_t itens_x[], itens_y[];
+extern osMutexId context_mutex;
+extern tContext sContext;
+
 const uint8_t item[] = {
 0x04,0x00,0x04,0x1c,0x0c,0x18,0x80,0x40,0x78,0x8c,0x44,0x80,0x8c,0x44,0x80,0x4c,0x24,0x48,0x04,0x00,0x04,0x5c,0x2c,0x54,0x8c,0x44,0x80,0x8c,0x44,0x80,0x78,0x3c,0x70,0x14,0x08,0x10,0x04,0x00,0x04
 ,0x84,0x40,0x78,0xa8,0x54,0x9c,0xd0,0x68,0xc0,0xd4,0x68,0xc4,0xd4,0x68,0xc4,0xbc,0x5c,0xac,0xa0,0x50,0x94,0xc0,0x60,0xb0,0xd4,0x68,0xc4,0xd4,0x68,0xc4,0xcc,0x64,0xbc,0xa4,0x50,0x98,0x78,0x3c,0x70
@@ -10,20 +14,32 @@ const uint8_t item[] = {
 ,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x04,0x00,0x00,0x38,0x1c,0x34,0x78,0x3c,0x6c,0x2c,0x14,0x28,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00
 }; 
 
-void drawItem(tContext sContext, int16_t x, int16_t y, int16_t last_x, int16_t last_y)
+uint32_t itemOneChannel[ITEM_PIXELS];
+void drawItem(int16_t x, int16_t y, int16_t last_x, int16_t last_y, uint8_t state[NUM_CHANNELS])
 {
-    int i, j;
-	int numberOfPixels;
-    uint32_t itemOneChannel[90];
+    uint16_t i, j;
+	uint32_t r, g, b;
+	uint32_t foreground;
 
-	numberOfPixels = sizeof(item)/sizeof(unsigned char);
 
 	
 	
 	j = 0;
-    for (i = 0; i < numberOfPixels - 3; i+=3)
+    for (i = 0; i < ITEM_PIXELS - 3; i+=3)
     {
-        itemOneChannel[j] = (item[i]<<16) + (item[i+1]<<8) + (item[i+2]);
+		r = item[i];
+		g = item[i+1];
+		b = item[i+2];
+		if (r > 0x5)
+			r = (r+state[0]) % 256;
+		
+		if (g > 0x5)
+			g = (g+state[1]) % 256;
+		
+		if (b > 0x5)
+			b = (b+state[2]) % 255;
+		
+		itemOneChannel[j] = (r << 16) + (g << 8) + b;
         j++;
     }
     
@@ -34,7 +50,7 @@ void drawItem(tContext sContext, int16_t x, int16_t y, int16_t last_x, int16_t l
 	
 	if (last_x < x)
 	{
-		for (i = 0; i < 7; i++)
+		for (i = 0; i < ITEM_HEIGHT; i++)
 		{
 			GrPixelDraw(&sContext,(last_x)%128,(i+last_y)%128);
 		}
@@ -42,40 +58,57 @@ void drawItem(tContext sContext, int16_t x, int16_t y, int16_t last_x, int16_t l
 	
 	else
 	{
-		for (i = 0; i < 7; i++)
+		for (i = 0; i < ITEM_HEIGHT; i++)
 		{
-			GrPixelDraw(&sContext,(12+last_x)%128,(i+last_y)%128);
+			GrPixelDraw(&sContext,((ITEM_WIDTH-1)+last_x)%128,(i+last_y)%128);
 		}
 	}
 	
-    for (i = 0; i < 7; i++)
+    for (i = 0; i < ITEM_HEIGHT; i++)
     {
-        for (j = 0; j < 13; j++)
+        for (j = 0; j < ITEM_WIDTH; j++)
         {
-            GrContextForegroundSet(&sContext, itemOneChannel[i*13 + j]);
-            GrPixelDraw(&sContext,(j+x)%128,(i+y)%128);
+			foreground = itemOneChannel[i*ITEM_WIDTH + j];
+			GrContextForegroundSet(&sContext, foreground);
+			GrPixelDraw(&sContext,(j+x)%128,(i+y)%128);
         }
     }
 }
 
-extern uint16_t itens_x[], itens_y[];
 
-void Item(tContext sContext)
+void Item(void const *args)
 {
-	uint8_t i;
-	static int16_t dx[] = {1, 1, -1};
-	static uint16_t last_x[] = {20,80,50}, last_y[] = {80, 30, 100};
+	uint8_t i, j;
+	int16_t dx[] = {1, 1, -1};
+	int16_t last_x[] = {20,80,50}, last_y[] = {80, 30, 100};
+	uint8_t states[NUM_ITENS][NUM_CHANNELS] = {{0, 40, 80}, {40, 80, 0}, {80, 0, 40}};
+	uint8_t state_time = 0;
 	
-	
-	for (i = 0; i < 3; i++)
+	while(1)
 	{
-		drawItem(sContext, itens_x[i], itens_y[i], last_x[i], last_y[i]);
-		last_x[i] = itens_x[i];
-		last_y[i] = itens_y[i];
-		itens_x[i] += dx[i];	
-		if (itens_x[i] > 128 && dx[i] == 1)
-			itens_x[i] = 0;
-		if (itens_x[i] == 0 && dx[i] == -1)
-			itens_x[i] = 128;
+		for (i = 0; i < NUM_ITENS; i++)
+		{
+			osMutexWait(context_mutex, osWaitForever);
+			drawItem(itens_x[i], itens_y[i], last_x[i], last_y[i], states[i]);
+			osMutexRelease(context_mutex);
+	
+			last_x[i] = itens_x[i];
+			last_y[i] = itens_y[i];
+			itens_x[i] += dx[i];	
+			if (itens_x[i] > 128 && dx[i] == 1)
+				itens_x[i] = 0;
+			if (itens_x[i] == 0 && dx[i] == -1)
+				itens_x[i] = 128;
+		
+			if (state_time == 15)
+			{
+				for (j = 0; j < NUM_CHANNELS; j++)
+				{
+					states[i][j] = (states[i][j]+30) % 127;
+				}
+				state_time = 0;
+			}
+		}
+		state_time++;
 	}
 }

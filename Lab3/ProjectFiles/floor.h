@@ -1,6 +1,7 @@
 #ifndef __FLOOR__H
 #define __FLOOR__H
 
+#include "cmsis_os.h"
 #include "TM4C129.h" // Device header
 #include <stdbool.h>
 #include <stdint.h>
@@ -13,7 +14,7 @@
 #define FLOOR_HEIGHT 3
 
 
-void drawFloor(tContext sContext);
-void Floor(tContext sContext);
+void drawFloor(void);
+void Floor(void);
 
 #endif

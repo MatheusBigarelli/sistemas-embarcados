@@ -1,6 +1,8 @@
 #include "enemy.h"
 
 extern uint16_t enemies_x[], enemies_y[];
+extern osMutexId context_mutex;
+extern tContext sContext;
 
 const uint8_t enemy[] = {
  0x08,0x10,0x18,0x2c,0x50,0x7c,0x40,0x70,0xac,0x4c,0x80,0xc4,0x50,0x8c,0xd4,0x50,0x88,0xd4,0x48,0x7c,0xc0,0x3c,0x68,0x9c,0x24,0x3c,0x5c,0x04,0x0c,0x10
@@ -12,11 +14,11 @@ const uint8_t enemy[] = {
 
 }; 
 
-void drawEnemy(tContext sContext, int16_t x, int16_t y, int16_t last_x, int16_t last_y)
+uint32_t enemyOneChannel[60];
+void drawEnemy(int16_t x, int16_t y, int16_t last_x, int16_t last_y)
 {
     int i, j, height, width;
 	int numberOfPixels;
-    uint32_t enemyOneChannel[180];
 
 	numberOfPixels = sizeof(enemy)/sizeof(unsigned char);
 
@@ -66,20 +68,25 @@ void drawEnemy(tContext sContext, int16_t x, int16_t y, int16_t last_x, int16_t 
 }
 
 
-void Enemy(tContext sContext)
+void Enemy(void const *args)
 {
 	uint8_t i;
-	static int16_t dx[] = {2, 2}, last_x[] = {20, 65}, last_y[] = {80, 45};
-
-	for (i = 0; i < 2; i++)
+	int16_t dx[] = {2, 2}, last_x[] = {20, 65}, last_y[] = {80, 45};
+	while(1)
 	{
-		drawEnemy(sContext, enemies_x[i], enemies_y[i], last_x[i], last_y[i]);
-		last_x[i] = enemies_x[i];
-		last_y[i] = enemies_y[i];
-		enemies_x[i] += dx[i];
-		if (enemies_x[i] > 110)
-			dx[i] *= -1;
-		if (enemies_x[i] < 20)
-			dx[i] *= -1;
+		for (i = 0; i < 2; i++)
+		{
+			osMutexWait(context_mutex, osWaitForever);
+			drawEnemy(enemies_x[i], enemies_y[i], last_x[i], last_y[i]);
+			osMutexRelease(context_mutex);
+		
+			last_x[i] = enemies_x[i];
+			last_y[i] = enemies_y[i];
+			enemies_x[i] += dx[i];
+			if (enemies_x[i] > 110)
+				dx[i] *= -1;
+			if (enemies_x[i] < 20)
+				dx[i] *= -1;
+		}
 	}
 }

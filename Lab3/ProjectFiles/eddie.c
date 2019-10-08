@@ -1,6 +1,8 @@
 #include "eddie.h"
 
-extern uint16_t eddie_x, eddie_y;
+extern int16_t eddie_x, eddie_y;
+extern osMutexId context_mutex;
+extern tContext sContext;
 
 const uint8_t eddie[] = {
  0x00,0x00,0x00,0x00,0x00,0x00,0x20,0x28,0x44,0x24,0x2c,0x4c,0x10,0x10,0x20,0x00,0x00,0x00
@@ -20,15 +22,14 @@ const uint8_t eddie[] = {
 ,0x00,0x00,0x00,0x04,0x04,0x04,0xc0,0xc0,0x3c,0xd0,0xd4,0x40,0xcc,0xd0,0x40,0xc4,0xc4,0x3c};
  
 
-void drawEddie(tContext sContext, int16_t x, int16_t y, uint16_t last_x, uint16_t last_y)
+uint32_t eddieOneChannel[90];
+void drawEddie(int16_t x, int16_t y, int16_t last_x, int16_t last_y, bool last_face_direction)
 {
-    int i, j;
+    int16_t i, j;
 	int numberOfPixels;
-    uint32_t eddieOneChannel[90];
 
 	numberOfPixels = sizeof(eddie)/sizeof(unsigned char);
 
-	
 	
 	j = 0;
     for (i = 0; i < numberOfPixels - 3; i+=3)
@@ -38,86 +39,140 @@ void drawEddie(tContext sContext, int16_t x, int16_t y, uint16_t last_x, uint16_
     }
     
     GrContextBackgroundSet(&sContext, ClrBlack);
-	
-	
-	GrContextForegroundSet(&sContext, ClrBlack);
-	
-	if (last_x < x)
-	{
-		for (i = 0; i < 15; i++)
-		{
-			GrPixelDraw(&sContext, last_x, i+last_y);
-			GrPixelDraw(&sContext, last_x+1, i+last_y);
-		}
-	}
-	
-	if (last_x > x)
-	{
-		for (i = 0; i < 15; i++)
-		{
-			GrPixelDraw(&sContext, 5+last_x, i+last_y);
-			GrPixelDraw(&sContext, 4+last_x, i+last_y);
-		}
-	}
 
-	
-    for (i = 0; i < 15; i++)
+	clearTrace(x, y, last_x, last_y);
+
+    for (i = 0; i < EDDIE_HEIGHT; i++)
     {
-        for (j = 0; j < 6; j++)
+        for (j = 0; j < EDDIE_WIDTH; j++)
         {
-			GrContextForegroundSet(&sContext, eddieOneChannel[i*6 + j]);
+			// Espelha o Eddie.
+			if (last_face_direction == DIR_LEFT)
+				GrContextForegroundSet(&sContext, eddieOneChannel[i*EDDIE_WIDTH + (EDDIE_WIDTH-1)-j]);
+			else
+				GrContextForegroundSet(&sContext, eddieOneChannel[i*EDDIE_WIDTH + j]);
             GrPixelDraw(&sContext,j+x,i+y);
         }
     }
 }
 
 
-void Eddie(tContext sContext)
+void clearTrace(int16_t x, int16_t y, int16_t last_x, int16_t last_y)
+{
+	GrContextForegroundSet(&sContext, ClrBlack);	
+	deleteXTrace(x, last_x, y, last_y);
+	deleteYTrace(y, last_y, x, last_x);
+}
+
+
+void deleteXTrace(int16_t x, int16_t last_x, int16_t y, int16_t last_y)
+{
+	int16_t i;
+	
+	if (last_x < x)
+	{
+		for (i = 0; i < EDDIE_HEIGHT; i++)
+		{
+			GrPixelDraw(&sContext, last_x, i+last_y);
+			GrPixelDraw(&sContext, last_x+1, i+last_y);
+		}
+	}
+	
+	else if (last_x > x)
+	{
+		for (i = 0; i < EDDIE_HEIGHT; i++)
+		{
+			GrPixelDraw(&sContext, 5+last_x, i+last_y);
+			GrPixelDraw(&sContext, 4+last_x, i+last_y);
+		}
+	}
+}
+
+
+void deleteYTrace(int16_t y, int16_t last_y, int16_t x, int16_t last_x)
+{
+    int16_t i, j, trace_del_inc, trace_del_signal;	
+
+	if (last_y < y)
+	{
+		trace_del_inc = 0;
+		trace_del_signal = 1;
+	}
+	else if (last_y > y)
+	{
+		trace_del_inc = EDDIE_HEIGHT-1;
+		trace_del_signal = -1;
+	}
+	for (i = 0; i < EDDIE_WIDTH; i++)
+		for (j = 0; j < EDDIE_SPEED; j++)
+			GrPixelDraw(&sContext, i+last_x, last_y+trace_del_inc+trace_del_signal*j);
+}
+
+
+
+void Eddie(void const *args)
 {
 	int16_t x, y;
-	uint16_t dx, dy;
-	static bool jump;
-	static uint8_t air_time = 6;
-	static uint16_t last_x = 64, last_y = 64;
-
-	drawEddie(sContext, eddie_x, eddie_y, last_x, last_y);
-
-
-	x = joy_read_x();
-	y = joy_read_y();
-	jump = button_read_s2();
-	x = x*200/0xFFF-100;
-	y = y*200/0xFFF-100;
-	
-	dx = 0;
-	if (x > 50)
-		dx = 2;
-	if (x < -50)
-		dx = -2;
-	dy = 0;
-//	if (y < -50)
-//		dy = 2;
-//	if (y > 50)
-//		dy = -2;
-	
-	if (jump)
+	int16_t dx, dy, jump_direction;
+	bool jump, jumping, last_face_direction = DIR_RIGHT;
+	uint16_t air_time = INIT_AIR_TIME;
+	int16_t last_x = 64, last_y = 64;
+	while (1)
 	{
-		if (air_time == 10)
-			dy = -10;
-		air_time--;
-	}
-	if (air_time == 0)
-	{
-		jump = false;
-		air_time = 10;
-		dy = 10;
-	}
-	
-	last_x = eddie_x;
-	last_y = eddie_y;
-	
-	eddie_x += dx;
-	eddie_y += dy;
+		osMutexWait(context_mutex, osWaitForever);
+		drawEddie(eddie_x, eddie_y, last_x, last_y, last_face_direction);
+		osMutexRelease(context_mutex);
 
 
+		x = joy_read_x();
+		y = joy_read_y();
+		jump = button_read_s2();
+		x = x*200/0xFFF-100;
+		y = y*200/0xFFF-100;
+		
+		dx = 0;
+		if (x > 50)
+			dx = EDDIE_SPEED;
+		if (x < -50)
+			dx = -EDDIE_SPEED;
+		dy = 0;
+		
+		if (jump && !jumping)
+		{
+			jump_direction = dx;
+			jumping = true;
+			air_time = INIT_AIR_TIME;
+		}
+		if (jumping)
+		{
+			if (air_time > INIT_AIR_TIME * 3/4)
+				dy = -EDDIE_SPEED;
+			else if (INIT_AIR_TIME/4 < air_time && air_time < INIT_AIR_TIME * 3/4)
+				dy = 0;
+			else if (air_time <= INIT_AIR_TIME / 4)
+				dy = EDDIE_SPEED;
+			air_time--;
+			dx = jump_direction;
+		}
+		if (air_time == 0 && jumping)
+			jumping = false;
+
+		
+		last_x = eddie_x;
+		last_y = eddie_y;
+		
+		eddie_x += dx;
+		eddie_y += dy;
+		
+		if (eddie_x + EDDIE_WIDTH >= 128)
+			eddie_x = 128-EDDIE_WIDTH;
+		
+		if (eddie_x < 0)
+			eddie_x = 0;
+		
+		if (dx == EDDIE_SPEED)
+			last_face_direction = DIR_RIGHT;
+		else if (dx == -EDDIE_SPEED)
+			last_face_direction = DIR_LEFT;
+	}
 }
