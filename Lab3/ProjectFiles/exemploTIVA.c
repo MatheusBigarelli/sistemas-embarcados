@@ -45,7 +45,7 @@ tContext sContext;
 // Floors never change places, so they are calculated on the go.
 
 // Ladders
-int16_t ladders_x[NUM_LADDERS] = {90, 30, 100}, ladders_y[NUM_LADDERS] = {LADDER_BASE_PIXEL, LADDER_BASE_PIXEL+21*2, LADDER_BASE_PIXEL+21*3};
+int16_t ladders_x[NUM_LADDERS] = {90, 30, 100}, ladders_y[NUM_LADDERS] = {LADDER_Y(FLOOR(3)), LADDER_Y(FLOOR(2)), LADDER_Y(FLOOR(1))};
 	
 // Enemies
 int16_t enemies_x[] = {20, 65}, enemies_y[] = {ENEMY_Y(FLOOR(2)), ENEMY_Y(FLOOR(3))};

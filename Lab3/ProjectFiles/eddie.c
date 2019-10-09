@@ -112,7 +112,7 @@ void deleteYTrace(int16_t y, int16_t last_y, int16_t x, int16_t last_x)
 
 void Eddie(void const *args)
 {
-	int16_t x, y;
+	int16_t x, y, roof, floor;
 	int16_t dx, dy, jump_direction;
 	bool jump, jumping, last_face_direction = DIR_RIGHT;
 	uint16_t air_time = INIT_AIR_TIME;
@@ -142,15 +142,22 @@ void Eddie(void const *args)
 			jump_direction = dx;
 			jumping = true;
 			air_time = INIT_AIR_TIME;
+			roof = eddie_y-3;
+			floor = eddie_y;
 		}
 		if (jumping)
 		{
 			if (air_time > INIT_AIR_TIME * 3/4)
-				dy = -EDDIE_SPEED;
+				dy = -EDDIE_JUMP_SPEED;
 			else if (INIT_AIR_TIME/4 < air_time && air_time < INIT_AIR_TIME * 3/4)
 				dy = 0;
 			else if (air_time <= INIT_AIR_TIME / 4)
-				dy = EDDIE_SPEED;
+				dy = EDDIE_JUMP_SPEED;
+			if (eddie_y + dy < roof)
+				dy = 0;
+			// y grows down on display
+			if (eddie_y + dy > floor)
+				dy = 0;
 			air_time--;
 			dx = jump_direction;
 		}
