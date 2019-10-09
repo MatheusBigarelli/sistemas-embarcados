@@ -537,6 +537,11 @@
               <FileType>5</FileType>
               <FilePath>.\item.h</FilePath>
             </File>
+            <File>
+              <FileName>map.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\map.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -1080,6 +1085,11 @@
               <FileName>item.h</FileName>
               <FileType>5</FileType>
               <FilePath>.\item.h</FilePath>
+            </File>
+            <File>
+              <FileName>map.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\map.h</FilePath>
             </File>
           </Files>
         </Group>

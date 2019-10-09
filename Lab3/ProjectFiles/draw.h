@@ -9,16 +9,16 @@
 #include "cfaf128x128x16.h"
 #include "util.h"
 
-void initMap();
-void draw(tContext sContext, const uint32_t oneChannel[], const uint16_t height, const uint16_t width, const uint16_t offset_j, const uint16_t offset_i, const uint8_t priority);
-void Eddie(tContext sContext, uint16_t xOffset, uint8_t areaOffset);
-void drawSneaker(tContext sContext, uint16_t xOffset, uint8_t areaOffset, uint8_t extraHeight);
-void Sneaker(tContext sContext, uint16_t xOffset, uint8_t areaOffset);
-void Boss(tContext sContext, uint16_t xOffset, uint8_t areaOffset);
-void Item(tContext sContext, uint16_t xOffset, uint8_t areaOffset, uint8_t colorIndex);
+void initMap(void);
+void draw(const uint32_t oneChannel[], const uint16_t height, const uint16_t width, const uint16_t offset_j, const uint16_t offset_i, const uint8_t priority, const uint8_t delta);
+void drawEddie(uint16_t xOffset, uint8_t areaOffset);
+void drawEnemy(uint16_t xOffset, uint8_t areaOffset, uint8_t extraHeight);
+void drawSneaker(uint16_t xOffset, uint8_t areaOffset);
+void drawBoss(uint16_t xOffset, uint8_t areaOffset);
+void drawItem(uint16_t xOffset, uint8_t areaOffset, uint8_t colorIndex, uint8_t delta);
 
-void Floor(tContext sContext);
-void Ladder(tContext sContext);
-void Score(tContext sContext);
+void drawFloor(void);
+void drawLadder(void);
+void drawScore(void);
 
 #endif

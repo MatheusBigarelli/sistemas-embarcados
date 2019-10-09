@@ -1,4 +1,7 @@
 #include "util.h"
+#include "draw.h"
+
+extern osMutexId mid_displayMutex;
 
 void flipVert(uint32_t image[], uint16_t rows, uint16_t columns)
 {
@@ -14,6 +17,8 @@ void flipVert(uint32_t image[], uint16_t rows, uint16_t columns)
 		}
 	}
 }
+
+
 
 void intToString(int64_t value, char * pBuf, uint32_t len, uint32_t base, uint8_t zeros){
 	static const char* pAscii = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -70,4 +75,80 @@ void intToString(int64_t value, char * pBuf, uint32_t len, uint32_t base, uint8_
 			pBuf[--pos] = pAscii[value % base];
 			value /= base;
 	} while(value > 0);
+}
+
+void Entrada(void const *arg)
+{
+	osStatus status;
+	while(1)
+	{
+		
+	}
+}
+
+void Eddie(void const *arg)
+{
+	osStatus status;
+	while(1)
+	{
+		status = osMutexWait(mid_displayMutex, osWaitForever);
+		drawEddie(30,3);
+		osMutexRelease(mid_displayMutex);
+	}
+}
+
+void Inimigos(void const *arg)
+{
+	osStatus status;
+	while(1)
+	{
+		status = osMutexWait(mid_displayMutex, osWaitForever);
+		drawSneaker(0,0);
+		drawSneaker(70,3);
+		drawBoss(20,4);
+		osMutexRelease(mid_displayMutex);
+	}
+}
+
+void ItensBrilhantes(void const *arg)
+{
+	osStatus status;
+	int xOffset = 0;
+	uint8_t delta = 0;
+	while(1)
+	{
+		status = osMutexWait(mid_displayMutex, osWaitForever);		
+		xOffset += delta;
+		drawItem(xOffset, 1,0,delta);
+		osMutexRelease(mid_displayMutex);
+		if(xOffset == (121))
+		{
+			delta = -1;
+		}
+		if(xOffset == 0)
+		{
+			delta = 1;
+		}
+	}
+}
+
+void PainelDeInstrumentos(void const *arg)
+{
+	osStatus status;
+	while(1)
+	{
+		status = osMutexWait(mid_displayMutex, osWaitForever);
+		drawFloor();
+		drawLadder();
+		drawScore();
+		osMutexRelease(mid_displayMutex);
+	}
+}
+
+void Saida(void const *arg)
+{
+	osStatus status;
+	while(1)
+	{
+	}
 }

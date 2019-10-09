@@ -27,10 +27,23 @@
 #include "buzzer.h"
 
 #include "draw.h"
+#include "util.h"
 
 
 //To print on the screen
 tContext sContext;
+
+//Threads
+osThreadDef(Entrada, osPriorityNormal, 1, 0);
+osThreadDef(Eddie, osPriorityNormal, 1, 0);
+osThreadDef(Inimigos, osPriorityNormal, 1, 0);
+osThreadDef(ItensBrilhantes, osPriorityNormal, 1, 0);
+osThreadDef(PainelDeInstrumentos, osPriorityNormal, 1, 0);
+osThreadDef(Saida, osPriorityNormal, 1, 0);
+
+//Mutex
+osMutexId mid_displayMutex;
+osMutexDef(displayMutex);
 
 /*----------------------------------------------------------------------------
  *    Initializations
@@ -54,32 +67,27 @@ void init_display(){
 	GrContextBackgroundSet(&sContext, ClrBlack);
 }
 
-#include <stdlib.h>
+void init_threads()
+{
+	osThreadCreate(osThread(Entrada), NULL);
+	osThreadCreate(osThread(Eddie), NULL);
+	osThreadCreate(osThread(Inimigos), NULL);
+	osThreadCreate(osThread(ItensBrilhantes), NULL);
+	osThreadCreate(osThread(PainelDeInstrumentos), NULL);
+	osThreadCreate(osThread(Saida), NULL);
+	
+	mid_displayMutex = osMutexCreate(osMutex(displayMutex));
+}
+
 /*----------------------------------------------------------------------------
  *      Main
  *---------------------------------------------------------------------------*/
 int main (void) {
-	int x,y,counter=0;
-	int i=0;		
+	int counter=0;
 	init_all();
 	init_display();
 	initMap();	
-	
-	while(1){
-		Floor(sContext);
-		Ladder(sContext);
-		Score(sContext);
-		
-		Eddie(sContext,30,3);
-		Sneaker(sContext,0,0);
-		Sneaker(sContext,70,3);
-		Boss(sContext,20,4);
-			
-		
-		Item(sContext, 40, 1,counter);
-		counter++;
-		if(counter == 5)
-			counter = 0;
-		
-	}	
+	osKernelInitialize();
+	init_threads();
+	osKernelStart();
 }
