@@ -9,16 +9,21 @@
 #include "cfaf128x128x16.h"
 #include "util.h"
 
+
+
 void initMap(void);
-void draw(const uint32_t oneChannel[], const uint16_t height, const uint16_t width, const uint16_t offset_j, const uint16_t offset_i, const uint8_t priority, const uint8_t delta);
+void draw(const uint8_t img[], const uint16_t height, const uint16_t width, const uint16_t offset_j, const uint16_t offset_i);
 void drawEddie(uint16_t xOffset, uint8_t areaOffset);
 void drawEnemy(uint16_t xOffset, uint8_t areaOffset, uint8_t extraHeight);
 void drawSneaker(uint16_t xOffset, uint8_t areaOffset);
 void drawBoss(uint16_t xOffset, uint8_t areaOffset);
-void drawItem(uint16_t xOffset, uint8_t areaOffset, uint8_t colorIndex, uint8_t delta);
+void drawItem(uint16_t xOffset, uint8_t areaOffset);
 
 void drawFloor(void);
 void drawLadder(void);
 void drawScore(void);
+
+
+
 
 #endif

@@ -114,21 +114,11 @@ void ItensBrilhantes(void const *arg)
 {
 	osStatus status;
 	int xOffset = 0;
-	uint8_t delta = 0;
 	while(1)
 	{
 		status = osMutexWait(mid_displayMutex, osWaitForever);		
-		xOffset += delta;
-		drawItem(xOffset, 1,0,delta);
+		drawItem(xOffset, 1);
 		osMutexRelease(mid_displayMutex);
-		if(xOffset == (121))
-		{
-			delta = -1;
-		}
-		if(xOffset == 0)
-		{
-			delta = 1;
-		}
 	}
 }
 

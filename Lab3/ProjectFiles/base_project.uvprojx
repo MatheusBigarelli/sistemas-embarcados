@@ -398,16 +398,6 @@
               <FilePath>.\draw.h</FilePath>
             </File>
             <File>
-              <FileName>move.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\move.c</FilePath>
-            </File>
-            <File>
-              <FileName>move.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\move.h</FilePath>
-            </File>
-            <File>
               <FileName>util.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\util.c</FilePath>
@@ -508,39 +498,14 @@
           <GroupName>Data</GroupName>
           <Files>
             <File>
-              <FileName>floor.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\floor.h</FilePath>
-            </File>
-            <File>
-              <FileName>eddie.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\eddie.h</FilePath>
-            </File>
-            <File>
-              <FileName>sneaker.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\sneaker.h</FilePath>
-            </File>
-            <File>
-              <FileName>name.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\name.h</FilePath>
-            </File>
-            <File>
-              <FileName>ladder.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\ladder.h</FilePath>
-            </File>
-            <File>
-              <FileName>item.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\item.h</FilePath>
-            </File>
-            <File>
               <FileName>map.h</FileName>
               <FileType>5</FileType>
               <FilePath>.\map.h</FilePath>
+            </File>
+            <File>
+              <FileName>images.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\images.h</FilePath>
             </File>
           </Files>
         </Group>
@@ -947,16 +912,6 @@
               <FilePath>.\draw.h</FilePath>
             </File>
             <File>
-              <FileName>move.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\move.c</FilePath>
-            </File>
-            <File>
-              <FileName>move.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\move.h</FilePath>
-            </File>
-            <File>
               <FileName>util.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\util.c</FilePath>
@@ -1057,39 +1012,14 @@
           <GroupName>Data</GroupName>
           <Files>
             <File>
-              <FileName>floor.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\floor.h</FilePath>
-            </File>
-            <File>
-              <FileName>eddie.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\eddie.h</FilePath>
-            </File>
-            <File>
-              <FileName>sneaker.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\sneaker.h</FilePath>
-            </File>
-            <File>
-              <FileName>name.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\name.h</FilePath>
-            </File>
-            <File>
-              <FileName>ladder.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\ladder.h</FilePath>
-            </File>
-            <File>
-              <FileName>item.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\item.h</FilePath>
-            </File>
-            <File>
               <FileName>map.h</FileName>
               <FileType>5</FileType>
               <FilePath>.\map.h</FilePath>
+            </File>
+            <File>
+              <FileName>images.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\images.h</FilePath>
             </File>
           </Files>
         </Group>

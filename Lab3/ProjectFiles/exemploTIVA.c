@@ -1,15 +1,15 @@
 /*============================================================================
- *                    Exemplos de utilização do Kit
+ *                    Exemplos de utilizaï¿½ï¿½o do Kit
  *              EK-TM4C1294XL + Educational BooterPack MKII 
  *---------------------------------------------------------------------------*
- *                    Prof. André Schneider de Oliveira
- *            Universidade Tecnológica Federal do Paraná (UTFPR)
+ *                    Prof. Andrï¿½ Schneider de Oliveira
+ *            Universidade Tecnolï¿½gica Federal do Paranï¿½ (UTFPR)
  *===========================================================================
  * Autores das bibliotecas:
  * 		Allan Patrick de Souza - <allansouza@alunos.utfpr.edu.br>
  * 		Guilherme Jacichen     - <jacichen@alunos.utfpr.edu.br>
  * 		Jessica Isoton Sampaio - <jessicasampaio@alunos.utfpr.edu.br>
- * 		Mariana Carrião        - <mcarriao@alunos.utfpr.edu.br>
+ * 		Mariana Carriï¿½o        - <mcarriao@alunos.utfpr.edu.br>
  *===========================================================================*/
 #include "cmsis_os.h"
 #include "TM4C129.h"                    // Device header
@@ -73,7 +73,7 @@ void init_threads()
 	osThreadCreate(osThread(Eddie), NULL);
 	osThreadCreate(osThread(Inimigos), NULL);
 	osThreadCreate(osThread(ItensBrilhantes), NULL);
-	osThreadCreate(osThread(PainelDeInstrumentos), NULL);
+	 osThreadCreate(osThread(PainelDeInstrumentos), NULL);
 	osThreadCreate(osThread(Saida), NULL);
 	
 	mid_displayMutex = osMutexCreate(osMutex(displayMutex));
