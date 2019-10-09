@@ -9,12 +9,15 @@
 
 #include "cfaf128x128x16.h"
 
+#define NUM_FLOORS 5
 
 #define FLOOR_WIDTH 128
 #define FLOOR_HEIGHT 3
 
+#define FLOOR_BASE_PIXEL 41
 
-void drawFloor(void);
+
+void drawFloor(uint8_t base_height);
 void Floor(void);
 
 #endif

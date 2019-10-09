@@ -12,8 +12,10 @@
 #define LADDER_WIDTH 12
 #define LADDER_HEIGHT 17
 
-#define LADDER_PIXELS LADDER_WIDTH*LADDER_HEIGHT
+#define LADDER_PIXELS (LADDER_WIDTH*LADDER_HEIGHT)
 #define NUM_LADDERS 3
+
+#define LADDER_BASE_PIXEL (FLOOR_BASE_PIXEL+FLOOR_HEIGHT+1)
 
 void drawLadder(uint16_t x, uint16_t y);
 void Ladder(void);

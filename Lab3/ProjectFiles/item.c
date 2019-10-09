@@ -1,6 +1,6 @@
 #include "item.h"
 
-extern uint16_t itens_x[], itens_y[];
+extern int16_t itens_x[], itens_y[];
 extern osMutexId context_mutex;
 extern tContext sContext;
 
@@ -100,7 +100,7 @@ void Item(void const *args)
 			itens_x[i] += dx[i];	
 			if (itens_x[i] > 128 && dx[i] == 1)
 				itens_x[i] = 0;
-			if (itens_x[i] == 0 && dx[i] == -1)
+			if (itens_x[i] < 0 && dx[i] == -1)
 				itens_x[i] = 128;
 		
 			if (state_time == 15)

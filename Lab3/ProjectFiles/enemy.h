@@ -9,8 +9,20 @@
 
 #include "cfaf128x128x16.h"
 
+#include "floor.h"
 
-void drawEnemy(int16_t x, int16_t y, int16_t last_x, int16_t last_y);
+#define LEFT_FOOT_UP true
+#define RIGHT_FOOT_UP false
+	
+#define NUM_ENEMIES 2
+
+#define ENEMY_WIDTH 10
+#define ENEMY_HEIGHT 6
+
+#define ENEMY_PIXELS (ENEMY_HEIGHT*ENEMY_WIDTH)
+
+
+void drawEnemy(int16_t x, int16_t y, int16_t last_x, int16_t last_y, bool feet_state);
 void Enemy(void const *args);
 
 

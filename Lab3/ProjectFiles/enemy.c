@@ -15,21 +15,14 @@ const uint8_t enemy[] = {
 }; 
 
 uint32_t enemyOneChannel[60];
-void drawEnemy(int16_t x, int16_t y, int16_t last_x, int16_t last_y)
+void drawEnemy(int16_t x, int16_t y, int16_t last_x, int16_t last_y, bool feet_state)
 {
-    int i, j, height, width;
-	int numberOfPixels;
-
-	numberOfPixels = sizeof(enemy)/sizeof(unsigned char);
-
-	height = 6;
-	width = 10;
-	
+    int i, j;
 	
 	j = 0;
-    for (i = 0; i < numberOfPixels - 3; i+=3)
+    for (i = 0; i < ENEMY_PIXELS; i++)
     {
-        enemyOneChannel[j] = (enemy[i]<<16) + (enemy[i+1]<<8) + (enemy[i+2]);
+        enemyOneChannel[j] = (enemy[3*i]<<16) + (enemy[3*i+1]<<8) + (enemy[3*i+2]);
         j++;
     }
     
@@ -41,7 +34,7 @@ void drawEnemy(int16_t x, int16_t y, int16_t last_x, int16_t last_y)
 	
 	if (last_x < x)
 	{
-		for (i = 0; i < height; i++)
+		for (i = 0; i < ENEMY_HEIGHT; i++)
 		{
 			GrPixelDraw(&sContext, last_x, i+last_y);
 			GrPixelDraw(&sContext, last_x+1, i+last_y);
@@ -50,18 +43,21 @@ void drawEnemy(int16_t x, int16_t y, int16_t last_x, int16_t last_y)
 	
 	else
 	{
-		for (i = 0; i < height; i++)
+		for (i = 0; i < ENEMY_HEIGHT; i++)
 		{
-			GrPixelDraw(&sContext, last_x+width-1, i+last_y);
-			GrPixelDraw(&sContext, last_x+width-2, i+last_y);
+			GrPixelDraw(&sContext, last_x+ENEMY_WIDTH-1, i+last_y);
+			GrPixelDraw(&sContext, last_x+ENEMY_WIDTH-2, i+last_y);
 		}
 	}
 	
-    for (i = 0; i < height; i++)
+    for (i = 0; i < ENEMY_HEIGHT; i++)
     {
-        for (j = 0; j < width; j++)
+        for (j = 0; j < ENEMY_WIDTH; j++)
         {
-            GrContextForegroundSet(&sContext, enemyOneChannel[i*width + j]);
+			if (feet_state == LEFT_FOOT_UP)
+				GrContextForegroundSet(&sContext, enemyOneChannel[i*ENEMY_WIDTH + j]);
+			else
+				GrContextForegroundSet(&sContext, enemyOneChannel[i*ENEMY_WIDTH + (ENEMY_WIDTH-1)-j]);
             GrPixelDraw(&sContext,j+x,i+y);
         }
     }
@@ -70,14 +66,17 @@ void drawEnemy(int16_t x, int16_t y, int16_t last_x, int16_t last_y)
 
 void Enemy(void const *args)
 {
-	uint8_t i;
+	uint8_t i, j;
 	int16_t dx[] = {2, 2}, last_x[] = {20, 65}, last_y[] = {80, 45};
+	bool feet_states[] = {LEFT_FOOT_UP, RIGHT_FOOT_UP};
+	uint8_t feet_time = 0;
+	
 	while(1)
 	{
 		for (i = 0; i < 2; i++)
 		{
 			osMutexWait(context_mutex, osWaitForever);
-			drawEnemy(enemies_x[i], enemies_y[i], last_x[i], last_y[i]);
+			drawEnemy(enemies_x[i], enemies_y[i], last_x[i], last_y[i], feet_states[i]);
 			osMutexRelease(context_mutex);
 		
 			last_x[i] = enemies_x[i];
@@ -87,6 +86,12 @@ void Enemy(void const *args)
 				dx[i] *= -1;
 			if (enemies_x[i] < 20)
 				dx[i] *= -1;
+			feet_time = (feet_time+1) % 10;
+			if (feet_time == 0)
+			{
+				for (j = 0; j < NUM_ENEMIES; j++)
+					feet_states[j] = 1 - feet_states[j];
+			}
 		}
 	}
 }

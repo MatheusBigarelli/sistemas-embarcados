@@ -13,7 +13,7 @@ const uint8_t floor[] = {
 
 
 uint32_t floorOneChannel[1152];
-void drawFloor()
+void drawFloor(uint8_t base_height)
 {
     int i, j;
 	int numberOfPixels;
@@ -34,14 +34,19 @@ void drawFloor()
         for (j = 0; j < FLOOR_WIDTH; j++)
         {
             GrContextForegroundSet(&sContext, floorOneChannel[i*FLOOR_WIDTH + j]);
-            GrPixelDraw(&sContext,j,i+110);
+            GrPixelDraw(&sContext,j,i+base_height);
         }
     }
 }
 
 void Floor(void)
 {
-	osMutexWait(context_mutex, osWaitForever);
-	drawFloor();
-	osMutexRelease(context_mutex);
+	uint8_t i, base_height;
+	for (i = 0; i < NUM_FLOORS; i++)
+	{
+		base_height = FLOOR_BASE_PIXEL + 21*i;
+		osMutexWait(context_mutex, osWaitForever);
+		drawFloor(base_height);
+		osMutexRelease(context_mutex);
+	}	
 }

@@ -1,7 +1,10 @@
 #include "ladder.h"
+#include "floor.h"
 
 extern tContext sContext;
 extern osMutexId context_mutex;
+
+extern int16_t ladders_x[NUM_LADDERS], ladders_y[NUM_LADDERS];
 
 const uint8_t ladder[] = {
 0x78,0x90,0xac,0x78,0x90,0xb0,0x60,0x6c,0x80,0x24,0x14,0x14,0x24,0x10,0x10,0x24,0x10,0x10,0x24,0x10,0x10,0x20,0x0c,0x0c,0x28,0x18,0x18,0x64,0x74,0x8c,0x78,0x90,0xb0,0x74,0x8c,0xac
@@ -30,9 +33,9 @@ void drawLadder(uint16_t x, uint16_t y)
 {
     uint8_t i, j;
 	j = 0;
-    for (i = 0; i < LADDER_PIXELS - 3; i+=3)
+    for (i = 0; i < LADDER_PIXELS; i++)
     {
-        ladderOneChannel[j] = (ladder[i]<<16) + (ladder[i+1]<<8) + (ladder[i+2]);
+        ladderOneChannel[j] = (ladder[3*i]<<16) + (ladder[3*i+1]<<8) + (ladder[3*i+2]);
         j++;
     }
     
@@ -52,11 +55,10 @@ void drawLadder(uint16_t x, uint16_t y)
 void Ladder(void)
 {
 	uint8_t i;
-	uint16_t x[NUM_LADDERS] = {90, 30, 60}, y[NUM_LADDERS] = {90, 70, 30};
 	for (i = 0; i < NUM_LADDERS; i++)
 	{
 		osMutexWait(context_mutex, osWaitForever);
-		drawLadder(x[i], y[i]);
+		drawLadder(ladders_x[i], ladders_y[i]);
 		osMutexRelease(context_mutex);
 	}
 }
