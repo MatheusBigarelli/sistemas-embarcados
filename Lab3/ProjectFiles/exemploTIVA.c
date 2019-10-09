@@ -29,6 +29,7 @@
 #include "eddie.h"
 #include "painel.h"
 #include "enemy.h"
+#include "item.h"
 
 
 
@@ -47,13 +48,13 @@ tContext sContext;
 int16_t ladders_x[NUM_LADDERS] = {90, 30, 100}, ladders_y[NUM_LADDERS] = {LADDER_BASE_PIXEL, LADDER_BASE_PIXEL+21*2, LADDER_BASE_PIXEL+21*3};
 	
 // Enemies
-int16_t enemies_x[] = {20, 65}, enemies_y[] = {FLOOR_BASE_PIXEL+21*2-ENEMY_HEIGHT, FLOOR_BASE_PIXEL+21*3-ENEMY_HEIGHT};
+int16_t enemies_x[] = {20, 65}, enemies_y[] = {ENEMY_Y(FLOOR(2)), ENEMY_Y(FLOOR(3))};
 
 // Itens
-int16_t itens_x[] = {20,80,50}, itens_y[] = {80,30,100};
+int16_t itens_x[] = {20,80,50}, itens_y[] = {ITEM_Y(FLOOR(4)), ITEM_Y(FLOOR(3)), ITEM_Y(FLOOR(2))};
 
 // Eddie
-int16_t eddie_x = 64-EDDIE_WIDTH/2, eddie_y = FLOOR_BASE_PIXEL+21*3+(21-EDDIE_HEIGHT);
+int16_t eddie_x = EDDIE_BASE_X, eddie_y = EDDIE_BASE_Y;
 
 
 // Segurança de recursos compartilhados

@@ -11,6 +11,8 @@
 #include "buttons.h"
 #include "joy.h"
 
+#include "floor.h"
+
 #define INIT_AIR_TIME 20
 
 #define DIR_RIGHT true
@@ -20,6 +22,9 @@
 #define EDDIE_HEIGHT 15
 
 #define EDDIE_SPEED 2
+
+#define EDDIE_BASE_X (64-EDDIE_WIDTH/2)
+#define EDDIE_BASE_Y (FLOOR_BASE_PIXEL+21*3+(21-EDDIE_HEIGHT))
 
 
 void drawEddie(int16_t x, int16_t y, int16_t last_x, int16_t last_y, bool last_face_direction);

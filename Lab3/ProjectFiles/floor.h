@@ -16,6 +16,7 @@
 
 #define FLOOR_BASE_PIXEL 41
 
+#define FLOOR(X) (NUM_FLOORS-X)
 
 void drawFloor(uint8_t base_height);
 void Floor(void);

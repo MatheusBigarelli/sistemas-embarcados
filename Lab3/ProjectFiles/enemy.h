@@ -22,6 +22,9 @@
 #define ENEMY_PIXELS (ENEMY_HEIGHT*ENEMY_WIDTH)
 
 
+
+#define ENEMY_Y(X) (FLOOR_BASE_PIXEL+21*X-ENEMY_HEIGHT)
+
 void drawEnemy(int16_t x, int16_t y, int16_t last_x, int16_t last_y, bool feet_state);
 void Enemy(void const *args);
 
