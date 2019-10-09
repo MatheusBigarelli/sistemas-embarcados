@@ -53,13 +53,10 @@ void Ladder(void)
 {
 	uint8_t i;
 	uint16_t x[NUM_LADDERS] = {90, 30, 60}, y[NUM_LADDERS] = {90, 70, 30};
-	while(1)
+	for (i = 0; i < NUM_LADDERS; i++)
 	{
-		for (i = 0; i < NUM_LADDERS; i++)
-		{
-			osMutexWait(context_mutex, osWaitForever);
-			drawLadder(x[i], y[i]);
-			osMutexRelease(context_mutex);
-		}
+		osMutexWait(context_mutex, osWaitForever);
+		drawLadder(x[i], y[i]);
+		osMutexRelease(context_mutex);
 	}
 }

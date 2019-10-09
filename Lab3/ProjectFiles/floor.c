@@ -41,10 +41,7 @@ void drawFloor()
 
 void Floor(void)
 {
-	while(1)
-	{
-		osMutexWait(context_mutex, osWaitForever);
-		drawFloor();
-		osMutexRelease(context_mutex);
-	}
+	osMutexWait(context_mutex, osWaitForever);
+	drawFloor();
+	osMutexRelease(context_mutex);
 }

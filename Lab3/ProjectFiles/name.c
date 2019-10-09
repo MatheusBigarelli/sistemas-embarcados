@@ -46,11 +46,7 @@ void drawName(void)
 
 void Name(void)
 {
-	while(1)
-	{
-		osMutexWait(context_mutex, osWaitForever);
-		drawName();
-		osMutexRelease(context_mutex);
-
-	}
+	osMutexWait(context_mutex, osWaitForever);
+	drawName();
+	osMutexRelease(context_mutex);
 }

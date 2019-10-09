@@ -69,8 +69,11 @@ void drawItem(int16_t x, int16_t y, int16_t last_x, int16_t last_y, uint8_t stat
         for (j = 0; j < ITEM_WIDTH; j++)
         {
 			foreground = itemOneChannel[i*ITEM_WIDTH + j];
-			GrContextForegroundSet(&sContext, foreground);
-			GrPixelDraw(&sContext,(j+x)%128,(i+y)%128);
+			if (foreground > 5)
+			{
+				GrContextForegroundSet(&sContext, foreground);
+				GrPixelDraw(&sContext,(j+x)%128,(i+y)%128);
+			}
         }
     }
 }

@@ -10,6 +10,9 @@ extern void Floor(void);
 void PainelDeInstrumentos(void const *args)
 {
 	Name();
-	Ladder();	
-	Floor();
+	while (1)
+	{
+		Ladder();	
+		Floor();
+	}
 }
