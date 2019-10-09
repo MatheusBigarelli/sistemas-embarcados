@@ -14,8 +14,10 @@
 #define NUM_ITENS 3
 #define NUM_CHANNELS 3
 
-#define ITEM_WIDTH 13
-#define ITEM_HEIGHT 7
+
+#define ITEM_WIDTH 7
+#define ITEM_HEIGHT 4
+
 
 #define ITEM_PIXELS (ITEM_WIDTH*ITEM_HEIGHT*3)
 
