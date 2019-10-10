@@ -6,7 +6,7 @@ extern tContext sContext;
 extern Enemy enemies[NUM_ENEMIES];
 
 
-int16_t ENEMY_Y(int16_t X) { return (FLOOR_BASE_PIXEL+21*X-ENEMY_HEIGHT); }
+int16_t ENEMY_Y(int16_t X) { return (FLOOR_BASE_PIXEL+20*X-ENEMY_HEIGHT); }
 
 
 const uint8_t enemy_img[] = {

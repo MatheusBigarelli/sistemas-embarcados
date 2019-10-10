@@ -427,6 +427,11 @@
               <FileType>1</FileType>
               <FilePath>.\title.c</FilePath>
             </File>
+            <File>
+              <FileName>input.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\input.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -945,6 +950,11 @@
               <FileName>title.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\title.c</FilePath>
+            </File>
+            <File>
+              <FileName>input.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\input.c</FilePath>
             </File>
           </Files>
         </Group>

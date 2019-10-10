@@ -15,17 +15,15 @@ const uint8_t floor[] = {
 };
 
 
-uint32_t floorOneChannel[1152];
+uint32_t floorOneChannel[FLOOR_PIXELS];
 void drawFloor(uint8_t base_height)
 {
     int i, j;
-	int numberOfPixels;
 
-	numberOfPixels = sizeof(floor)/sizeof(unsigned char);
 	j = 0;
-    for (i = 0; i < numberOfPixels - 3; i+=3)
+    for (i = 0; i < FLOOR_PIXELS; i++)
     {
-        floorOneChannel[j] = (floor[i]<<16) + (floor[i+1]<<8) + (floor[i+2]);
+        floorOneChannel[j] = (floor[3*i]<<16) + (floor[3*i+1]<<8) + (floor[3*i+2]);
         j++;
     }
     
@@ -47,7 +45,7 @@ void Floor(void)
 	uint8_t i, base_height;
 	for (i = 0; i < NUM_FLOORS; i++)
 	{
-		base_height = FLOOR_BASE_PIXEL + 21*i;
+		base_height = FLOOR_BASE_PIXEL + 20*i;
 		osMutexWait(context_mutex, osWaitForever);
 		drawFloor(base_height);
 		osMutexRelease(context_mutex);

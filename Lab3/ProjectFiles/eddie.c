@@ -28,8 +28,6 @@ uint32_t eddieOneChannel[EDDIE_PIXELS];
 void drawEddie(Eddie eddie)
 {
     int16_t i, j;
-
-	
 	j = 0;
     for (i = 0; i < EDDIE_PIXELS; i++)
     {
@@ -112,25 +110,6 @@ void drawEddie(Eddie eddie)
 
 
 
-//void resizeImage3(int h1, int w1, int h2, int w2)
-//{
-//		int i, j;
-//		int x_ratio = (int)((w1<<16)/w2) +1;
-//    int y_ratio = (int)((h1<<16)/h2) +1;
-//    int x2, y2 ;
-//	
-//    for (i=0;i<h2;i++)
-//		{
-//        for (j=0;j<w2;j++)
-//				{
-//            x2 = ((j*x_ratio)>>16) ;
-//            y2 = ((i*y_ratio)>>16) ;
-//            image.data[(i*w2)+j] = images[current_image][(y2*w1)+x2] ;
-//        }                
-//    }
-//}
-
-
 void clearTrace(Eddie eddie)
 {
 	GrContextForegroundSet(&sContext, ClrBlack);	
@@ -177,7 +156,7 @@ void deleteYTrace(Eddie eddie)
 		}
 	}
 	
-	else if (eddie.last_y > eddie.y)
+	else //if (eddie.last_y > eddie.y)
 	{
 		for (i = 0; i < EDDIE_WIDTH; i++)
 		{
@@ -188,30 +167,6 @@ void deleteYTrace(Eddie eddie)
 	}
 }
 
-
-//bool objectCollidedWith(Object obj1, Object obj2)
-//{
-//	if (obj1.x < obj2.x && obj1.x+obj1.width >= obj2.x)
-//	{
-//		if (obj1.y < obj2.y && obj1.y+obj1.height >= obj2.y)
-//			return true;
-//		if (obj1.y >= obj2.y && obj1.y+obj1.height <= obj2.y+obj2.height)
-//			return true;
-//		if (obj1.y > obj2.y && obj1.y+obj1.height >= obj2.y+obj2.height)
-//			return true;
-//	}
-//	if (obj1.x > obj2.x && obj1.x+obj1.width >= obj2.x+obj2.width)
-//	{
-//		if (obj1.y < obj2.y && obj1.y+obj1.height >= obj2.y)
-//			return true;
-//		if (obj1.y >= obj2.y && obj1.y+obj1.height <= obj2.y+obj2.height)
-//			return true;
-//		if (obj1.y > obj2.y && obj1.y+obj1.height >= obj2.y+obj2.height)
-//			return true;
-//	}
-//	
-//	return false;
-//}
 
 
 void EddieThread(void const *args)
@@ -244,19 +199,34 @@ void EddieThread(void const *args)
 	{		
 		obj_ladder.x = ladders[0].x;
 		obj_ladder.y = ladders[0].y;
+		
 		obj_eddie.x = eddie.x;
 		obj_eddie.y = eddie.y;
+		
+		if (eddie.jump_state == HIGH)
+			obj_eddie.height = 4/5*EDDIE_HEIGHT;
+		else if (eddie.jump_state == ROOF)
+			obj_eddie.height = 3/5*EDDIE_HEIGHT;
+		else
+			obj_eddie.height = EDDIE_HEIGHT;
+
 		obj_enemy.x = enemies[0].x;
 		obj_enemy.y = enemies[0].y;
 		if (objectCollidedWith(obj_eddie, obj_ladder))
+		{
 			eddie.x = EDDIE_BASE_X;
+			osSignalSet(osThreadId(PainelDeInstrumentos), );
+		}
 		if (objectCollidedWith(obj_eddie, obj_enemy))
 			eddie.x = EDDIE_BASE_X;
 		
-		osMutexWait(context_mutex, osWaitForever);
-		drawEddie(eddie);
-		osMutexRelease(context_mutex);
-
+		if (eddie.x != eddie.last_x || eddie.y != eddie.last_y)
+		{
+			osMutexWait(context_mutex, osWaitForever);
+			drawEddie(eddie);
+			osMutexRelease(context_mutex);
+		}
+		
 		x = joy_read_x();
 		y = joy_read_y();
 		jump = button_read_s2();
@@ -280,17 +250,17 @@ void EddieThread(void const *args)
 		}
 		if (jumping)
 		{
-			if (air_time > INIT_AIR_TIME * 6/9)
+			if (air_time >= INIT_AIR_TIME-(FLOOR_SIZE-EDDIE_HEIGHT))
 			{
 				eddie.jump_state = HIGH;
 				eddie.dy = -EDDIE_JUMP_SPEED;
 			}
-			else if (INIT_AIR_TIME*3/9 < air_time && air_time < INIT_AIR_TIME * 7/9)
+			else if (EDDIE_HEIGHT < air_time && air_time < INIT_AIR_TIME-(FLOOR_SIZE-EDDIE_HEIGHT))
 			{
 				eddie.jump_state = ROOF;
 				eddie.dy = 0;
 			}
-			else if (air_time <= INIT_AIR_TIME * 3/9)
+			else if (air_time <= EDDIE_HEIGHT)
 			{
 				eddie.jump_state = HIGH;
 				eddie.dy = EDDIE_JUMP_SPEED;

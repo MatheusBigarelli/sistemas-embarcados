@@ -13,8 +13,11 @@
 
 #define FLOOR_WIDTH 128
 #define FLOOR_HEIGHT 3
+#define FLOOR_PIXELS (FLOOR_WIDTH*FLOOR_HEIGHT)
 
-#define FLOOR_BASE_PIXEL 41
+#define FLOOR_BASE_PIXEL 45
+
+#define FLOOR_SIZE 20
 
 
 int16_t FLOOR(int16_t X);

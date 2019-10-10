@@ -12,4 +12,7 @@
 #include "ladder.h"
 #include "floor.h"
 
+#define TITLE_SIG_BASE 0x00
+#define FLOOR_SIG_BASE 0x01 << 24
+
 #endif

@@ -15,10 +15,10 @@
 #include "floor.h"
 #include "ladder.h"
 #include "enemy.h"
-
+#include "floor.h"
 #include "collision.h"
 
-#define INIT_AIR_TIME 27
+#define INIT_AIR_TIME 54
 
 #define DIR_RIGHT true
 #define DIR_LEFT  false
@@ -27,14 +27,19 @@
 #define EDDIE_HEIGHT 12
 #define EDDIE_PIXELS (EDDIE_WIDTH*EDDIE_HEIGHT)
 
-#define EDDIE_SPEED 2
+#define EDDIE_SPEED 1
 #define EDDIE_JUMP_SPEED 1
 
 // Free space between Eddie and the roof.
-#define FREE_SPACE (21-FLOOR_HEIGHT - EDDIE_HEIGHT)
+#define FREE_SPACE (20-FLOOR_HEIGHT - EDDIE_HEIGHT)
 
 #define EDDIE_BASE_X (64-EDDIE_WIDTH/2)
-#define EDDIE_BASE_Y (FLOOR_BASE_PIXEL+21*3+(21-EDDIE_HEIGHT))
+#define EDDIE_BASE_Y (FLOOR_BASE_PIXEL+20*3+(20-EDDIE_HEIGHT))
+
+#define EDDIE_SIG_RIGHT 0x00000000
+#define EDDIE_SIG_LEFT  0x00000001
+#define EDDIE_SIG_JUMP  0x00000002
+#define EDDIE_SIG_CLIMB 0x00000003
 
 
 typedef enum {

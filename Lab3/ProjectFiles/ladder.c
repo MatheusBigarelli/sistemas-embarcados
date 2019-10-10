@@ -9,7 +9,7 @@ extern int16_t ladders_x[NUM_LADDERS], ladders_y[NUM_LADDERS];
 extern Ladder ladders[NUM_LADDERS];
 
 
-int16_t LADDER_Y(int16_t X) { return (LADDER_BASE_PIXEL+21*(X-1)); }
+int16_t LADDER_Y(int16_t X) { return (LADDER_BASE_PIXEL+20*(X-1)); }
 
 
 const uint8_t ladder_img[] = {
