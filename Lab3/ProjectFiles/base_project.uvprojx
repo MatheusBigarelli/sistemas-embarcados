@@ -393,11 +393,6 @@
               <FilePath>.\eddie.c</FilePath>
             </File>
             <File>
-              <FileName>name.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\name.c</FilePath>
-            </File>
-            <File>
               <FileName>item.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\item.c</FilePath>
@@ -421,6 +416,26 @@
               <FileName>ladder.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\ladder.c</FilePath>
+            </File>
+            <File>
+              <FileName>collision.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\collision.c</FilePath>
+            </File>
+            <File>
+              <FileName>title.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\title.c</FilePath>
+            </File>
+            <File>
+              <FileName>tiva-random.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\tiva-random.c</FilePath>
+            </File>
+            <File>
+              <FileName>ustdlib.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\ustdlib.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -907,11 +922,6 @@
               <FilePath>.\eddie.c</FilePath>
             </File>
             <File>
-              <FileName>name.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\name.c</FilePath>
-            </File>
-            <File>
               <FileName>item.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\item.c</FilePath>
@@ -935,6 +945,26 @@
               <FileName>ladder.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\ladder.c</FilePath>
+            </File>
+            <File>
+              <FileName>collision.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\collision.c</FilePath>
+            </File>
+            <File>
+              <FileName>title.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\title.c</FilePath>
+            </File>
+            <File>
+              <FileName>tiva-random.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\tiva-random.c</FilePath>
+            </File>
+            <File>
+              <FileName>ustdlib.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\ustdlib.c</FilePath>
             </File>
           </Files>
         </Group>

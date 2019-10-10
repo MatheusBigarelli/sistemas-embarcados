@@ -1,5 +1,8 @@
 #include "floor.h"
 
+int16_t FLOOR(int16_t X) { return (NUM_FLOORS-X); }
+
+
 extern tContext sContext;
 extern osMutexId context_mutex;
 

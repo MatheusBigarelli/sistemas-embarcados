@@ -19,26 +19,9 @@ const uint8_t eddie[] = {
 ,0x00,0x00,0x00,0x04,0x04,0x00,0x8c,0x8c,0x34,0xd0,0xd0,0x50,0xd0,0xd0,0x50,0xc4,0xc4,0x4c,0xb0,0xb0,0x44,0xa8,0xa8,0x40
 };
 
-//const uint8_t eddie[] = {
-// 0x00,0x00,0x00,0x00,0x00,0x00,0x20,0x28,0x44,0x24,0x2c,0x4c,0x10,0x10,0x20,0x00,0x00,0x00
-//,0x00,0x00,0x00,0x38,0x3c,0x6c,0x84,0x90,0xe4,0x88,0x98,0xf0,0x64,0x70,0xb8,0x10,0x14,0x20
-//,0x00,0x00,0x00,0x0c,0x10,0x10,0xd0,0xd0,0x54,0xe4,0xe4,0x58,0x98,0x98,0x40,0x14,0x14,0x08
-//,0x00,0x00,0x00,0x08,0x0c,0x04,0xcc,0xd4,0x40,0xe0,0xe8,0x48,0x94,0x9c,0x30,0x14,0x14,0x04
-//,0x0c,0x1c,0x0c,0x38,0x7c,0x38,0x50,0xa0,0x44,0x3c,0x70,0x30,0x40,0x84,0x38,0x20,0x4c,0x20
-//,0x24,0x58,0x24,0x48,0xa4,0x48,0x3c,0x8c,0x3c,0x00,0x00,0x00,0x28,0x58,0x28,0x44,0x9c,0x44
-//,0x24,0x58,0x24,0x48,0xa4,0x48,0x3c,0x8c,0x3c,0x00,0x00,0x00,0x28,0x58,0x28,0x44,0x9c,0x44
-//,0x24,0x58,0x24,0x48,0xa4,0x48,0x3c,0x8c,0x3c,0x00,0x00,0x00,0x28,0x58,0x28,0x44,0x9c,0x44
-//,0x24,0x58,0x24,0x48,0xa4,0x48,0x3c,0x8c,0x3c,0x00,0x00,0x00,0x18,0x34,0x18,0x28,0x60,0x28
-//,0x24,0x58,0x24,0x48,0xa4,0x48,0x44,0x9c,0x44,0x24,0x54,0x24,0x08,0x14,0x08,0x08,0x14,0x08
-//,0x14,0x30,0x14,0x40,0x90,0x40,0x48,0xa4,0x48,0x48,0xa0,0x48,0x44,0x98,0x44,0x2c,0x64,0x2c
-//,0x00,0x00,0x00,0x10,0x20,0x0c,0xa0,0xb8,0x3c,0xb0,0xc8,0x44,0x58,0x70,0x28,0x04,0x08,0x04
-//,0x00,0x00,0x00,0x04,0x04,0x00,0xc0,0xc0,0x3c,0xd4,0xd4,0x40,0x60,0x60,0x1c,0x00,0x00,0x00
-//,0x00,0x00,0x00,0x04,0x04,0x00,0xc0,0xc0,0x3c,0xd4,0xd4,0x40,0x70,0x70,0x20,0x20,0x20,0x08
-//,0x00,0x00,0x00,0x04,0x04,0x04,0xc0,0xc0,0x3c,0xd0,0xd4,0x40,0xcc,0xd0,0x40,0xc4,0xc4,0x3c};
-// 
 
 uint32_t eddieOneChannel[EDDIE_PIXELS];
-void drawEddie(int16_t x, int16_t y, int16_t last_x, int16_t last_y, bool last_face_direction)
+void drawEddie(int16_t x, int16_t y, int16_t last_x, int16_t last_y, bool last_face_direction, uint8_t jump_state)
 {
     int16_t i, j;
 
@@ -52,28 +35,81 @@ void drawEddie(int16_t x, int16_t y, int16_t last_x, int16_t last_y, bool last_f
     
     GrContextBackgroundSet(&sContext, ClrBlack);
 
-	clearTrace(x, y, last_x, last_y);
-
-    for (i = 0; i < EDDIE_HEIGHT; i++)
-    {
-        for (j = 0; j < EDDIE_WIDTH; j++)
-        {
-			// Espelha o Eddie.
-			if (last_face_direction == DIR_LEFT)
-				GrContextForegroundSet(&sContext, eddieOneChannel[i*EDDIE_WIDTH + (EDDIE_WIDTH-1)-j]);
-			else
-				GrContextForegroundSet(&sContext, eddieOneChannel[i*EDDIE_WIDTH + j]);
-            GrPixelDraw(&sContext,j+x,i+y);
-        }
-    }
+	clearTrace(x, y, last_x, last_y, jump_state);
+	
+	if (jump_state == ON_GROUND)
+	{
+		for (i = 0; i < EDDIE_HEIGHT; i++)
+		{
+			for (j = 0; j < EDDIE_WIDTH; j++)
+			{
+				// Espelha o Eddie.
+				if (last_face_direction == DIR_LEFT)
+					GrContextForegroundSet(&sContext, eddieOneChannel[i*EDDIE_WIDTH + (EDDIE_WIDTH-1)-j]);
+				else
+					GrContextForegroundSet(&sContext, eddieOneChannel[i*EDDIE_WIDTH + j]);
+				GrPixelDraw(&sContext,j+x,i+y);
+			}
+		}
+	}
+	else if (jump_state == HIGH)
+	{
+		for (i = 0; i < EDDIE_HEIGHT*3/4; i++)
+		{
+			for (j = 0; j < EDDIE_WIDTH; j++)
+			{
+				// Espelha o Eddie.
+				if (last_face_direction == DIR_LEFT)
+					GrContextForegroundSet(&sContext, eddieOneChannel[i*EDDIE_WIDTH + (EDDIE_WIDTH-1)-j]);
+				else
+					GrContextForegroundSet(&sContext, eddieOneChannel[i*EDDIE_WIDTH + j]);
+				GrPixelDraw(&sContext,j+x,i+y);
+			}
+		}
+	}
+	else
+	{
+		for (i = 0; i < EDDIE_HEIGHT*2/4; i++)
+		{
+			for (j = 0; j < EDDIE_WIDTH; j++)
+			{
+				// Espelha o Eddie.
+				if (last_face_direction == DIR_LEFT)
+					GrContextForegroundSet(&sContext, eddieOneChannel[i*EDDIE_WIDTH + (EDDIE_WIDTH-1)-j]);
+				else
+					GrContextForegroundSet(&sContext, eddieOneChannel[i*EDDIE_WIDTH + j]);
+				GrPixelDraw(&sContext,j+x,i+y);
+			}
+		}
+	}
 }
 
 
-void clearTrace(int16_t x, int16_t y, int16_t last_x, int16_t last_y)
+
+//void resizeImage3(int h1, int w1, int h2, int w2)
+//{
+//		int i, j;
+//		int x_ratio = (int)((w1<<16)/w2) +1;
+//    int y_ratio = (int)((h1<<16)/h2) +1;
+//    int x2, y2 ;
+//	
+//    for (i=0;i<h2;i++)
+//		{
+//        for (j=0;j<w2;j++)
+//				{
+//            x2 = ((j*x_ratio)>>16) ;
+//            y2 = ((i*y_ratio)>>16) ;
+//            image.data[(i*w2)+j] = images[current_image][(y2*w1)+x2] ;
+//        }                
+//    }
+//}
+
+
+void clearTrace(int16_t x, int16_t y, int16_t last_x, int16_t last_y, uint8_t jump_state)
 {
 	GrContextForegroundSet(&sContext, ClrBlack);	
 	deleteXTrace(x, last_x, y, last_y);
-	deleteYTrace(y, last_y, x, last_x);
+	deleteYTrace(y, last_y, x, last_x, jump_state);
 }
 
 
@@ -101,23 +137,27 @@ void deleteXTrace(int16_t x, int16_t last_x, int16_t y, int16_t last_y)
 }
 
 
-void deleteYTrace(int16_t y, int16_t last_y, int16_t x, int16_t last_x)
+void deleteYTrace(int16_t y, int16_t last_y, int16_t x, int16_t last_x, uint8_t jump_state)
 {
-    int16_t i, j, trace_del_inc, trace_del_signal;	
+    int16_t i, j, trace_del_off, trace_del_signal;	
 
 	if (last_y < y)
 	{
-		trace_del_inc = 0;
+		trace_del_off = 0;
 		trace_del_signal = 1;
 	}
 	else if (last_y > y)
 	{
-		trace_del_inc = EDDIE_HEIGHT-1;
+		trace_del_off = EDDIE_HEIGHT-1;
 		trace_del_signal = -1;
 	}
-	for (i = 0; i < EDDIE_WIDTH; i++)
-		for (j = 0; j < EDDIE_SPEED; j++)
-			GrPixelDraw(&sContext, i+last_x, last_y+trace_del_inc+trace_del_signal*j);
+
+	if (jump_state == HIGH)
+	{
+		for (i = 0; i < EDDIE_WIDTH; i++)
+			for (j = 0; j < EDDIE_JUMP_SPEED+EDDIE_HEIGHT/4; j++)
+				GrPixelDraw(&sContext, i+last_x, last_y+trace_del_off+trace_del_signal*j);
+	}
 }
 
 
@@ -126,13 +166,14 @@ void Eddie(void const *args)
 {
 	int16_t x, y, roof, floor;
 	int16_t dx, dy, jump_direction;
+	uint8_t jump_state = ON_GROUND;
 	bool jump, jumping, last_face_direction = DIR_RIGHT;
 	uint16_t air_time = INIT_AIR_TIME;
 	int16_t last_x = 64, last_y = 64;
 	while (1)
 	{
 		osMutexWait(context_mutex, osWaitForever);
-		drawEddie(eddie_x, eddie_y, last_x, last_y, last_face_direction);
+		drawEddie(eddie_x, eddie_y, last_x, last_y, last_face_direction, jump_state);
 		osMutexRelease(context_mutex);
 
 
@@ -155,27 +196,40 @@ void Eddie(void const *args)
 			jumping = true;
 			air_time = INIT_AIR_TIME;
 			roof = eddie_y - FREE_SPACE;
-			floor = eddie_y;
+			floor = eddie_y+EDDIE_HEIGHT;
 		}
 		if (jumping)
 		{
-			if (air_time > INIT_AIR_TIME * 3/4)
+			if (air_time > INIT_AIR_TIME * 6/9)
+			{
+				jump_state = HIGH;
 				dy = -EDDIE_JUMP_SPEED;
-			else if (INIT_AIR_TIME/4 < air_time && air_time < INIT_AIR_TIME * 3/4)
+			}
+			else if (INIT_AIR_TIME*3/9 < air_time && air_time < INIT_AIR_TIME * 7/4)
 				dy = 0;
-			else if (air_time <= INIT_AIR_TIME / 4)
+			else if (air_time <= INIT_AIR_TIME * 3/9)
+			{
+				jump_state = ROOF;
 				dy = EDDIE_JUMP_SPEED;
+			}
+			
 			if (eddie_y + dy < roof)
+			{
+				jump_state = ROOF;
 				dy = 0;
+			}
 			// y grows down on display
-			if (eddie_y + dy > floor)
+			if (eddie_y+EDDIE_HEIGHT + dy > floor)
 				dy = 0;
+			
 			air_time--;
 			dx = jump_direction;
 		}
 		if (air_time == 0 && jumping)
+		{
+			jump_state = ON_GROUND;
 			jumping = false;
-
+		}
 		
 		last_x = eddie_x;
 		last_y = eddie_y;

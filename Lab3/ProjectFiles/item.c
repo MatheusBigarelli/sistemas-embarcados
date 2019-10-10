@@ -4,8 +4,10 @@ extern int16_t itens_x[], itens_y[];
 extern osMutexId context_mutex;
 extern tContext sContext;
 
+extern Item itens[NUM_ITENS];
 
-const uint8_t item[] = {
+
+const uint8_t item_img[] = {
  0x58,0x34,0x34,0xb4,0x6c,0x6c,0xcc,0x7c,0x7c,0x84,0x50,0x50,0xb4,0x6c,0x6c,0xcc,0x7c,0x7c,0x84,0x50,0x50
 ,0xb8,0x70,0x70,0xe0,0x88,0x88,0xe0,0x88,0x88,0xdc,0x88,0x88,0xe0,0x88,0x88,0xe0,0x88,0x88,0xdc,0x84,0x84
 ,0x40,0x28,0x28,0x94,0x58,0x58,0xd4,0x80,0x80,0xe0,0x88,0x88,0xdc,0x84,0x84,0xb4,0x6c,0x6c,0x64,0x3c,0x3c
@@ -14,32 +16,32 @@ const uint8_t item[] = {
 
 
 uint32_t itemOneChannel[ITEM_PIXELS];
-void drawItem(int16_t x, int16_t y, int16_t last_x, int16_t last_y, uint8_t state[NUM_CHANNELS])
+void drawItem(Item item)
 {
     uint16_t i, j;
 	uint32_t r, g, b;
 	uint32_t foreground;
 	
 	j = 0;
-    for (i = 0; i < ITEM_PIXELS - 3; i+=3)
+    for (i = 0; i < ITEM_PIXELS; i++)
     {
-		r = item[i];
-		g = item[i+1];
-		b = item[i+2];
+		r = item_img[3*i];
+		g = item_img[3*i+1];
+		b = item_img[3*i+2];
 		if (r > 10)
-			r = (r+state[0]) % 256;
+			r = (r+item.glow_state[0]) % 256;
 		if (r < 10)
-			r = item[i];
+			r = item_img[i];
 		
 		if (g > 10)
-			g = (g+state[1]) % 256;
+			g = (g+item.glow_state[1]) % 256;
 		if (g < 10)
-			g = item[i];
+			g = item_img[i];
 		
 		if (b > 10)
-			b = (b+state[2]) % 256;
+			b = (b+item.glow_state[2]) % 256;
 		if (b < 10)
-			b = item[i];
+			b = item_img[i];
 		
 		itemOneChannel[j] = (r << 16) + (g << 8) + b;
         j++;
@@ -50,11 +52,11 @@ void drawItem(int16_t x, int16_t y, int16_t last_x, int16_t last_y, uint8_t stat
 	
 	GrContextForegroundSet(&sContext, ClrBlack);
 	
-	if (last_x < x)
+	if (item.last_x < item.x)
 	{
 		for (i = 0; i < ITEM_HEIGHT; i++)
 		{
-			GrPixelDraw(&sContext,(last_x)%128,(i+last_y)%128);
+			GrPixelDraw(&sContext,(item.last_x)%128,(i+item.last_y)%128);
 		}
 	}
 	
@@ -62,7 +64,7 @@ void drawItem(int16_t x, int16_t y, int16_t last_x, int16_t last_y, uint8_t stat
 	{
 		for (i = 0; i < ITEM_HEIGHT; i++)
 		{
-			GrPixelDraw(&sContext,((ITEM_WIDTH-1)+last_x)%128,(i+last_y)%128);
+			GrPixelDraw(&sContext,((ITEM_WIDTH-1)+item.last_x)%128,(i+item.last_y)%128);
 		}
 	}
 	
@@ -74,45 +76,58 @@ void drawItem(int16_t x, int16_t y, int16_t last_x, int16_t last_y, uint8_t stat
 			if (foreground > 5)
 			{
 				GrContextForegroundSet(&sContext, foreground);
-				GrPixelDraw(&sContext,(j+x)%128,(i+y)%128);
+				GrPixelDraw(&sContext,(j+item.x)%128,(i+item.y)%128);
 			}
         }
     }
 }
 
 
-void Item(void const *args)
+void ItemThread(void const *args)
 {
 	uint8_t i, j;
-	int16_t dx[] = {1, 1, -1};
-	int16_t last_x[] = {20,80,50}, last_y[] = {80, 30, 100};
-	uint8_t states[NUM_CHANNELS] = {0, 40, 80}, ds;
+	int16_t ds;
+	for (i = 0; i < NUM_ITENS; i++)
+	{
+		itens[i].x = urand() % (128-ITEM_WIDTH);
+		itens[i].y = ITEM_Y(FLOOR(urand()+2));
+		itens[i].speed = urand()%3 - 1;
+		itens[i].last_x = itens[i].x;
+		itens[i].last_y = itens[i].y;
+		itens[i].glow_state[0] = 0;
+		itens[i].glow_state[1] = 40;
+		itens[i].glow_state[2] = 80;
+	}
 	
 	while(1)
 	{
 		for (i = 0; i < NUM_ITENS; i++)
 		{
 			osMutexWait(context_mutex, osWaitForever);
-			drawItem(itens_x[i], itens_y[i], last_x[i], last_y[i], states);
+			drawItem(itens[i]);
 			osMutexRelease(context_mutex);
 	
-			last_x[i] = itens_x[i];
-			last_y[i] = itens_y[i];
-			itens_x[i] += dx[i];	
-			if (itens_x[i] > 128 && dx[i] == 1)
-				itens_x[i] = 0;
-			if (itens_x[i] < 0 && dx[i] == -1)
-				itens_x[i] = 128;
+			itens[i].last_x = itens[i].x;
+			itens[i].last_y = itens[i].y;
+			
+			itens[i].x += itens[i].speed;	
+			if (itens[i].x > 128 && itens[i].speed == 1)
+				itens[i].x = 0;
+			if (itens[i].x < 0 && itens[i].speed == -1)
+				itens[i].x = 128;
 			
 			for (j = 0; j < NUM_CHANNELS; j++)
 			{
-				if (states[i] > 120)
+				if (itens[i].glow_state[j] > 120)
 					ds = -2;
-				if (states[i] < 2)
+				if (itens[i].glow_state[j] < 2)
 					ds = 2;
 				
-				states[i] += ds;
+				itens[i].glow_state[j] += ds;
 			}
 		}
 	}
 }
+
+// Cannot use macro with rand() in initialization.
+int16_t ITEM_Y(int16_t X) { return (FLOOR_BASE_PIXEL+21*(X-1)+FLOOR_HEIGHT+1); }

@@ -12,6 +12,6 @@ typedef enum {
 	ID_ENEMY,
 	ID_ITEM,
 	ID_LADDER
-} Characters;
+} Character;
 
 #endif

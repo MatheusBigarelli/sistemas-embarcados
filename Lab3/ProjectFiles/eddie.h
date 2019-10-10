@@ -13,7 +13,7 @@
 
 #include "floor.h"
 
-#define INIT_AIR_TIME 20
+#define INIT_AIR_TIME 36
 
 #define DIR_RIGHT true
 #define DIR_LEFT  false
@@ -32,10 +32,17 @@
 #define EDDIE_BASE_Y (FLOOR_BASE_PIXEL+21*3+(21-EDDIE_HEIGHT))
 
 
-void drawEddie(int16_t x, int16_t y, int16_t last_x, int16_t last_y, bool last_face_direction);
-void clearTrace(int16_t x, int16_t y, int16_t last_x, int16_t last_y);
+typedef enum {
+	ON_GROUND,
+	HIGH,
+	ROOF
+} JumpStates;
+
+
+void drawEddie(int16_t x, int16_t y, int16_t last_x, int16_t last_y, bool last_face_direction, uint8_t jump_state);
+void clearTrace(int16_t x, int16_t y, int16_t last_x, int16_t last_y, uint8_t jump_state);
 void deleteXTrace(int16_t x, int16_t last_x, int16_t y, int16_t last_y);
-void deleteYTrace(int16_t y, int16_t last_y, int16_t x, int16_t last_x);
+void deleteYTrace(int16_t y, int16_t last_y, int16_t x, int16_t last_x, uint8_t jump_state);
 void Eddie(void const *args);
 
 #endif
