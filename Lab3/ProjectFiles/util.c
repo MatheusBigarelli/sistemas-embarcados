@@ -100,13 +100,51 @@ void Eddie(void const *arg)
 void Inimigos(void const *arg)
 {
 	osStatus status;
+	int xOffset1 = 0;
+	Direction dir1 = NONE;
+	int xOffset2 = 20;
+	Direction dir2 = NONE;
 	while(1)
 	{
 		status = osMutexWait(mid_displayMutex, osWaitForever);
-		drawSneaker(0,0);
-		drawSneaker(70,3);
-		drawBoss(20,4);
+		drawSneaker(xOffset1,0,dir1);
+		drawSneaker(70,3,NONE);
+		drawBoss(xOffset2,4,dir2);
 		osMutexRelease(mid_displayMutex);
+		osDelay(5);
+		if(xOffset1 == 0)
+		{
+			dir1 = RIGHT;
+		}
+		else if (xOffset1 == 100)
+		{
+			dir1 = LEFT;
+		}
+		if(dir1 == RIGHT)
+		{
+			xOffset1++;
+		}
+		else
+		{
+			xOffset1--;
+		}
+		
+		if(xOffset2 == 0)
+		{
+			dir2 = RIGHT;
+		}
+		else if (xOffset2 == 100)
+		{
+			dir2 = LEFT;
+		}
+		if(dir2 == RIGHT)
+		{
+			xOffset2++;
+		}
+		else
+		{
+			xOffset2--;
+		}
 	}
 }
 
@@ -114,11 +152,33 @@ void ItensBrilhantes(void const *arg)
 {
 	osStatus status;
 	int xOffset = 0;
+	Direction dir = NONE;
 	while(1)
 	{
 		status = osMutexWait(mid_displayMutex, osWaitForever);		
-		drawItem(xOffset, 1);
-		osMutexRelease(mid_displayMutex);
+		drawItem(xOffset, 1, dir);
+		osMutexRelease(mid_displayMutex);			
+		osDelay(16);		
+		if(xOffset == 0)
+		{
+			dir = RIGHT;
+		}
+		else if (xOffset == 100)
+		{
+			dir = LEFT;
+		}
+		if(dir == RIGHT)
+		{
+			xOffset++;
+		}
+		else
+		{
+			xOffset--;
+		}
+		
+		
+		
+		
 	}
 }
 

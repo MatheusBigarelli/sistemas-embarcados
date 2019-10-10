@@ -9,15 +9,35 @@
 #include "cfaf128x128x16.h"
 #include "util.h"
 
+enum dir
+{
+    NONE,
+    RIGHT,
+    LEFT
+};
+typedef enum dir Direction;
 
+enum colors
+{
+	EMPTY = 0,
+	LADDER,
+	FLOOR,
+	ITEM,
+	ENEMY_LEGS,
+	ENEMY_HEAD,
+	EDDIE_SHIRT,
+	EDDIE_HAT,
+	EDDIE_BODY
+};
+typedef enum colors ColorIndex;
 
 void initMap(void);
-void draw(const uint8_t img[], const uint16_t height, const uint16_t width, const uint16_t offset_j, const uint16_t offset_i);
+void draw(const uint8_t img[], const uint16_t height, const uint16_t width, const uint16_t offset_j, const uint16_t offset_i, Direction dir, ColorIndex index);
 void drawEddie(uint16_t xOffset, uint8_t areaOffset);
-void drawEnemy(uint16_t xOffset, uint8_t areaOffset, uint8_t extraHeight);
-void drawSneaker(uint16_t xOffset, uint8_t areaOffset);
-void drawBoss(uint16_t xOffset, uint8_t areaOffset);
-void drawItem(uint16_t xOffset, uint8_t areaOffset);
+void drawEnemy(uint16_t xOffset, uint8_t areaOffset, uint8_t extraHeight, Direction dir);
+void drawSneaker(uint16_t xOffset, uint8_t areaOffset, Direction dir);
+void drawBoss(uint16_t xOffset, uint8_t areaOffset, Direction dir);
+void drawItem(uint16_t xOffset, uint8_t areaOffset, Direction dir);
 
 void drawFloor(void);
 void drawLadder(void);

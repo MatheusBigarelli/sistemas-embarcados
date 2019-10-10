@@ -5,30 +5,31 @@
 // As imagens estao "normalizadas" para economizar espaco
 // O que esta armazenado sao os codigos das cores, por exemplo 7 indica a cor do chapeu do eddie, enquanto 8 indica a cor do seu corpo
 // Assim podemos usar 3bits para representar a cor, como o menor valor � 8bits em C usamos isso.
-enum colors
-{
-	EMPTY = 0,
-	LADDER,
-	FLOOR,
-	ITEM,
-	ENEMY_LEGS,
-	ENEMY_HEAD,
-	EDDIE_SHIRT,
-	EDDIE_HAT,
-	EDDIE_BODY
-};
-typedef enum colors ColorIndex;
 
-/*EDDIE IMAGE*/
-#define EDDIE_HEIGHT 16
-#define EDDIE_WIDTH 10
-#define EDDIE_NUMBER_PIXELS EDDIE_HEIGHT*EDDIE_WIDTH
-const uint8_t eddie[] = {
+
+/*EDDIE IMAGES*/
+
+#define EDDIE_HAT_HEIGHT 2
+#define EDDIE_HAT_WIDTH 10
+const uint8_t eddie_hat[] = {
 0,0,0,7,7,7,7,0,0,0,
-0,7,7,7,7,7,7,7,7,0,
+0,7,7,7,7,7,7,7,7,0,};
+#define EDDIE_BODY1_HEIGHT 3
+#define EDDIE_BODY1_WIDTH 10
+const uint8_t eddie_body1[] = {
 0,0,0,8,8,8,8,0,0,0,
 0,0,0,8,8,8,8,8,8,0,
 0,0,0,8,8,8,8,0,0,0,
+};
+#define EDDIE_BODY2_HEIGHT 3
+#define EDDIE_BODY2_WIDTH 10
+const uint8_t eddie_body2[] = {
+0,0,0,8,8,8,8,0,0,0,
+0,0,0,8,8,8,8,0,0,0,
+0,0,0,8,8,8,8,8,8,8};
+#define EDDIE_SHIRT_HEIGHT 8
+#define EDDIE_SHIRT_WIDTH 10
+const uint8_t eddie_shirt[] = {
 0,0,6,6,6,6,6,6,0,0,
 6,6,6,6,0,0,6,6,6,6,
 6,6,6,6,0,0,6,6,6,6,
@@ -36,11 +37,8 @@ const uint8_t eddie[] = {
 6,6,6,6,0,0,0,0,0,0,
 6,6,6,6,6,0,0,0,0,0,
 6,6,6,6,6,6,6,6,6,6,
-0,0,6,6,6,6,6,6,0,0,
-0,0,0,8,8,8,8,0,0,0,
-0,0,0,8,8,8,8,0,0,0,
-0,0,0,8,8,8,8,8,8,8};
-
+0,0,6,6,6,6,6,6,0,0};
+#define EDDIE_HEIGHT 16
 
 /*SNEAKER IMAGES*/
 #define  HEAD_HEIGHT 4

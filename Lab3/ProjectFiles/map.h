@@ -13,6 +13,7 @@
 
 
 
-unsigned char map[MAP_HEIGHT][MAP_WIDTH]; // mapa de prioridades 
+// buffer com 2 niveis de profundidade, guarda o pixel atual e o anterior
+unsigned char buffer[2][MAP_HEIGHT][MAP_WIDTH]; 
 
 #endif
