@@ -13,7 +13,8 @@ enum dir
 {
     NONE,
     RIGHT,
-    LEFT
+    LEFT,
+	UPDATE //desculpa nao quero colocar mais argumento na draw
 };
 typedef enum dir Direction;
 
@@ -31,9 +32,18 @@ enum colors
 };
 typedef enum colors ColorIndex;
 
+enum colisions
+{
+	NO_COLISION = 0,
+	EDDIE_ITEM,
+	EDDIE_ENEMY
+};
+typedef enum colisions TypeOfColision;
+
 void initMap(void);
 void draw(const uint8_t img[], const uint16_t height, const uint16_t width, const uint16_t offset_j, const uint16_t offset_i, Direction dir, ColorIndex index);
-void drawEddie(uint16_t xOffset, uint8_t areaOffset);
+void clear(ColorIndex index, const uint16_t height, const uint16_t width, const uint16_t offset_j, const uint16_t offset_i);
+void drawEddie(uint16_t xOffset, uint8_t areaOffset, Direction dir);
 void drawEnemy(uint16_t xOffset, uint8_t areaOffset, uint8_t extraHeight, Direction dir);
 void drawSneaker(uint16_t xOffset, uint8_t areaOffset, Direction dir);
 void drawBoss(uint16_t xOffset, uint8_t areaOffset, Direction dir);
@@ -43,7 +53,7 @@ void drawFloor(void);
 void drawLadder(void);
 void drawScore(void);
 
-
+TypeOfColision checkColision(ColorIndex index1, ColorIndex index2);
 
 
 #endif

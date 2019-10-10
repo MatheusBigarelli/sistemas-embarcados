@@ -6,10 +6,12 @@
 #include <stddef.h>
 #include "cmsis_os.h"
 
-void flipVert(uint32_t image[], uint16_t rows, uint16_t columns);
+#define JOY_SENSITIVITY 50
+
+void flipVert(uint8_t image[], uint16_t rows, uint16_t columns);
 void intToString(int64_t value, char * pBuf, uint32_t len, uint32_t base, uint8_t zeros);
 
-// Definições das threads
+// Definiï¿½ï¿½es das threads
 void Entrada(void const *arg);
 void Eddie(void const *arg);
 void Inimigos(void const *arg);

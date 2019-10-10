@@ -507,6 +507,11 @@
               <FileType>5</FileType>
               <FilePath>.\images.h</FilePath>
             </File>
+            <File>
+              <FileName>images.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\images.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -1020,6 +1025,11 @@
               <FileName>images.h</FileName>
               <FileType>5</FileType>
               <FilePath>.\images.h</FilePath>
+            </File>
+            <File>
+              <FileName>images.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\images.c</FilePath>
             </File>
           </Files>
         </Group>

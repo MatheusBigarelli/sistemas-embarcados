@@ -1,12 +1,18 @@
 #include "util.h"
 #include "draw.h"
+#include "joy.h"
+#include "images.h"
 
 extern osMutexId mid_displayMutex;
 
-void flipVert(uint32_t image[], uint16_t rows, uint16_t columns)
+bool eddieCollectedItem = false;
+bool eddieCollidedWithEnemy = false;
+uint8_t areaOfItemCollected;
+
+void flipVert(uint8_t  image[], uint16_t rows, uint16_t columns)
 {
 	int i=0,j =0;
-	uint32_t temp;
+	uint8_t temp;
 	for(i=0;i<rows;i++)
 	{
 		for(j=0;j<columns/2;j++)
@@ -77,23 +83,72 @@ void intToString(int64_t value, char * pBuf, uint32_t len, uint32_t base, uint8_
 	} while(value > 0);
 }
 
+Direction joyDir = UPDATE;
+extern tContext sContext;
+
 void Entrada(void const *arg)
 {
 	osStatus status;
+	int x;
+	// char pbufx[10];
 	while(1)
 	{
-		
+		x = joy_read_x();
+		x = x*200/0xFFF-100;		
+		// intToString(x, pbufx, 10, 10, 4);
+		status = osMutexWait(mid_displayMutex, osWaitForever);
+		// GrStringDraw(&sContext,(char*)pbufx, -1, 10,  10, true);		
+		osMutexRelease(mid_displayMutex);
+		if (x > 1)
+		{
+			joyDir = RIGHT;
+		}		
+		else if(x < -JOY_SENSITIVITY)
+		{
+			joyDir = LEFT;
+		}
+		else
+		{
+			joyDir = NONE;
+		}		
 	}
 }
 
 void Eddie(void const *arg)
 {
 	osStatus status;
+	int xOffset = 0;
+	int areaOffset = 2;
+	char pbufx[10];
+	bool first = true;
 	while(1)
 	{
 		status = osMutexWait(mid_displayMutex, osWaitForever);
-		drawEddie(30,3);
+		if (first)
+		{
+			drawEddie(0,areaOffset,UPDATE);
+			first = false;
+		}
+		if(eddieCollidedWithEnemy)
+		{
+			GrStringDraw(&sContext,"Morreu",-1,0,10,true);
+			eddieCollidedWithEnemy = false;
+		}
+		drawEddie(xOffset,areaOffset,joyDir);
 		osMutexRelease(mid_displayMutex);
+		if(joyDir == RIGHT)
+		{
+			xOffset++;
+			if(xOffset > 128 - 10)
+				xOffset = 128 - 10;
+		}
+		else if(joyDir == LEFT)
+		{
+
+			xOffset--;
+			if(xOffset < 0)
+				xOffset = 0;
+		}
 	}
 }
 
@@ -108,7 +163,7 @@ void Inimigos(void const *arg)
 	{
 		status = osMutexWait(mid_displayMutex, osWaitForever);
 		drawSneaker(xOffset1,0,dir1);
-		drawSneaker(70,3,NONE);
+		drawSneaker(70,3,UPDATE);
 		drawBoss(xOffset2,4,dir2);
 		osMutexRelease(mid_displayMutex);
 		osDelay(5);
@@ -129,7 +184,7 @@ void Inimigos(void const *arg)
 			xOffset1--;
 		}
 		
-		if(xOffset2 == 0)
+		if(xOffset2 == 20)
 		{
 			dir2 = RIGHT;
 		}
@@ -151,30 +206,59 @@ void Inimigos(void const *arg)
 void ItensBrilhantes(void const *arg)
 {
 	osStatus status;
-	int xOffset = 0;
-	Direction dir = NONE;
+	int i,numberOfItens =3,itemTopOffset;
+	int xOffset[] = {60, 60, 60};
+	int areaOffset[] = {1,2,3};
+	char buffer[10];
+	Direction dir[] = {NONE,NONE,NONE};
 	while(1)
 	{
-		status = osMutexWait(mid_displayMutex, osWaitForever);		
-		drawItem(xOffset, 1, dir);
+		status = osMutexWait(mid_displayMutex, osWaitForever);	
+		if(eddieCollectedItem)
+		{
+			intToString(areaOfItemCollected,buffer,10,10,1);
+			GrStringDraw(&sContext,(char*)buffer,-1,0,10,true);
+			eddieCollectedItem = false;
+			for (i = 0; i < numberOfItens; i++)
+			{
+				if(areaOfItemCollected == areaOffset[i])
+				{
+					itemTopOffset = (127 - FLOOR_HEIGHT - LADDER_HEIGHT) - (LADDER_HEIGHT + FLOOR_HEIGHT) * (areaOffset[i]) + 1 + 10;
+					clear(ITEM,ITEM_HEIGHT,ITEM_WIDTH,xOffset[i],itemTopOffset);
+				}
+			}
+			
+		}
+		for (i = 0; i < numberOfItens; i++)
+		{
+			if (areaOfItemCollected != areaOffset[i])
+			{
+				drawItem(xOffset[i], areaOffset[i], dir[i]);
+			}
+			
+		}
 		osMutexRelease(mid_displayMutex);			
 		osDelay(16);		
-		if(xOffset == 0)
+		for (i = 0; i < numberOfItens; i++)
 		{
-			dir = RIGHT;
+			if(xOffset[i] == 60)
+			{
+				dir[i] = RIGHT;
+			}
+			else if (xOffset[i] == 110)
+			{
+				dir[i] = LEFT;
+			}
+			if(dir[i] == RIGHT)
+			{
+				xOffset[i]++;
+			}
+			else
+			{
+				xOffset[i]--;
+			}
 		}
-		else if (xOffset == 100)
-		{
-			dir = LEFT;
-		}
-		if(dir == RIGHT)
-		{
-			xOffset++;
-		}
-		else
-		{
-			xOffset--;
-		}
+		
 		
 		
 		
