@@ -14,4 +14,9 @@ typedef enum {
 	ID_LADDER
 } Character;
 
+typedef struct {
+	int16_t x, y;
+	int16_t width, height;
+} Object;
+
 #endif

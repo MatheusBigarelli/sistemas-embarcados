@@ -7,8 +7,6 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-#include "ustdlib.h"
-
 #include "grlib/grlib.h"
 #include "cfaf128x128x16.h"
 

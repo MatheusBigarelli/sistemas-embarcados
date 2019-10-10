@@ -1,11 +1,13 @@
 #include "item.h"
 
-extern int16_t itens_x[], itens_y[];
 extern osMutexId context_mutex;
 extern tContext sContext;
 
 extern Item itens[NUM_ITENS];
 
+
+// Cannot use macro with rand() in initialization.
+int16_t ITEM_Y(int16_t X) { return (FLOOR_BASE_PIXEL+21*(X-1)+FLOOR_HEIGHT+1); }
 
 const uint8_t item_img[] = {
  0x58,0x34,0x34,0xb4,0x6c,0x6c,0xcc,0x7c,0x7c,0x84,0x50,0x50,0xb4,0x6c,0x6c,0xcc,0x7c,0x7c,0x84,0x50,0x50
@@ -89,9 +91,9 @@ void ItemThread(void const *args)
 	int16_t ds;
 	for (i = 0; i < NUM_ITENS; i++)
 	{
-		itens[i].x = urand() % (128-ITEM_WIDTH);
-		itens[i].y = ITEM_Y(FLOOR(urand()+2));
-		itens[i].speed = urand()%3 - 1;
+		itens[i].x = rand() % (128-ITEM_WIDTH);
+		itens[i].y = ITEM_Y(FLOOR(i+2));
+		itens[i].speed = rand()%3 - 1;
 		itens[i].last_x = itens[i].x;
 		itens[i].last_y = itens[i].y;
 		itens[i].glow_state[0] = 0;
@@ -129,5 +131,3 @@ void ItemThread(void const *args)
 	}
 }
 
-// Cannot use macro with rand() in initialization.
-int16_t ITEM_Y(int16_t X) { return (FLOOR_BASE_PIXEL+21*(X-1)+FLOOR_HEIGHT+1); }

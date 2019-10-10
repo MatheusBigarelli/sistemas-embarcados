@@ -14,17 +14,24 @@
 #define LEFT_FOOT_UP true
 #define RIGHT_FOOT_UP false
 	
-#define NUM_ENEMIES 2
+#define NUM_ENEMIES 3
 
 #define ENEMY_WIDTH 8
 #define ENEMY_HEIGHT 5
 
 #define ENEMY_PIXELS (ENEMY_HEIGHT*ENEMY_WIDTH)
 
+typedef struct {
+	int16_t x, y;
+	int16_t last_x, last_y;
+	int16_t speed;
+	bool feet_state;
+} Enemy;
+
 
 int16_t ENEMY_Y(int16_t X);
-void drawEnemy(int16_t x, int16_t y, int16_t last_x, int16_t last_y, bool feet_state);
-void Enemy(void const *args);
+void drawEnemy(Enemy enemy);
+void EnemyThread(void const *args);
 
 
 #endif

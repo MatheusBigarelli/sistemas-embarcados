@@ -427,16 +427,6 @@
               <FileType>1</FileType>
               <FilePath>.\title.c</FilePath>
             </File>
-            <File>
-              <FileName>tiva-random.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\tiva-random.c</FilePath>
-            </File>
-            <File>
-              <FileName>ustdlib.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\ustdlib.c</FilePath>
-            </File>
           </Files>
         </Group>
         <Group>
@@ -955,16 +945,6 @@
               <FileName>title.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\title.c</FilePath>
-            </File>
-            <File>
-              <FileName>tiva-random.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\tiva-random.c</FilePath>
-            </File>
-            <File>
-              <FileName>ustdlib.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\ustdlib.c</FilePath>
             </File>
           </Files>
         </Group>

@@ -5,6 +5,7 @@
 #include "TM4C129.h"                    // Device header
 #include <stdbool.h>
 #include <stdint.h>
+#include <math.h>
 #include "grlib/grlib.h"
 
 #include "cfaf128x128x16.h"
@@ -12,8 +13,12 @@
 #include "joy.h"
 
 #include "floor.h"
+#include "ladder.h"
+#include "enemy.h"
 
-#define INIT_AIR_TIME 36
+#include "collision.h"
+
+#define INIT_AIR_TIME 27
 
 #define DIR_RIGHT true
 #define DIR_LEFT  false
@@ -38,11 +43,19 @@ typedef enum {
 	ROOF
 } JumpStates;
 
+typedef struct {
+	uint8_t id;
+	int16_t x, y;
+	int16_t last_x, last_y;
+	int16_t dx, dy;
+	uint8_t jump_state;
+	bool last_face_direction;
+} Eddie;
 
-void drawEddie(int16_t x, int16_t y, int16_t last_x, int16_t last_y, bool last_face_direction, uint8_t jump_state);
-void clearTrace(int16_t x, int16_t y, int16_t last_x, int16_t last_y, uint8_t jump_state);
-void deleteXTrace(int16_t x, int16_t last_x, int16_t y, int16_t last_y);
-void deleteYTrace(int16_t y, int16_t last_y, int16_t x, int16_t last_x, uint8_t jump_state);
-void Eddie(void const *args);
+void drawEddie(Eddie eddie);
+void clearTrace(Eddie eddie);
+void deleteXTrace(Eddie eddie);
+void deleteYTrace(Eddie eddie);
+void EddieThread(void const *args);
 
 #endif

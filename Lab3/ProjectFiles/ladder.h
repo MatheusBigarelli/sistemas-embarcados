@@ -18,8 +18,12 @@
 #define LADDER_BASE_PIXEL (FLOOR_BASE_PIXEL+FLOOR_HEIGHT+1)
 
 
+typedef struct {
+	int16_t x, y;
+} Ladder;
+
 int16_t LADDER_Y(int16_t X);
-void drawLadder(uint16_t x, uint16_t y);
-void Ladder(void);
+void drawLadder(Ladder ladder);
+void LadderFunc(void);
 
 #endif
