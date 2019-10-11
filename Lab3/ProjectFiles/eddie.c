@@ -39,51 +39,48 @@ void drawEddie(Image eddie)
 		eddie.width = EDDIE_HAT_WIDTH;
 		eddie.height = EDDIE_HAT_HEIGHT;
 		eddie.y = eddieTopOffset;
-		draw2(eddie);
+		draw(eddie);
 		eddie.colorIndex = EDDIE_BODY;
 		eddie.data = eddie_body1;
 		eddie.width = EDDIE_BODY1_WIDTH;
 		eddie.height = EDDIE_BODY1_HEIGHT;
 		eddie.y += EDDIE_HAT_HEIGHT;
-		draw2(eddie);
+		draw(eddie);
 		eddie.colorIndex = EDDIE_SHIRT;
 		eddie.data = eddie_shirt;
 		eddie.width = EDDIE_SHIRT_WIDTH;
 		eddie.height = EDDIE_SHIRT_HEIGHT;
 		eddie.y += EDDIE_BODY1_HEIGHT;
-		draw2(eddie);
+		draw(eddie);
 		eddie.colorIndex = EDDIE_BODY;
-		eddie.data = eddie_body2;
-		eddie.width = EDDIE_BODY2_WIDTH;
-		eddie.height = EDDIE_BODY2_HEIGHT;
 		eddie.y += EDDIE_SHIRT_HEIGHT;
-		draw2(eddie);
-		// currentDir = UPDATE;
+		if(eddie.isMoving)
+		{
+			if(eddieFeetUp)
+			{
+				eddie.data = eddie_body_moving;
+				eddie.width = EDDIE_BODY_MOVING_WIDTH;
+				eddie.height = EDDIE_BODY_MOVING_HEIGHT;
+				draw(eddie);
+			}
+			else
+			{
+				eddie.data = eddie_body_moving2;
+				eddie.width = EDDIE_BODY_MOVING2_WIDTH;
+				eddie.height = EDDIE_BODY_MOVING2_HEIGHT;
+				draw(eddie);
+			}
+			eddieFeetUp = !eddieFeetUp;
+		}
+		else
+		{
+			eddie.data = eddie_body2;
+			eddie.width = EDDIE_BODY2_WIDTH;
+			eddie.height = EDDIE_BODY2_HEIGHT;
+			clear(eddie);
+			draw(eddie);
+		}
 		lastFacingDir = eddie.dirX;
 		return;
 	}
-	
-		
-	
-	// // Eddie esta se movendo para direcao dir
-	// draw(eddie_hat, EDDIE_HAT_HEIGHT, EDDIE_HAT_WIDTH, initialXPosition + xOffset, eddieTopOffset,dir,EDDIE_HAT);
-	// eddieTopOffset += EDDIE_HAT_HEIGHT;
-	// draw(eddie_body1, EDDIE_BODY1_HEIGHT, EDDIE_BODY1_WIDTH, initialXPosition + xOffset, eddieTopOffset,dir,EDDIE_BODY);
-	// eddieTopOffset += EDDIE_BODY1_HEIGHT;
-	// draw(eddie_shirt, EDDIE_SHIRT_HEIGHT, EDDIE_SHIRT_WIDTH, initialXPosition + xOffset, eddieTopOffset,dir,EDDIE_SHIRT);
-	// eddieTopOffset += EDDIE_SHIRT_HEIGHT;
-	
-	// // Animacao de movimento do eddie
-	// if (eddieFeetUp)
-	// {
-	// 	draw(eddie_body_moving, EDDIE_BODY_MOVING_HEIGHT, EDDIE_BODY_MOVING_WIDTH, initialXPosition + xOffset, eddieTopOffset,dir,EDDIE_BODY);
-	// 	eddieFeetUp = false;
-	// }
-	// else
-	// {
-	// 	draw(eddie_body_moving2, EDDIE_BODY_MOVING2_HEIGHT, EDDIE_BODY_MOVING2_WIDTH, initialXPosition + xOffset, eddieTopOffset,dir,EDDIE_BODY);
-	// 	eddieFeetUp = true;
-	// }	
-	// currentDir = dir;
-	// lastFacingDir = dir;
 }

@@ -4,14 +4,12 @@ extern uint8_t ladder[];
 
 extern uint8_t floor[];
 
+
+
 void drawLadder(Image img)
 {
 	int i, j = 0;
-
-	int numberOfAreas = 4;
-	int numberOfLaddersInArea = 2;
-
-	int ladderStarts[4][2] = {
+	int ladderStarts[NUMBER_OF_AREAS][NUMBER_OF_LADDERS_IN_AREA] = {
 		{10, 70},
 		{60, 30},
 		{0, 50},
@@ -22,13 +20,13 @@ void drawLadder(Image img)
 	if(img.needsUpdate)
 	{
 		img.data = ladder;
-		for (i = 0; i < numberOfAreas; i++)
+		for (i = 0; i < NUMBER_OF_AREAS; i++)
 		{
 			img.y = (127 - FLOOR_HEIGHT) - LADDER_HEIGHT * (i + 1) - FLOOR_HEIGHT * i;
-			for (j = 0; j < numberOfLaddersInArea; j++)
+			for (j = 0; j < NUMBER_OF_LADDERS_IN_AREA; j++)
 			{
 				img.x = ladderStarts[i][j];
-				draw2(img);
+				draw(img);
 			}
 		}
 	}
@@ -67,7 +65,7 @@ void drawFloor(Image img)
 		for (i = 0; i < numberOfFloors; i++)
 		{
 			img.y =  (127 - FLOOR_HEIGHT) - i * (FLOOR_HEIGHT + LADDER_HEIGHT);
-			draw2(img);
+			draw(img);
 		}
 	}
 	

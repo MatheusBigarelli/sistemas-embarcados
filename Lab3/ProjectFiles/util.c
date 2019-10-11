@@ -83,37 +83,48 @@ void intToString(int64_t value, char * pBuf, uint32_t len, uint32_t base, uint8_
 	} while(value > 0);
 }
 
-Direction joyDir;
+Direction joyDir = NONE;
 extern tContext sContext;
 bool joyMoving;
 
 void Entrada(void const *arg)
 {
 	osStatus status;
-	int x;
+	int x,y;
 	// char pbufx[10];
 	while(1)
 	{
 		x = joy_read_x();
+		y = joy_read_y();
 		x = x*200/0xFFF-100;		
+		y = y*200/0xFFF-100;
 		// intToString(x, pbufx, 10, 10, 4);
 		status = osMutexWait(mid_displayMutex, osWaitForever);
 		// GrStringDraw(&sContext,(char*)pbufx, -1, 10,  10, true);		
 		osMutexRelease(mid_displayMutex);
-		if (x > JOY_SENSITIVITY)
+		joyMoving = false;
+		joyDir = NONE;
+		if (x > JOY_SENSITIVITY_X)
 		{
 			joyMoving = true;
 			joyDir = RIGHT;
 		}		
-		else if(x < -JOY_SENSITIVITY)
+		if(x < -JOY_SENSITIVITY_X)
 		{
 			joyMoving = true;
 			joyDir = LEFT;
 		}	
-		else
+		if (y > JOY_SENSITIVITY_Y)
 		{
-			joyMoving = false;
+			joyMoving = true;
+			joyDir = UP;
 		}
+		if(y <  -JOY_SENSITIVITY_Y)
+		{
+			joyMoving = true;
+			joyDir = DOWN;
+		}
+		
 		
 	}
 }
@@ -121,12 +132,15 @@ void Entrada(void const *arg)
 void Eddie(void const *arg)
 {
 	osStatus status;
+	int initialXPosition = 0;
+	int initialAreaOffset = 3;
 	char pbufx[10];
 	Image eddie;	
 	bool first = true;
-	eddie.x = 0;
+	bool stopedMoving = false; // Usado para evitar flicker ao atualizar as pernas do Eddie
+	eddie.x = initialXPosition;
 	eddie.y = 0;
-	eddie.areaOffset = 3;
+	eddie.areaOffset = initialAreaOffset;
 	eddie.needsUpdate = true;
 	eddie.isMoving = false;
 	eddie.dirX = RIGHT;
@@ -134,20 +148,29 @@ void Eddie(void const *arg)
 	while(1)
 	{
 		status = osMutexWait(mid_displayMutex, osWaitForever);
-		// if (first)
-		// {
-		// 	drawEddie(0,areaOffset,UPDATE);
-		// 	first = false;
-		// }
 		if(eddieCollidedWithEnemy)
 		{
-			GrStringDraw(&sContext,"Morreu",-1,0,10,true);
+			
 			eddieCollidedWithEnemy = false;
+			clearEddie(eddie);
+			eddie.x = initialXPosition;
+			eddie.areaOffset = initialAreaOffset;
 		}
 		drawEddie(eddie);
-		osMutexRelease(mid_displayMutex);
+		
 		if(joyMoving)
 		{
+			if (joyDir == UP && eddieCanToLadder(eddie.x,eddie.areaOffset) == UP)
+			{
+				clearEddie(eddie);
+				eddie.areaOffset++;
+			}
+			if (joyDir == DOWN && eddieCanToLadder(eddie.x,eddie.areaOffset) == DOWN)
+			{
+				clearEddie(eddie);
+				eddie.areaOffset--;
+			}
+			osMutexRelease(mid_displayMutex);
 			if(joyDir == RIGHT)
 			{
 				eddie.x++;
@@ -164,7 +187,7 @@ void Eddie(void const *arg)
 					
 				eddie.dirX = RIGHT;
 			}
-			else if(joyDir == LEFT)
+			if(joyDir == LEFT)
 			{
 				eddie.x--;
 				if(eddie.x < 1)
@@ -178,13 +201,20 @@ void Eddie(void const *arg)
 				}	
 				eddie.dirX = LEFT;
 			}
+			
 			eddie.needsUpdate = true;
-			ladderImage.needsUpdate = true;
+			stopedMoving = false;
 		}
 		else
 		{
+			osMutexRelease(mid_displayMutex);
 			eddie.isMoving = false;
 			eddie.needsUpdate = false;
+			if(!stopedMoving)
+			{
+				eddie.needsUpdate = true;
+				stopedMoving = true;
+			}
 		}
 		
 		
@@ -192,6 +222,37 @@ void Eddie(void const *arg)
 	}
 }
 
+Direction eddieCanToLadder(uint16_t eddieXPosition, uint8_t eddieAreaOffset)
+{
+	int i,j;
+	int ladderXPosition;
+	int ladderStarts[NUMBER_OF_AREAS][NUMBER_OF_LADDERS_IN_AREA] = {
+		{10, 70},
+		{60, 30},
+		{0, 50},
+		{100, 20}};
+	for (i = 0; i < NUMBER_OF_AREAS; i++)
+	{
+		for (j = 0; j < NUMBER_OF_LADDERS_IN_AREA; j++)
+		{
+			ladderXPosition = ladderStarts[i][j];
+			if (eddieXPosition > ladderXPosition && eddieXPosition < (ladderXPosition + LADDER_WIDTH)) // Alinhado com escada
+			{
+				if(eddieAreaOffset == i) // Escada no mesmo nivel que Eddie
+				{
+					return UP;
+				}
+				if(eddieAreaOffset == i + 1) // Escada logo abaixo do Eddie
+				{
+					return DOWN;
+				}
+			}
+			
+		}		
+	}
+	return NONE;
+	
+}
 void Inimigos(void const *arg)
 {
 	osStatus status;
@@ -288,7 +349,6 @@ void ItensBrilhantes(void const *arg)
 				itens[i].dirX = dir[i];
 				itens[i].x = xOffset[i];
 				drawItem(itens[i]);			
-				// drawItem(xOffset[i], areaOffset[i], dir[i]);
 			}
 			
 		}
@@ -312,12 +372,7 @@ void ItensBrilhantes(void const *arg)
 			{
 				xOffset[i]--;
 			}
-		}
-		
-		
-		
-		
-		
+		}		
 	}
 }
 

@@ -24,7 +24,7 @@ void drawEnemy(Image img, uint8_t extraHeight)
 	img.width = HEAD_WIDTH;
 	img.height = HEAD_HEIGHT;
 	img.y = headTopOffset;
-	draw2(img);
+	draw(img);
 	img.colorIndex = ENEMY_LEGS;
 	img.data = legsExtra;
 	img.width = LEGS_EXTRA_WIDTH;
@@ -32,7 +32,7 @@ void drawEnemy(Image img, uint8_t extraHeight)
 	for (i = 0; i < extraHeight; i++)
 	{
 		img.y = headTopOffset + HEAD_HEIGHT + i;
-		draw2(img);
+		draw(img);
 	}	
 	flipVert(legs, LEGS_HEIGHT, LEGS_WIDTH);
 	img.colorIndex = ENEMY_LEGS;
@@ -40,5 +40,5 @@ void drawEnemy(Image img, uint8_t extraHeight)
 	img.width = LEGS_WIDTH;
 	img.height = LEGS_HEIGHT;
 	img.y = headTopOffset + HEAD_HEIGHT + extraHeight;
-	draw2(img);
+	draw(img);
 }

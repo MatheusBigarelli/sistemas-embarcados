@@ -22,6 +22,7 @@
 #define EDDIE_SHIRT_WIDTH 10
 
 #define EDDIE_HEIGHT 16
+#define EDDIE_WIDTH 10
 
 /*SNEAKER IMAGES*/
 #define  HEAD_HEIGHT 4

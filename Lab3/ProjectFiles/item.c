@@ -11,5 +11,5 @@ void drawItem(Image img)
 	img.width = ITEM_WIDTH;
 	img.height = ITEM_HEIGHT;
 	img.y = itemTopOffset;
-	draw2(img);
+	draw(img);
 }

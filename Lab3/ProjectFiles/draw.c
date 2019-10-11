@@ -1,10 +1,9 @@
 #include "draw.h"
 
-
 extern bool eddieCollectedItem;
 extern bool eddieCollidedWithEnemy;
 extern uint8_t areaOfItemCollected;
-
+extern Image ladderImage;
 
 // Paleta de cores usada no jogo
 uint32_t palette[9];
@@ -48,24 +47,68 @@ void checkColision(ColorIndex index1, ColorIndex index2, uint16_t areaOffset)
 		if(index2 == ENEMY_HEAD || index2 == ENEMY_LEGS) // Eddie colidindo com inimigo
 		{
 			eddieCollidedWithEnemy = true;
+		}		
+		if(index2 == LADDER)
+		{
+			ladderImage.needsUpdate = true;
 		}
 	}
-	// Esse segundo if nao eh necessario, esse verificacao ocorreria quando o outro objeto (index2) estivesse sendo renderizado
-	else if(index2 == EDDIE_SHIRT || index2 == EDDIE_HAT || index2 == EDDIE_BODY) // index2 eh o Eddie
+	else if(index1 == ENEMY_HEAD || index1 == ENEMY_LEGS)
 	{
-		if(index1 == ITEM) // Eddie coletando item
+		if(index2 == LADDER)
 		{
-			areaOfItemCollected = areaOffset;
-			eddieCollectedItem = true;
+			ladderImage.needsUpdate = true;
 		}
-		if(index1 == ENEMY_HEAD || index1 == ENEMY_LEGS) // Eddie colidindo com inimigo
+	}
+	else if(index1 == ITEM )
+	{
+		if(index2 == LADDER)
 		{
-			eddieCollidedWithEnemy = true;
+			ladderImage.needsUpdate = true;
+		}
+	}
+}
+void clear(Image img)
+{
+	int i,j;
+	ColorIndex current;
+	for (i = 0; i < img.height; i++)
+	{
+		for (j = 0; j < img.width; j++)
+		{
+			current = buffer[0][i + img.y][img.x + j];
+			if (current == img.colorIndex)
+			{
+				current = buffer[1][i + img.y][img.x + j];
+				GrContextForegroundSet(&sContext, palette[current]);
+				GrPixelDraw(&sContext, img.x + j, i + img.y);
+				buffer[0][i + img.y][img.x + j] = current;
+			}			
 		}
 	}
 }
 
-void draw2(Image img)
+void clearEddie(Image eddie)
+{
+	int i,j;
+	ColorIndex colorOnPreviousFrame;
+	int y = (127 - FLOOR_HEIGHT) - EDDIE_HEIGHT - (LADDER_HEIGHT + FLOOR_HEIGHT) * (eddie.areaOffset);
+	for (i = 0; i < EDDIE_HEIGHT; i++)
+	{
+		for (j = 0; j < EDDIE_WIDTH + 1; j++)
+		{
+			if (buffer[0][i + y][eddie.x + j-1] != EMPTY)
+			{
+				colorOnPreviousFrame = buffer[1][i + y][eddie.x -1 + j];
+				GrContextForegroundSet(&sContext, palette[colorOnPreviousFrame]);
+				GrPixelDraw(&sContext, eddie.x + j-1, i + y);
+				buffer[0][i + y][eddie.x + j-1] = colorOnPreviousFrame;
+			}
+		}
+	}
+}
+
+void draw(Image img)
 {
 	int i, j;
 	ColorIndex newIndex;
@@ -79,13 +122,13 @@ void draw2(Image img)
 		{
 			for (j = 0; j < img.width; j++)
 			{
-				currentIndex = buffer[0][i + img.y + img.dirY][img.x + j - img.dirX];
+				currentIndex = buffer[0][i + img.y ][img.x + j - img.dirX];
 				if(currentIndex == img.colorIndex)
 				{
-					previousBufferPixel = buffer[1][i + img.y + img.dirY][img.x + j - img.dirX];
+					previousBufferPixel = buffer[1][i + img.y][img.x + j - img.dirX];
 					GrContextForegroundSet(&sContext, palette[previousBufferPixel]);
-					GrPixelDraw(&sContext, img.x + j - img.dirX, i + img.y + img.dirY);
-					buffer[0][i + img.y + img.dirY][img.x + j - img.dirX] = previousBufferPixel;
+					GrPixelDraw(&sContext, img.x + j - img.dirX, i + img.y);
+					buffer[0][i + img.y][img.x + j - img.dirX] = previousBufferPixel;
 				}
 		
 			}
@@ -118,103 +161,3 @@ void draw2(Image img)
 		firstPixel = false;
 	}
 }
-
-// void draw(const uint8_t image[], const uint16_t height, const uint16_t width, const uint16_t offset_j, const uint16_t offset_i, Direction dir, ColorIndex index)
-// {
-// 	int i, j;
-// 	ColorIndex newPixel;
-// 	ColorIndex currentPixel;
-// 	ColorIndex previousBufferPixel;		  // Usando quando o objeto esta movendo e seu rastro deve ser apagado.
-// 	bool firstPixel = false;
-// 	TypeOfColision colision;
-// 	if (dir == RIGHT) // Indo para direita
-// 	{
-// 		for (i = 0; i < height; i++)
-// 		{
-// 			for (j = 0; j < width; j++)
-// 			{
-// 				currentPixel = buffer[0][i + offset_i][offset_j + j - 1];
-// 				if(currentPixel == index)
-// 				{
-// 					previousBufferPixel = buffer[1][i + offset_i][offset_j + j -1];
-// 					GrContextForegroundSet(&sContext, palette[previousBufferPixel]);
-// 					GrPixelDraw(&sContext, offset_j + j - 1, i + offset_i);
-// 					buffer[0][i + offset_i][offset_j + j - 1] = previousBufferPixel;
-// 				}
-		
-// 			}
-// 		}
-// 	}
-// 	else if (dir == LEFT) // Indo para esquerda
-// 	{
-// 		for (i = 0; i < height; i++)
-// 		{
-// 			for (j = 0; j < width; j++)
-// 			{
-// 				currentPixel = buffer[0][i + offset_i][offset_j + j + 1];
-// 				if(currentPixel == index)
-// 				{
-// 					previousBufferPixel = buffer[1][i + offset_i][offset_j + j + 1];
-// 					GrContextForegroundSet(&sContext, palette[previousBufferPixel]);
-// 					GrPixelDraw(&sContext, offset_j + j + 1, i + offset_i);
-// 					buffer[0][i + offset_i][offset_j + j + 1] = previousBufferPixel;
-// 				}
-				
-// 			}
-// 		}
-// 	}
-// 	else if (dir == UPDATE)
-// 	{
-// 		for (i = 0; i < height; i++)
-// 		{
-// 			for (j = 0; j < width; j++)
-// 			{
-// 				currentPixel = buffer[0][i + offset_i][offset_j + j ];
-// 				if(currentPixel == index)
-// 				{
-// 					previousBufferPixel = buffer[1][i + offset_i][offset_j + j];
-// 					GrContextForegroundSet(&sContext, palette[previousBufferPixel]);
-// 					GrPixelDraw(&sContext, offset_j + j, i + offset_i);
-// 					buffer[0][i + offset_i][offset_j + j ] = previousBufferPixel;
-// 				}
-				
-// 			}
-// 		}
-// 	}
-	
-// 	GrContextBackgroundSet(&sContext, ClrBlack);
-// 	for (i = 0; i < height; i++)
-// 	{
-// 		for (j = 0; j < width; j++)
-// 		{
-// 			newPixel = image[i * width + j];
-// 			// as coordenadas i,j sao relativas � imagem e nao ao mapa por isso considera o offset(para ter coordenadas absolutas)
-// 			currentPixel = buffer[0][i + offset_i][offset_j + j];
-			
-// 			colision = checkColision(newPixel, currentPixel);
-// 			if(colision == EDDIE_ITEM)
-// 			{
-// 				areaOfItemCollected = (i + offset_i - (127 - FLOOR_HEIGHT))/(-1*(LADDER_HEIGHT + FLOOR_HEIGHT));
-// 				eddieCollectedItem = true;		
-				
-// 			}
-// 			else if(colision == EDDIE_ENEMY)
-// 			{
-// 				eddieCollidedWithEnemy = true;
-// 			}
-// 			if (newPixel > currentPixel) // desenha apenas se tiver mais prioridade que o pixel atual
-// 			{
-// 				GrContextForegroundSet(&sContext, palette[newPixel]);
-// 				GrPixelDraw(&sContext, offset_j + j, i + offset_i);
-				
-
-// 				// Move o pixel atual para o "fundo" do buffer
-// 				buffer[1][i + offset_i][offset_j + j] = currentPixel;
-// 				// Atualiza o pixel atual com o novo valor
-// 				buffer[0][i + offset_i][offset_j + j] = newPixel;
-// 			}
-
-// 		}
-// 		firstPixel = false;
-// 	}
-// }

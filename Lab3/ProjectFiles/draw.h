@@ -13,14 +13,18 @@
 #define MAP_HEIGHT 128
 #define MAP_WIDTH 128
 
-
+#define NUMBER_OF_AREAS 4
+#define NUMBER_OF_LADDERS_IN_AREA 2
 
 extern tContext sContext;
 
 enum dir
 {
-    RIGHT = 1, // No caso do eixo Y RIGHT significa para cima
-    LEFT = -1, // No caso do eixo Y LEFT significa para baixo
+	UP = 2,
+	DOWN = -2,
+	RIGHT = 1,
+	LEFT = -1,
+	NONE = 0
 };
 typedef enum dir Direction;
 
@@ -52,9 +56,11 @@ struct image
 typedef struct image Image;
 
 void initMap(void);
-void draw2(Image img);
-void draw(const uint8_t img[], const uint16_t height, const uint16_t width, const uint16_t offset_j, const uint16_t offset_i, Direction dir, ColorIndex index);
+void clear(Image img);
+void clearEddie(Image eddie);
+void draw(Image img);
 void checkColision(ColorIndex index1, ColorIndex index2, uint16_t areaOffset);
+
 
 // As funcoes abaixo estao definidas nos respectivos .c e nao no draw.c
 void drawEddie(Image img);
@@ -69,6 +75,7 @@ void drawFloor(Image img);
 void drawLadder(Image img);
 void drawScore(void);
 
+Direction eddieCanToLadder(uint16_t eddieXPosition, uint8_t eddieAreaOffset);
 
 
 
