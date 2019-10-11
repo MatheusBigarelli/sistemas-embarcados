@@ -30,6 +30,7 @@
 #include "util.h"
 
 
+
 //To print on the screen
 tContext sContext;
 
@@ -71,10 +72,10 @@ void init_threads()
 {
 	osThreadCreate(osThread(Entrada), NULL);
 	osThreadCreate(osThread(Eddie), NULL);
-	osThreadCreate(osThread(Inimigos), NULL);
-	osThreadCreate(osThread(ItensBrilhantes), NULL);
-	 osThreadCreate(osThread(PainelDeInstrumentos), NULL);
-	osThreadCreate(osThread(Saida), NULL);
+	// osThreadCreate(osThread(Inimigos), NULL);
+	// osThreadCreate(osThread(ItensBrilhantes), NULL);
+	//  osThreadCreate(osThread(PainelDeInstrumentos), NULL);
+	// osThreadCreate(osThread(Saida), NULL);
 	
 	mid_displayMutex = osMutexCreate(osMutex(displayMutex));
 }
@@ -84,6 +85,7 @@ void init_threads()
  *---------------------------------------------------------------------------*/
 int main (void) {
 	int counter=0;
+	char* pbuffer;
 	init_all();
 	init_display();
 	initMap();	

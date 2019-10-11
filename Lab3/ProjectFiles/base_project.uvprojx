@@ -407,6 +407,26 @@
               <FileType>5</FileType>
               <FilePath>.\util.h</FilePath>
             </File>
+            <File>
+              <FileName>eddie.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\eddie.c</FilePath>
+            </File>
+            <File>
+              <FileName>enemy.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\enemy.c</FilePath>
+            </File>
+            <File>
+              <FileName>item.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\item.c</FilePath>
+            </File>
+            <File>
+              <FileName>background.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\background.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -497,11 +517,6 @@
         <Group>
           <GroupName>Data</GroupName>
           <Files>
-            <File>
-              <FileName>map.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\map.h</FilePath>
-            </File>
             <File>
               <FileName>images.h</FileName>
               <FileType>5</FileType>
@@ -926,6 +941,26 @@
               <FileType>5</FileType>
               <FilePath>.\util.h</FilePath>
             </File>
+            <File>
+              <FileName>eddie.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\eddie.c</FilePath>
+            </File>
+            <File>
+              <FileName>enemy.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\enemy.c</FilePath>
+            </File>
+            <File>
+              <FileName>item.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\item.c</FilePath>
+            </File>
+            <File>
+              <FileName>background.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\background.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -1016,11 +1051,6 @@
         <Group>
           <GroupName>Data</GroupName>
           <Files>
-            <File>
-              <FileName>map.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\map.h</FilePath>
-            </File>
             <File>
               <FileName>images.h</FileName>
               <FileType>5</FileType>
