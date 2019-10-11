@@ -2,9 +2,14 @@
 
 extern uint8_t item[];
 
-void drawItem(uint16_t xOffset, uint8_t areaOffset, Direction dir)
+void drawItem(Image img)
 {
 	int i, j = 0, itemTopOffset;
-	itemTopOffset = (127 - FLOOR_HEIGHT - LADDER_HEIGHT) - (LADDER_HEIGHT + FLOOR_HEIGHT) * (areaOffset) + 1 + 10;
-	// draw(item, ITEM_HEIGHT, ITEM_WIDTH, xOffset, itemTopOffset,dir,ITEM);
+	itemTopOffset = (127 - FLOOR_HEIGHT - LADDER_HEIGHT) - (LADDER_HEIGHT + FLOOR_HEIGHT) * (img.areaOffset) + 1 + 10;
+	img.colorIndex = ITEM;
+	img.data = item;
+	img.width = ITEM_WIDTH;
+	img.height = ITEM_HEIGHT;
+	img.y = itemTopOffset;
+	draw2(img);
 }

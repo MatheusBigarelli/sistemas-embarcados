@@ -79,13 +79,13 @@ void draw2(Image img)
 		{
 			for (j = 0; j < img.width; j++)
 			{
-				currentIndex = buffer[0][i + img.yOffset + img.dirY][img.xOffset + j + img.dirX];
+				currentIndex = buffer[0][i + img.y + img.dirY][img.x + j - img.dirX];
 				if(currentIndex == img.colorIndex)
 				{
-					previousBufferPixel = buffer[1][i + img.yOffset + img.dirY][img.xOffset + j + img.dirX];
+					previousBufferPixel = buffer[1][i + img.y + img.dirY][img.x + j - img.dirX];
 					GrContextForegroundSet(&sContext, palette[previousBufferPixel]);
-					GrPixelDraw(&sContext, img.xOffset + j + img.dirX, i + img.yOffset + img.dirY);
-					buffer[0][i + img.yOffset + img.dirY][img.xOffset + j + img.dirX] = previousBufferPixel;
+					GrPixelDraw(&sContext, img.x + j - img.dirX, i + img.y + img.dirY);
+					buffer[0][i + img.y + img.dirY][img.x + j - img.dirX] = previousBufferPixel;
 				}
 		
 			}
@@ -99,19 +99,19 @@ void draw2(Image img)
 		{
 			newIndex = img.data[i * img.width + j];
 			// as coordenadas i,j sao relativas � imagem e nao ao mapa por isso considera o offset(para ter coordenadas absolutas)
-			currentIndex = buffer[0][i + img.yOffset][img.xOffset + j];
+			currentIndex = buffer[0][i + img.y][img.x + j];
 			
 			checkColision(newIndex, currentIndex, img.areaOffset);
 
 			if (newIndex > currentIndex) // desenha apenas se tiver mais prioridade que o pixel atual
 			{
 				GrContextForegroundSet(&sContext, palette[newIndex]);
-				GrPixelDraw(&sContext, img.xOffset + j, i + img.yOffset);				
+				GrPixelDraw(&sContext, img.x + j, i + img.y);				
 
 				// Move o pixel atual para o "fundo" do buffer
-				buffer[1][i + img.yOffset][img.xOffset + j] = currentIndex;
+				buffer[1][i + img.y][img.x + j] = currentIndex;
 				// Atualiza o pixel atual com o novo valor
-				buffer[0][i + img.yOffset][img.xOffset + j] = newIndex;
+				buffer[0][i + img.y][img.x + j] = newIndex;
 			}
 
 		}

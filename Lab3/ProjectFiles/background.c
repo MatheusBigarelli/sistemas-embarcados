@@ -4,7 +4,7 @@ extern uint8_t ladder[];
 
 extern uint8_t floor[];
 
-void drawLadder(void)
+void drawLadder(Image img)
 {
 	int i, j = 0;
 
@@ -16,14 +16,23 @@ void drawLadder(void)
 		{60, 30},
 		{0, 50},
 		{100, 20}};
-
-	for (i = 0; i < numberOfAreas; i++)
+	img.colorIndex = LADDER;
+	img.width = LADDER_WIDTH;
+	img.height = LADDER_HEIGHT;
+	if(img.needsUpdate)
 	{
-		for (j = 0; j < numberOfLaddersInArea; j++)
+		img.data = ladder;
+		for (i = 0; i < numberOfAreas; i++)
 		{
-			// draw(ladder, LADDER_HEIGHT, LADDER_WIDTH, ladderStarts[i][j], (127 - FLOOR_HEIGHT) - LADDER_HEIGHT * (i + 1) - FLOOR_HEIGHT * i,NONE,LADDER);
+			img.y = (127 - FLOOR_HEIGHT) - LADDER_HEIGHT * (i + 1) - FLOOR_HEIGHT * i;
+			for (j = 0; j < numberOfLaddersInArea; j++)
+			{
+				img.x = ladderStarts[i][j];
+				draw2(img);
+			}
 		}
 	}
+	
 }
 
 void drawScore(void)
@@ -43,13 +52,23 @@ void drawScore(void)
 	}
 }
 
-void drawFloor(void)
+void drawFloor(Image img)
 {
 	int i, j = 0;
 	int numberOfFloors = 5;
-	
-	for (i = 0; i < numberOfFloors; i++)
+
+	img.colorIndex = FLOOR;
+	img.width = FLOOR_WIDTH;
+	img.height = FLOOR_HEIGHT;
+	img.x = 0;
+	if(img.needsUpdate)
 	{
-		// draw(floor, FLOOR_HEIGHT, FLOOR_WIDTH, 0, (127 - FLOOR_HEIGHT) - i * (FLOOR_HEIGHT + LADDER_HEIGHT),NONE,FLOOR);
+		img.data = floor;
+		for (i = 0; i < numberOfFloors; i++)
+		{
+			img.y =  (127 - FLOOR_HEIGHT) - i * (FLOOR_HEIGHT + LADDER_HEIGHT);
+			draw2(img);
+		}
 	}
+	
 }

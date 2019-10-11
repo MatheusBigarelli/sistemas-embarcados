@@ -43,9 +43,10 @@ struct image
 {
 	ColorIndex colorIndex;
 	uint16_t width, height;
+	uint16_t x,y;
 	uint8_t* data;
 	Direction dirX, dirY;
-	uint16_t xOffset,yOffset, areaOffset;
+	uint8_t areaOffset;
 	bool needsUpdate, isMoving;
 };
 typedef struct image Image;
@@ -56,16 +57,16 @@ void draw(const uint8_t img[], const uint16_t height, const uint16_t width, cons
 void checkColision(ColorIndex index1, ColorIndex index2, uint16_t areaOffset);
 
 // As funcoes abaixo estao definidas nos respectivos .c e nao no draw.c
-void drawEddie(Image eddie);
+void drawEddie(Image img);
 
-void drawEnemy(uint16_t xOffset, uint8_t areaOffset, uint8_t extraHeight, Direction dir);
-void drawSneaker(uint16_t xOffset, uint8_t areaOffset, Direction dir);
-void drawBoss(uint16_t xOffset, uint8_t areaOffset, Direction dir);
+void drawEnemy(Image img, uint8_t extraHeight);
+void drawSneaker(Image img);
+void drawBoss(Image img);
 
-void drawItem(uint16_t xOffset, uint8_t areaOffset, Direction dir);
+void drawItem(Image img);
 
-void drawFloor(void);
-void drawLadder(void);
+void drawFloor(Image img);
+void drawLadder(Image img);
 void drawScore(void);
 
 

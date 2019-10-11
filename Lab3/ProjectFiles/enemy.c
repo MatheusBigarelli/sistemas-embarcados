@@ -4,26 +4,41 @@ extern uint8_t head[] ;
 extern uint8_t legs[];
 extern uint8_t legsExtra[];
 
-void drawSneaker(uint16_t xOffset, uint8_t areaOffset, Direction dir)
+void drawSneaker(Image img)
 {
-	drawEnemy(xOffset, areaOffset, 0, dir);
+	drawEnemy(img, 0);
 }
-void drawBoss(uint16_t xOffset, uint8_t areaOffset, Direction dir)
+void drawBoss(Image img)
 {
-	drawEnemy(xOffset, areaOffset, 5, dir);
+	drawEnemy(img, 5);
 }
 
-void drawEnemy(uint16_t xOffset, uint8_t areaOffset, uint8_t extraHeight, Direction dir)
+void drawEnemy(Image img, uint8_t extraHeight)
 {
 	int i, j = 0, sneakerHeight, headTopOffset;
 
 	sneakerHeight = HEAD_HEIGHT + LEGS_HEIGHT + extraHeight;
-	headTopOffset = (127 - FLOOR_HEIGHT) - sneakerHeight - (LADDER_HEIGHT + FLOOR_HEIGHT) * (areaOffset);
-	// draw(head, HEAD_HEIGHT, HEAD_WIDTH, xOffset, headTopOffset,dir,ENEMY_HEAD);
+	headTopOffset = (127 - FLOOR_HEIGHT) - sneakerHeight - (LADDER_HEIGHT + FLOOR_HEIGHT) * (img.areaOffset);
+	img.colorIndex = ENEMY_HEAD;
+	img.data = head;
+	img.width = HEAD_WIDTH;
+	img.height = HEAD_HEIGHT;
+	img.y = headTopOffset;
+	draw2(img);
+	img.colorIndex = ENEMY_LEGS;
+	img.data = legsExtra;
+	img.width = LEGS_EXTRA_WIDTH;
+	img.height = LEGS_EXTRA_HEIGHT;
 	for (i = 0; i < extraHeight; i++)
 	{
-		// draw(legsExtra, LEGS_EXTRA_HEIGHT, LEGS_EXTRA_WIDTH, xOffset, headTopOffset + HEAD_HEIGHT + i,dir,ENEMY_LEGS);
-	}
+		img.y = headTopOffset + HEAD_HEIGHT + i;
+		draw2(img);
+	}	
 	flipVert(legs, LEGS_HEIGHT, LEGS_WIDTH);
-	// draw(legs, LEGS_HEIGHT, LEGS_WIDTH, xOffset, headTopOffset + HEAD_HEIGHT + extraHeight,dir,ENEMY_LEGS);
+	img.colorIndex = ENEMY_LEGS;
+	img.data = legs;
+	img.width = LEGS_WIDTH;
+	img.height = LEGS_HEIGHT;
+	img.y = headTopOffset + HEAD_HEIGHT + extraHeight;
+	draw2(img);
 }

@@ -6,7 +6,10 @@ extern osMutexId mid_displayMutex;
 
 bool eddieCollectedItem = false;
 bool eddieCollidedWithEnemy = false;
-uint8_t areaOfItemCollected;
+uint8_t areaOfItemCollected = -1;
+
+
+Image floorImage, ladderImage;
 
 void flipVert(uint8_t  image[], uint16_t rows, uint16_t columns)
 {
@@ -22,8 +25,6 @@ void flipVert(uint8_t  image[], uint16_t rows, uint16_t columns)
 		}
 	}
 }
-
-
 
 void intToString(int64_t value, char * pBuf, uint32_t len, uint32_t base, uint8_t zeros){
 	static const char* pAscii = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -83,8 +84,8 @@ void intToString(int64_t value, char * pBuf, uint32_t len, uint32_t base, uint8_
 }
 
 Direction joyDir;
-bool eddieMoving;
 extern tContext sContext;
+bool joyMoving;
 
 void Entrada(void const *arg)
 {
@@ -99,19 +100,19 @@ void Entrada(void const *arg)
 		status = osMutexWait(mid_displayMutex, osWaitForever);
 		// GrStringDraw(&sContext,(char*)pbufx, -1, 10,  10, true);		
 		osMutexRelease(mid_displayMutex);
-		if (x > 1)
+		if (x > JOY_SENSITIVITY)
 		{
-			eddieMoving = true;
+			joyMoving = true;
 			joyDir = RIGHT;
 		}		
 		else if(x < -JOY_SENSITIVITY)
 		{
-			eddieMoving = true;
+			joyMoving = true;
 			joyDir = LEFT;
-		}		
+		}	
 		else
 		{
-			eddieMoving = false;
+			joyMoving = false;
 		}
 		
 	}
@@ -123,10 +124,13 @@ void Eddie(void const *arg)
 	char pbufx[10];
 	Image eddie;	
 	bool first = true;
-	eddie.xOffset = 0;
-	eddie.areaOffset = 2;
+	eddie.x = 0;
+	eddie.y = 0;
+	eddie.areaOffset = 3;
 	eddie.needsUpdate = true;
 	eddie.isMoving = false;
+	eddie.dirX = RIGHT;
+	eddie.dirY = 0;
 	while(1)
 	{
 		status = osMutexWait(mid_displayMutex, osWaitForever);
@@ -135,47 +139,89 @@ void Eddie(void const *arg)
 		// 	drawEddie(0,areaOffset,UPDATE);
 		// 	first = false;
 		// }
-		// if(eddieCollidedWithEnemy)
-		// {
-		// 	GrStringDraw(&sContext,"Morreu",-1,0,10,true);
-		// 	eddieCollidedWithEnemy = false;
-		// }
-		// drawEddie(xOffset,areaOffset,joyDir);
+		if(eddieCollidedWithEnemy)
+		{
+			GrStringDraw(&sContext,"Morreu",-1,0,10,true);
+			eddieCollidedWithEnemy = false;
+		}
 		drawEddie(eddie);
 		osMutexRelease(mid_displayMutex);
-		if(joyDir == RIGHT)
+		if(joyMoving)
 		{
-			eddie.xOffset++;
-			if(eddie.xOffset > 128 - EDDIE_SHIRT_WIDTH)
-				eddie.xOffset = 128 - EDDIE_SHIRT_WIDTH;
-			eddie.dirX = RIGHT;
+			if(joyDir == RIGHT)
+			{
+				eddie.x++;
+				if(eddie.x > 128 - EDDIE_SHIRT_WIDTH)
+				{
+					eddie.x = 128 - EDDIE_SHIRT_WIDTH;
+					eddie.isMoving = false;
+				}
+				else
+				{
+					eddie.isMoving = true;
+				}
+				
+					
+				eddie.dirX = RIGHT;
+			}
+			else if(joyDir == LEFT)
+			{
+				eddie.x--;
+				if(eddie.x < 1)
+				{
+					eddie.x = 1;
+					eddie.isMoving = false;
+				}
+				else
+				{
+					eddie.isMoving = true;
+				}	
+				eddie.dirX = LEFT;
+			}
+			eddie.needsUpdate = true;
+			ladderImage.needsUpdate = true;
 		}
-		else if(joyDir == LEFT)
+		else
 		{
-			eddie.xOffset--;
-			if(eddie.xOffset < 0)
-				eddie.xOffset = 0;
-			eddie.dirX = LEFT;
+			eddie.isMoving = false;
+			eddie.needsUpdate = false;
 		}
-		eddie.isMoving = eddieMoving;
+		
+		
+		
 	}
 }
 
 void Inimigos(void const *arg)
 {
 	osStatus status;
+	Image enemy;
 	int xOffset1 = 0;
 	Direction dir1 = RIGHT;
 	int xOffset2 = 20;
 	Direction dir2 = RIGHT;
+	enemy.x = enemy.y = 0;
+	enemy.needsUpdate = true;
+	enemy.isMoving = false;
+	enemy.dirX = RIGHT;
+	enemy.dirY = 0;
 	while(1)
 	{
 		status = osMutexWait(mid_displayMutex, osWaitForever);
-		drawSneaker(xOffset1,0,dir1);
-		drawSneaker(70,3,RIGHT);
-		drawBoss(xOffset2,4,dir2);
+		enemy.x = xOffset1;
+		enemy.areaOffset = 0;
+		enemy.dirX = dir1;
+		drawSneaker(enemy);
+		enemy.areaOffset = 3;
+		enemy.x = 70;
+		drawSneaker(enemy);
+		enemy.areaOffset = 4;
+		enemy.x = xOffset2;
+		enemy.dirX = dir2;
+		drawBoss(enemy);
 		osMutexRelease(mid_displayMutex);
-		osDelay(5);
+		enemy.isMoving = true;
+		osDelay(15);
 		if(xOffset1 == 0)
 		{
 			dir1 = RIGHT;
@@ -216,33 +262,33 @@ void ItensBrilhantes(void const *arg)
 {
 	osStatus status;
 	int i,numberOfItens =3,itemTopOffset;
-	int xOffset[] = {60, 60, 60};
+	Image itens[3];	
+	Image item1, item2, item3;
+	int xOffset[] = {10, 60, 0};
 	int areaOffset[] = {1,2,3};
 	char buffer[10];
 	Direction dir[] = {RIGHT,RIGHT,RIGHT};
+	item1.areaOffset = 0;
+	item2.areaOffset = 3;
+	item3.areaOffset = 2;
+	itens[0] = item1;
+	itens[1] = item2;
+	itens[2] = item3;
+	
 	while(1)
 	{
 		status = osMutexWait(mid_displayMutex, osWaitForever);	
-		if(eddieCollectedItem)
-		{
-			intToString(areaOfItemCollected,buffer,10,10,1);
-			GrStringDraw(&sContext,(char*)buffer,-1,0,10,true);
-			eddieCollectedItem = false;
-			for (i = 0; i < numberOfItens; i++)
-			{
-				if(areaOfItemCollected == areaOffset[i])
-				{
-					itemTopOffset = (127 - FLOOR_HEIGHT - LADDER_HEIGHT) - (LADDER_HEIGHT + FLOOR_HEIGHT) * (areaOffset[i]) + 1 + 10;
-					// clear(ITEM,ITEM_HEIGHT,ITEM_WIDTH,xOffset[i],itemTopOffset);
-				}
-			}
-			
-		}
+
 		for (i = 0; i < numberOfItens; i++)
 		{
 			if (areaOfItemCollected != areaOffset[i])
 			{
-				drawItem(xOffset[i], areaOffset[i], dir[i]);
+				itens[i].needsUpdate = true;
+				itens[i].isMoving = true;
+				itens[i].dirX = dir[i];
+				itens[i].x = xOffset[i];
+				drawItem(itens[i]);			
+				// drawItem(xOffset[i], areaOffset[i], dir[i]);
 			}
 			
 		}
@@ -277,13 +323,20 @@ void ItensBrilhantes(void const *arg)
 
 void PainelDeInstrumentos(void const *arg)
 {
-	osStatus status;
+	osStatus status;	
+
+	floorImage.needsUpdate = true;		
+	ladderImage.needsUpdate = true;
 	while(1)
 	{
 		status = osMutexWait(mid_displayMutex, osWaitForever);
-		drawFloor();
-		drawLadder();
+		drawFloor(floorImage);
+		floorImage.needsUpdate = false;
+		drawLadder(ladderImage);
+		ladderImage.needsUpdate = false;
 		drawScore();
+		
+		
 		osMutexRelease(mid_displayMutex);
 	}
 }
