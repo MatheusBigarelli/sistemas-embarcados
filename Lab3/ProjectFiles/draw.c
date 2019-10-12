@@ -95,14 +95,14 @@ void clearEddie(Image eddie)
 	int y = (127 - FLOOR_HEIGHT) - EDDIE_HEIGHT - (LADDER_HEIGHT + FLOOR_HEIGHT) * (eddie.areaOffset);
 	for (i = 0; i < EDDIE_HEIGHT; i++)
 	{
-		for (j = 0; j < EDDIE_WIDTH + 1; j++)
+		for (j = 0; j < EDDIE_WIDTH; j++)
 		{
-			if (buffer[0][i + y][eddie.x + j-1] != EMPTY)
+			if (buffer[0][i + y][eddie.x + j] != EMPTY)
 			{
-				colorOnPreviousFrame = buffer[1][i + y][eddie.x -1 + j];
+				colorOnPreviousFrame = buffer[1][i + y][eddie.x + j];
 				GrContextForegroundSet(&sContext, palette[colorOnPreviousFrame]);
-				GrPixelDraw(&sContext, eddie.x + j-1, i + y);
-				buffer[0][i + y][eddie.x + j-1] = colorOnPreviousFrame;
+				GrPixelDraw(&sContext, eddie.x + j, i + y);
+				buffer[0][i + y][eddie.x + j] = colorOnPreviousFrame;
 			}
 		}
 	}
@@ -122,13 +122,38 @@ void draw(Image img)
 		{
 			for (j = 0; j < img.width; j++)
 			{
-				currentIndex = buffer[0][i + img.y + img.dirY][img.x + j - img.dirX];
-				if(currentIndex == img.colorIndex)
+				if(img.dirX != NONE)
 				{
-					previousBufferPixel = buffer[1][i + img.y  + img.dirY][img.x + j - img.dirX];
-					GrContextForegroundSet(&sContext, palette[previousBufferPixel]);
-					GrPixelDraw(&sContext, img.x + j - img.dirX, i + img.y  + img.dirY);
-					buffer[0][i + img.y  + img.dirY][img.x + j - img.dirX] = previousBufferPixel;
+					currentIndex = buffer[0][i + img.y ][img.x + j - img.dirX];
+					if(currentIndex == img.colorIndex)
+					{
+						previousBufferPixel = buffer[1][i + img.y][img.x + j - img.dirX];
+						GrContextForegroundSet(&sContext, palette[previousBufferPixel]);
+						GrPixelDraw(&sContext, img.x + j - img.dirX, i + img.y);
+						buffer[0][i + img.y][img.x + j - img.dirX] = previousBufferPixel;
+					}
+				}
+				if(img.dirY != NONE)
+				{
+					currentIndex = buffer[0][i + img.y + img.dirY][img.x + j];
+					if(currentIndex == img.colorIndex)
+					{
+						previousBufferPixel = buffer[1][i + img.y  + img.dirY][img.x + j];
+						GrContextForegroundSet(&sContext, palette[previousBufferPixel]);
+						GrPixelDraw(&sContext, img.x + j, i + img.y  + img.dirY);
+						buffer[0][i + img.y  + img.dirY][img.x + j] = previousBufferPixel;
+					}
+				}
+				if(img.dirY != NONE && img.dirX != NONE)
+				{
+					currentIndex = buffer[0][i + img.y + img.dirY][img.x + j - img.dirX];
+					if(currentIndex == img.colorIndex)
+					{
+						previousBufferPixel = buffer[1][i + img.y  + img.dirY][img.x + j - img.dirX];
+						GrContextForegroundSet(&sContext, palette[previousBufferPixel]);
+						GrPixelDraw(&sContext, img.x + j - img.dirX, i + img.y  + img.dirY);
+						buffer[0][i + img.y  + img.dirY][img.x + j - img.dirX] = previousBufferPixel;
+					}
 				}
 		
 			}

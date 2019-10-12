@@ -147,6 +147,8 @@ void Eddie(void const *arg)
 	Image eddie;	
 	bool first = true;
 	bool stopedMoving = false; // Usado para evitar flicker ao atualizar as pernas do Eddie
+	Direction longJump = NONE;
+	
 	eddie.x = initialXPosition;
 	eddie.y = 0;
 	eddie.areaOffset = initialAreaOffset;
@@ -242,6 +244,10 @@ void Eddie(void const *arg)
 		// Tratamento do pulo
 		if(jumpHeight>0 && jumpHeight < JUMP_LIMIT) 
 		{
+			if((joyDir == RIGHT || joyDir == LEFT) && longJump == NONE)
+			{
+				longJump = joyDir;
+			}
 			eddie.y--;
 			eddie.dirY = RIGHT; // Para cimam nao da pra usar UP, pois na funcao draw usa dirY para somar com indice i.
 			jumpHeight++;
@@ -262,6 +268,7 @@ void Eddie(void const *arg)
 			eddie.dirY = NONE;
 			jumpHeight = 0;
 			eddie.isMoving = false;
+			longJump = NONE;
 		}
 		
 		

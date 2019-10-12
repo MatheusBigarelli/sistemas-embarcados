@@ -19,5 +19,8 @@ void drawItem(Image img)
 	img.y = itemTopOffset;
 	draw(img);
 	currentColor += 1;
-	
+	if(currentColor == 0x00FFFFFF)
+	{
+		currentColor = 0x00C97ABB;
+	}
 }
