@@ -7,6 +7,7 @@ extern osMutexId mid_displayMutex;
 bool eddieCollectedItem = false;
 bool eddieCollidedWithEnemy = false;
 uint8_t areaOfItemCollected = -1;
+bool stopedMoving = false; // Usado para evitar flicker ao atualizar as pernas do Eddie
 
 
 Image floorImage, ladderImage;
@@ -146,7 +147,6 @@ void Eddie(void const *arg)
 	char pbufx[10];
 	Image eddie;	
 	bool first = true;
-	bool stopedMoving = false; // Usado para evitar flicker ao atualizar as pernas do Eddie
 	
 	eddie.x = initialXPosition;
 	eddie.areaOffset = initialAreaOffset;	
@@ -168,71 +168,7 @@ void Eddie(void const *arg)
 		}
 		drawEddie(eddie);
 		
-		if(joyMoving)
-		{
-			if (joyDir == UP && eddieCanGoToLadder(eddie.x,eddie.areaOffset) == UP)
-			{
-				clearEddie(eddie);
-				eddie.areaOffset++;
-				eddie.y = (127 - FLOOR_HEIGHT) - EDDIE_HEIGHT - (LADDER_HEIGHT + FLOOR_HEIGHT) * (eddie.areaOffset);
-			}
-			if (joyDir == DOWN && eddieCanGoToLadder(eddie.x,eddie.areaOffset) == DOWN)
-			{
-				clearEddie(eddie);
-				eddie.areaOffset--;
-				eddie.y = (127 - FLOOR_HEIGHT) - EDDIE_HEIGHT - (LADDER_HEIGHT + FLOOR_HEIGHT) * (eddie.areaOffset);
-			}
-			
-			osMutexRelease(mid_displayMutex);
-			
-			
-			if(joyDir == RIGHT)
-			{
-				eddie.x++;
-				if(eddie.x > 128 - EDDIE_SHIRT_WIDTH)
-				{
-					eddie.x = 128 - EDDIE_SHIRT_WIDTH;
-					eddie.isMoving = false;
-				}
-				else
-				{
-					eddie.isMoving = true;
-				}		
-				eddie.dirX = RIGHT;
-			}
-			if(joyDir == LEFT)
-			{
-				eddie.x--;
-				if(eddie.x < 1)
-				{
-					eddie.x = 1;
-					eddie.isMoving = false;
-				}
-				else
-				{
-					eddie.isMoving = true;
-				}	
-				eddie.dirX = LEFT;
-			}			
-			eddie.needsUpdate = true;
-			stopedMoving = false;
-			if( (joyDir == UP && eddieCanGoToLadder(eddie.x,eddie.areaOffset) != UP) || (joyDir == DOWN && eddieCanGoToLadder(eddie.x,eddie.areaOffset) != DOWN))
-			{
-				eddie.isMoving = false;
-				stopedMoving = true;
-			}
-		}
-		else
-		{
-			osMutexRelease(mid_displayMutex);
-			eddie.isMoving = false;
-			eddie.needsUpdate = false;
-			if(!stopedMoving)
-			{
-				eddie.needsUpdate = true;
-				stopedMoving = true;
-			}
-		}
+		handleEddieMovement(&eddie);
 		handleEddieJump(&eddie);
 		
 	}

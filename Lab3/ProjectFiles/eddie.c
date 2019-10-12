@@ -9,6 +9,10 @@ extern uint8_t eddie_body_moving2[];
 extern uint8_t eddie_shirt[];
 extern uint8_t eddie_shirt_jumping[];
 
+extern osMutexId mid_displayMutex;
+extern bool joyMoving;
+extern bool stopedMoving;
+
 Direction currentDir;
 Direction lastFacingDir = NONE;
 bool eddieFeetUp = false;
@@ -26,7 +30,7 @@ void handleEddieJump(Image* eddie)
 			if((joyDir == RIGHT || joyDir == LEFT) && longJump == 0)
 			{
 				longJumpDir = joyDir;
-				longJump = 15;
+				longJump = 20;
 			}
 			eddie->y--;
 			eddie->dirY = RIGHT; // Para cimam nao da pra usar UP, pois na funcao draw usa dirY para somar com indice i.
@@ -88,6 +92,75 @@ void handleEddieJump(Image* eddie)
 			longJump = 0;
 			longJumpDir = NONE;
 			eddie->needsUpdate = true;
+		}
+}
+
+void handleEddieMovement(Image* eddie)
+{
+	if(joyMoving)
+		{
+			if (joyDir == UP && eddieCanGoToLadder(eddie->x,eddie->areaOffset) == UP)
+			{
+				clearEddie(*eddie);
+				eddie->areaOffset++;
+				eddie->y = (127 - FLOOR_HEIGHT) - EDDIE_HEIGHT - (LADDER_HEIGHT + FLOOR_HEIGHT) * (eddie->areaOffset);
+			}
+			if (joyDir == DOWN && eddieCanGoToLadder(eddie->x,eddie->areaOffset) == DOWN)
+			{
+				clearEddie(*eddie);
+				eddie->areaOffset--;
+				eddie->y = (127 - FLOOR_HEIGHT) - EDDIE_HEIGHT - (LADDER_HEIGHT + FLOOR_HEIGHT) * (eddie->areaOffset);
+			}
+			
+			osMutexRelease(mid_displayMutex);
+			
+			
+			if(joyDir == RIGHT)
+			{
+				eddie->x++;
+				if(eddie->x > 128 - EDDIE_SHIRT_WIDTH)
+				{
+					eddie->x = 128 - EDDIE_SHIRT_WIDTH;
+					eddie->isMoving = false;
+				}
+				else
+				{
+					eddie->isMoving = true;
+				}		
+				eddie->dirX = RIGHT;
+			}
+			if(joyDir == LEFT)
+			{
+				eddie->x--;
+				if(eddie->x < 1)
+				{
+					eddie->x = 1;
+					eddie->isMoving = false;
+				}
+				else
+				{
+					eddie->isMoving = true;
+				}	
+				eddie->dirX = LEFT;
+			}			
+			eddie->needsUpdate = true;
+			stopedMoving = false;
+			if( (joyDir == UP && eddieCanGoToLadder(eddie->x,eddie->areaOffset) != UP) || (joyDir == DOWN && eddieCanGoToLadder(eddie->x,eddie->areaOffset) != DOWN))
+			{
+				eddie->isMoving = false;
+				stopedMoving = true;
+			}
+		}
+		else
+		{
+			osMutexRelease(mid_displayMutex);
+			eddie->isMoving = false;
+			eddie->needsUpdate = false;
+			if(!stopedMoving)
+			{
+				eddie->needsUpdate = true;
+				stopedMoving = true;
+			}
 		}
 }
 
