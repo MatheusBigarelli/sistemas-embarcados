@@ -277,7 +277,7 @@ void ItensBrilhantes(void const *arg)
 				drawItem(itens[i]);			
 			}
 			else
-			{
+			{				
 				clear(itens[i]);
 				itemToAvoid = i;
 			}
