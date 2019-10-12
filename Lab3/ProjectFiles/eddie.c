@@ -22,6 +22,38 @@ extern Direction joyDir;
 int longJump = 0;
 Direction longJumpDir = NONE;
 
+Direction eddieCanGoToLadder(uint16_t eddieXPosition, uint8_t eddieAreaOffset)
+{
+	int i,j;
+	int ladderXPosition;
+	int ladderStarts[NUMBER_OF_AREAS][NUMBER_OF_LADDERS_IN_AREA] = {
+		{10, 70},
+		{60, 30},
+		{0, 50},
+		{100, 20}};
+	for (i = 0; i < NUMBER_OF_AREAS; i++)
+	{
+		for (j = 0; j < NUMBER_OF_LADDERS_IN_AREA; j++)
+		{
+			ladderXPosition = ladderStarts[i][j];
+			if (eddieXPosition > ladderXPosition + 2 && eddieXPosition < (ladderXPosition + LADDER_WIDTH - 10)) // Alinhado com escada
+			{
+				if(eddieAreaOffset == i) // Escada no mesmo nivel que Eddie
+				{
+					return UP;
+				}
+				if(eddieAreaOffset == i + 1) // Escada logo abaixo do Eddie
+				{
+					return DOWN;
+				}
+			}
+			
+		}		
+	}
+	return NONE;
+	
+}
+
 void handleEddieJump(Image* eddie)
 {
 	// Tratamento do pulo
