@@ -69,7 +69,7 @@ void drawEnemy(Image img, uint8_t extraHeight);
 void drawSneaker(Image img);
 void drawBoss(Image img);
 
-void drawItem(Image img);
+void drawItem(Image* img);
 
 void drawFloor(Image img);
 void drawLadder(Image img);
@@ -78,5 +78,8 @@ void drawScore(void);
 Direction eddieCanGoToLadder(uint16_t eddieXPosition, uint8_t eddieAreaOffset);
 void handleEddieJump(Image* eddie);
 void handleEddieMovement(Image* eddie);
+
+void updateItens(Image* item1, Image* item2);
+void collectItem(Image* item);
 
 #endif

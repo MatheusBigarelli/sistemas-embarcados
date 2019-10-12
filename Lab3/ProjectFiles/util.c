@@ -247,20 +247,19 @@ void Inimigos(void const *arg)
 void ItensBrilhantes(void const *arg)
 {
 	osStatus status;
-	int i,numberOfItens =3,itemTopOffset;
+	int i,numberOfItens =2,itemTopOffset;
 	int itemToAvoid = -1;
-	Image itens[3];	
-	Image item1, item2, item3;
-	int xOffset[] = {10, 60, 0};
-	int areaOffset[] = {1,2,3};
+	Image itens[2];	
+	Image item1, item2;
 	char buffer[10];
-	Direction dir[] = {RIGHT,RIGHT,RIGHT};
 	item1.areaOffset = 0;
+	item1.x = 10;
+	item1.dirX = RIGHT;
 	item2.areaOffset = 3;
-	item3.areaOffset = 2;
+	item2.x = 60;
+	item2.dirX = RIGHT;
 	itens[0] = item1;
 	itens[1] = item2;
-	itens[2] = item3;
 	
 	while(1)
 	{
@@ -268,13 +267,11 @@ void ItensBrilhantes(void const *arg)
 
 		for (i = 0; i < numberOfItens; i++)
 		{
-			if (areaOfItemCollected != areaOffset[i])
+			if (areaOfItemCollected != itens[i].areaOffset)
 			{
 				itens[i].needsUpdate = true;
 				itens[i].isMoving = true;
-				itens[i].dirX = dir[i];
-				itens[i].x = xOffset[i];
-				drawItem(itens[i]);			
+				drawItem(&itens[i]);			
 			}
 			else
 			{				
@@ -283,32 +280,10 @@ void ItensBrilhantes(void const *arg)
 			}
 			
 		}
-		osMutexRelease(mid_displayMutex);			
-		for (i = 0; i < numberOfItens; i++)
-		{
-			if(i != itemToAvoid)
-			{
-				if(xOffset[i] == 0)
-				{
-					dir[i] = RIGHT;
-				}
-				else if (xOffset[i] == 110)
-				{
-					dir[i] = LEFT;
-				}
-				if(dir[i] == RIGHT)
-				{
-					xOffset[i]++;
-				}
-				else
-				{
-					xOffset[i]--;
-				}
-			}
+		updateItens(&itens[0], &itens[1]);	
+		osMutexRelease(mid_displayMutex);		
 			
-			
-		}		
-	}
+	}		
 }
 
 void PainelDeInstrumentos(void const *arg)
