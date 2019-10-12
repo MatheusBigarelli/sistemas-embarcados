@@ -255,7 +255,6 @@ void ItensBrilhantes(void const *arg)
 {
 	osStatus status;
 	int i,numberOfItens =2,itemTopOffset;
-	int itemToAvoid = -1;
 	Image itens[2];	
 	Image item1, item2;
 	char buffer[10];
@@ -274,6 +273,7 @@ void ItensBrilhantes(void const *arg)
 
 		for (i = 0; i < numberOfItens; i++)
 		{
+			if(itens[i].collected)continue;
 			if (areaOfItemCollected != itens[i].areaOffset)
 			{
 				itens[i].needsUpdate = true;
@@ -282,8 +282,7 @@ void ItensBrilhantes(void const *arg)
 			}
 			else
 			{				
-				clear(itens[i]);
-				itemToAvoid = i;
+				collectItem(&itens[i]);
 			}
 			
 		}

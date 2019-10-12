@@ -66,6 +66,11 @@ void checkColision(ColorIndex index1, ColorIndex index2, uint16_t areaOffset)
 		{
 			ladderImage.needsUpdate = true;
 		}
+		if(index2 == EDDIE_HAT || index2 == EDDIE_BODY)
+		{
+			areaOfItemCollected = areaOffset; // O Eddie so pode coletar o item que esta na mesma area que ele
+			eddieCollectedItem = true;
+		}
 	}
 }
 void clear(Image img)

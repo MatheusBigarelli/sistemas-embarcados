@@ -51,7 +51,7 @@ struct image
 	uint8_t* data;
 	Direction dirX, dirY;
 	uint8_t areaOffset;
-	bool needsUpdate, isMoving;
+	bool needsUpdate, isMoving, collected;
 };
 typedef struct image Image;
 
