@@ -234,9 +234,12 @@ void drawEddie(Image eddie)
 				if(eddie.dirX == LEFT)
 				{
 					eddie.x++;	
-					eddie.y++;					
 					clearEddie(eddie);
 					eddie.x--;
+					eddie.y++;
+					
+					clearEddie(eddie);
+					
 					eddie.y--;
 				}
 				else

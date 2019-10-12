@@ -278,6 +278,7 @@ void ItensBrilhantes(void const *arg)
 {
 	osStatus status;
 	int i,numberOfItens =3,itemTopOffset;
+	int itemToAvoid = -1;
 	Image itens[3];	
 	Image item1, item2, item3;
 	int xOffset[] = {10, 60, 0};
@@ -305,27 +306,37 @@ void ItensBrilhantes(void const *arg)
 				itens[i].x = xOffset[i];
 				drawItem(itens[i]);			
 			}
+			else
+			{
+				clear(itens[i]);
+				itemToAvoid = i;
+			}
 			
 		}
 		osMutexRelease(mid_displayMutex);			
 		for (i = 0; i < numberOfItens; i++)
 		{
-			if(xOffset[i] == 60)
+			if(i != itemToAvoid)
 			{
-				dir[i] = RIGHT;
+				if(xOffset[i] == 0)
+				{
+					dir[i] = RIGHT;
+				}
+				else if (xOffset[i] == 110)
+				{
+					dir[i] = LEFT;
+				}
+				if(dir[i] == RIGHT)
+				{
+					xOffset[i]++;
+				}
+				else
+				{
+					xOffset[i]--;
+				}
 			}
-			else if (xOffset[i] == 110)
-			{
-				dir[i] = LEFT;
-			}
-			if(dir[i] == RIGHT)
-			{
-				xOffset[i]++;
-			}
-			else
-			{
-				xOffset[i]--;
-			}
+			
+			
 		}		
 	}
 }
