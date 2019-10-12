@@ -86,6 +86,7 @@ void intToString(int64_t value, char * pBuf, uint32_t len, uint32_t base, uint8_
 Direction joyDir = NONE;
 extern tContext sContext;
 bool joyMoving;
+int jumpHeight = 0;
 
 void Entrada(void const *arg)
 {
@@ -96,6 +97,14 @@ void Entrada(void const *arg)
 	{
 		x = joy_read_x();
 		y = joy_read_y();
+		if(button_read_s2())
+		{
+			if(jumpHeight == 0)
+			{
+					jumpHeight = 1;
+			}
+			
+		}
 		x = x*200/0xFFF-100;		
 		y = y*200/0xFFF-100;
 		// intToString(x, pbufx, 10, 10, 4);
@@ -143,8 +152,8 @@ void Eddie(void const *arg)
 	eddie.areaOffset = initialAreaOffset;
 	eddie.needsUpdate = true;
 	eddie.isMoving = false;
-	eddie.dirX = RIGHT;
-	eddie.dirY = 0;
+	eddie.dirX = NONE;
+	eddie.dirY = NONE;
 	while(1)
 	{
 		status = osMutexWait(mid_displayMutex, osWaitForever);
@@ -160,20 +169,27 @@ void Eddie(void const *arg)
 		
 		if(joyMoving)
 		{
-			if (joyDir == UP && eddieCanToLadder(eddie.x,eddie.areaOffset) == UP)
+			if (joyDir == UP && eddieCanGoToLadder(eddie.x,eddie.areaOffset) == UP)
 			{
 				clearEddie(eddie);
 				eddie.areaOffset++;
 			}
-			if (joyDir == DOWN && eddieCanToLadder(eddie.x,eddie.areaOffset) == DOWN)
+			if (joyDir == DOWN && eddieCanGoToLadder(eddie.x,eddie.areaOffset) == DOWN)
 			{
 				clearEddie(eddie);
 				eddie.areaOffset--;
 			}
+			
 			osMutexRelease(mid_displayMutex);
+			
+			
 			if(joyDir == RIGHT)
 			{
 				eddie.x++;
+				if(eddie.dirY == RIGHT)
+				{
+					eddie.x += 0;
+				}
 				if(eddie.x > 128 - EDDIE_SHIRT_WIDTH)
 				{
 					eddie.x = 128 - EDDIE_SHIRT_WIDTH;
@@ -182,14 +198,16 @@ void Eddie(void const *arg)
 				else
 				{
 					eddie.isMoving = true;
-				}
-				
-					
+				}		
 				eddie.dirX = RIGHT;
 			}
 			if(joyDir == LEFT)
 			{
 				eddie.x--;
+				if(eddie.dirY == LEFT)
+				{
+					eddie.x += 0;
+				}
 				if(eddie.x < 1)
 				{
 					eddie.x = 1;
@@ -200,10 +218,14 @@ void Eddie(void const *arg)
 					eddie.isMoving = true;
 				}	
 				eddie.dirX = LEFT;
-			}
-			
+			}			
 			eddie.needsUpdate = true;
 			stopedMoving = false;
+			if( (joyDir == UP && eddieCanGoToLadder(eddie.x,eddie.areaOffset) != UP) || (joyDir == DOWN && eddieCanGoToLadder(eddie.x,eddie.areaOffset) != DOWN))
+			{
+				eddie.isMoving = false;
+				stopedMoving = true;
+			}
 		}
 		else
 		{
@@ -217,12 +239,36 @@ void Eddie(void const *arg)
 			}
 		}
 		
+		// Tratamento do pulo
+		if(jumpHeight>0 && jumpHeight < JUMP_LIMIT) 
+		{
+			eddie.y--;
+			eddie.dirY = RIGHT; // Para cimam nao da pra usar UP, pois na funcao draw usa dirY para somar com indice i.
+			jumpHeight++;
+			eddie.needsUpdate = true;
+			eddie.isMoving = true;
+		}
+		else if (jumpHeight >= JUMP_LIMIT && jumpHeight < JUMP_LIMIT*2 - 1) // Eddie alcancou o limite do pulo
+		{
+			eddie.y++;
+			eddie.dirY = LEFT; // Para baixo
+			jumpHeight++;	//TODO: arrumar outro nome pra isso
+			eddie.needsUpdate = true;
+			eddie.isMoving = true;
+		}
+		else if(jumpHeight == 2*JUMP_LIMIT - 1)
+		{
+			eddie.y = 0;
+			eddie.dirY = NONE;
+			jumpHeight = 0;
+			eddie.isMoving = false;
+		}
 		
 		
 	}
 }
 
-Direction eddieCanToLadder(uint16_t eddieXPosition, uint8_t eddieAreaOffset)
+Direction eddieCanGoToLadder(uint16_t eddieXPosition, uint8_t eddieAreaOffset)
 {
 	int i,j;
 	int ladderXPosition;
@@ -282,7 +328,6 @@ void Inimigos(void const *arg)
 		drawBoss(enemy);
 		osMutexRelease(mid_displayMutex);
 		enemy.isMoving = true;
-		osDelay(15);
 		if(xOffset1 == 0)
 		{
 			dir1 = RIGHT;
@@ -353,7 +398,6 @@ void ItensBrilhantes(void const *arg)
 			
 		}
 		osMutexRelease(mid_displayMutex);			
-		osDelay(16);		
 		for (i = 0; i < numberOfItens; i++)
 		{
 			if(xOffset[i] == 60)

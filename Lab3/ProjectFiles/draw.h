@@ -22,8 +22,8 @@ enum dir
 {
 	UP = 2,
 	DOWN = -2,
-	RIGHT = 1,
-	LEFT = -1,
+	RIGHT = 1, // UP qnd pulando
+	LEFT = -1, // DOWN qnd  pulando
 	NONE = 0
 };
 typedef enum dir Direction;
@@ -75,7 +75,7 @@ void drawFloor(Image img);
 void drawLadder(Image img);
 void drawScore(void);
 
-Direction eddieCanToLadder(uint16_t eddieXPosition, uint8_t eddieAreaOffset);
+Direction eddieCanGoToLadder(uint16_t eddieXPosition, uint8_t eddieAreaOffset);
 
 
 

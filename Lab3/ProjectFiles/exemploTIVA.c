@@ -74,7 +74,7 @@ void init_threads()
 	osThreadCreate(osThread(Eddie), NULL);
 	osThreadCreate(osThread(Inimigos), NULL);
 	osThreadCreate(osThread(ItensBrilhantes), NULL);
-	osThreadCreate(osThread(PainelDeInstrumentos), NULL);
+  osThreadCreate(osThread(PainelDeInstrumentos), NULL);
 	osThreadCreate(osThread(Saida), NULL);
 	
 	mid_displayMutex = osMutexCreate(osMutex(displayMutex));

@@ -4,12 +4,16 @@ extern uint8_t head[] ;
 extern uint8_t legs[];
 extern uint8_t legsExtra[];
 
+extern uint32_t palette[9];
+
 void drawSneaker(Image img)
 {
+	palette[ENEMY_HEAD] = 0x006D8BBD;
 	drawEnemy(img, 0);
 }
 void drawBoss(Image img)
 {
+	palette[ENEMY_HEAD] = 0x00AA814E; // Altera a cor da cabeca para identificar como chefao
 	drawEnemy(img, 5);
 }
 

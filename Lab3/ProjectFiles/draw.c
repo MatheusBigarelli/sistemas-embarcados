@@ -122,13 +122,13 @@ void draw(Image img)
 		{
 			for (j = 0; j < img.width; j++)
 			{
-				currentIndex = buffer[0][i + img.y ][img.x + j - img.dirX];
+				currentIndex = buffer[0][i + img.y + img.dirY][img.x + j - img.dirX];
 				if(currentIndex == img.colorIndex)
 				{
-					previousBufferPixel = buffer[1][i + img.y][img.x + j - img.dirX];
+					previousBufferPixel = buffer[1][i + img.y  + img.dirY][img.x + j - img.dirX];
 					GrContextForegroundSet(&sContext, palette[previousBufferPixel]);
-					GrPixelDraw(&sContext, img.x + j - img.dirX, i + img.y);
-					buffer[0][i + img.y][img.x + j - img.dirX] = previousBufferPixel;
+					GrPixelDraw(&sContext, img.x + j - img.dirX, i + img.y  + img.dirY);
+					buffer[0][i + img.y  + img.dirY][img.x + j - img.dirX] = previousBufferPixel;
 				}
 		
 			}
@@ -141,7 +141,7 @@ void draw(Image img)
 		for (j = 0; j < img.width; j++)
 		{
 			newIndex = img.data[i * img.width + j];
-			// as coordenadas i,j sao relativas � imagem e nao ao mapa por isso considera o offset(para ter coordenadas absolutas)
+			// as coordenadas i,j sao relativas a imagem e nao ao mapa por isso considera o offset(para ter coordenadas absolutas)
 			currentIndex = buffer[0][i + img.y][img.x + j];
 			
 			checkColision(newIndex, currentIndex, img.areaOffset);
