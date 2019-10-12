@@ -162,6 +162,13 @@ void Eddie(void const *arg)
 		{
 			eddieCollidedWithEnemy = false;
 			clearEddie(eddie);
+			eddie.x--;
+			clearEddie(eddie);
+			eddie.y--;
+			clearEddie(eddie);
+			eddie.x++;
+			clearEddie(eddie);
+			eddie.y++;
 			eddie.x = initialXPosition;
 			eddie.areaOffset = initialAreaOffset;
 		}
