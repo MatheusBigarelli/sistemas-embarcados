@@ -96,13 +96,14 @@ void drawEddie(Image eddie)
 	int i, j = 0, eddieTopOffset,eddieInitialY;
 	int deltay = 0;
 	int startToCutEddie = 2; //Problema <
+	bool first = true;
 	if(eddie.needsUpdate == false)
 	{
 		return; // Nao precisa fazer nada com o eddie.
 	}
 	else
 	{
-
+		
 		if(eddie.dirX != lastFacingDir && lastFacingDir != NONE)
 		{		
 			flipVert(eddie_hat, EDDIE_HAT_HEIGHT, EDDIE_HAT_WIDTH);
@@ -117,6 +118,12 @@ void drawEddie(Image eddie)
 		eddieInitialY = eddie.y;
 		if(eddie.dirY != LEFT) // Eddie nao esta caindo do pulo, pode imprimir na ordem normal
 		{
+			if(eddie.dirY == RIGHT)
+			{
+				eddie.y++;
+				clearEddie(eddie);
+				eddie.y--;
+			}
 			eddie.colorIndex = EDDIE_HAT;
 			eddie.data = eddie_hat;
 			eddie.width = EDDIE_HAT_WIDTH;
@@ -133,12 +140,42 @@ void drawEddie(Image eddie)
 			eddie.colorIndex = EDDIE_SHIRT;
 			if(eddieInitialY < eddieTopOffset - startToCutEddie ) 
 			{
-				eddie.data = eddie_shirt_jumping;
-				eddie.width = EDDIE_SHIRT_WIDTH;
-				eddie.height = EDDIE_SHIRT_JUMPING_HEIGHT;
-				eddie.y += EDDIE_BODY1_HEIGHT;
-				draw(eddie); // Desenha camisa
-				eddie.y += EDDIE_SHIRT_JUMPING_HEIGHT;
+				if(first)
+				{
+					eddie.data = eddie_shirt;
+					eddie.width = EDDIE_SHIRT_WIDTH;
+					eddie.height = EDDIE_SHIRT_HEIGHT + 2;
+					eddie.y += EDDIE_BODY1_HEIGHT;
+					clear(eddie); // Desenha camisa
+					eddie.data = eddie_shirt_jumping;
+					eddie.width = EDDIE_SHIRT_WIDTH;
+					eddie.height = EDDIE_SHIRT_JUMPING_HEIGHT;
+					draw(eddie); // Desenha camisa
+					eddie.y += EDDIE_SHIRT_HEIGHT;
+					eddie.colorIndex = EDDIE_BODY;			
+					eddie.data = eddie_body2;
+					eddie.width = EDDIE_BODY2_WIDTH;
+					eddie.height = EDDIE_BODY2_HEIGHT;
+					eddie.y -= 2;
+					draw(eddie);
+					first = false;
+				}
+				else
+				{
+					eddie.y += EDDIE_BODY1_HEIGHT;
+					eddie.data = eddie_shirt_jumping;
+					eddie.width = EDDIE_SHIRT_WIDTH;
+					eddie.height = EDDIE_SHIRT_JUMPING_HEIGHT;
+					draw(eddie); // Desenha camisa
+					eddie.y += EDDIE_SHIRT_JUMPING_HEIGHT;
+					eddie.colorIndex = EDDIE_BODY;			
+					eddie.data = eddie_body2;
+					eddie.width = EDDIE_BODY2_WIDTH;
+					eddie.height = EDDIE_BODY2_HEIGHT;
+					clear(eddie);
+					draw(eddie);
+				}
+				
 			}
 			else
 			{
@@ -148,16 +185,17 @@ void drawEddie(Image eddie)
 				eddie.y += EDDIE_BODY1_HEIGHT;
 				draw(eddie); // Desenha camisa
 				eddie.y += EDDIE_SHIRT_HEIGHT;
+				eddie.colorIndex = EDDIE_BODY;
+			
+				eddie.data = eddie_body2;
+				eddie.width = EDDIE_BODY2_WIDTH;
+				eddie.height = EDDIE_BODY2_HEIGHT;
+				clear(eddie);
+				draw(eddie);
 			}			
 			
 			
-			eddie.colorIndex = EDDIE_BODY;
 			
-			eddie.data = eddie_body2;
-			eddie.width = EDDIE_BODY2_WIDTH;
-			eddie.height = EDDIE_BODY2_HEIGHT;
-			clear(eddie);
-			draw(eddie);
 		}
 		else // Eddie caindo, imprime na ordem contraria(comecando dos pes)
 		{
@@ -168,44 +206,65 @@ void drawEddie(Image eddie)
 			if(eddieInitialY < eddieTopOffset - startToCutEddie ) 
 			{
 				eddie.y += EDDIE_HAT_HEIGHT + EDDIE_BODY1_HEIGHT + EDDIE_SHIRT_JUMPING_HEIGHT;
-			}
-			else
-			{		
-				eddie.y += EDDIE_HAT_HEIGHT + EDDIE_BODY1_HEIGHT + EDDIE_SHIRT_HEIGHT;				
-			}			
-			draw(eddie); // Desenha os pes
-			
-			
-			eddie.colorIndex = EDDIE_SHIRT;
-			if(eddieInitialY < eddieTopOffset - startToCutEddie)
-			{
+				draw(eddie); // Desenha os pes			
+				eddie.colorIndex = EDDIE_SHIRT;
+				
 				eddie.y -= EDDIE_SHIRT_JUMPING_HEIGHT;
 				eddie.data = eddie_shirt_jumping;
 				eddie.width = EDDIE_SHIRT_WIDTH;
 				eddie.height = EDDIE_SHIRT_JUMPING_HEIGHT;
+				
+				draw(eddie); // Desenha a camisa
+			
+				eddie.y -= EDDIE_BODY1_HEIGHT;
+				eddie.colorIndex = EDDIE_BODY;
+				eddie.data = eddie_body1;
+				eddie.width = EDDIE_BODY1_WIDTH;
+				eddie.height = EDDIE_BODY1_HEIGHT;
+				draw(eddie); // Desenha cabeca
+				
+				eddie.y -= EDDIE_HAT_HEIGHT;
+				eddie.colorIndex = EDDIE_HAT;
+				eddie.data = eddie_hat;
+				eddie.width = EDDIE_HAT_WIDTH;
+				eddie.height = EDDIE_HAT_HEIGHT;
+				draw(eddie);
+				
 			}
 			else
 			{		
+				eddie.y--;
+				clearEddie(eddie);
+				eddie.y++;
+				
+				eddie.y += EDDIE_HAT_HEIGHT + EDDIE_BODY1_HEIGHT + EDDIE_SHIRT_HEIGHT;
+				draw(eddie); // Desenha os pes
+					
+				eddie.colorIndex = EDDIE_SHIRT;
+				
 				eddie.y -= EDDIE_SHIRT_HEIGHT;
 				eddie.data = eddie_shirt;
 				eddie.width = EDDIE_SHIRT_WIDTH;
 				eddie.height = EDDIE_SHIRT_HEIGHT;
-			}				
-			draw(eddie); // Desenha a camisa
+				
+				draw(eddie); // Desenha a camisa
 			
-			eddie.y -= EDDIE_BODY1_HEIGHT;
-			eddie.colorIndex = EDDIE_BODY;
-			eddie.data = eddie_body1;
-			eddie.width = EDDIE_BODY1_WIDTH;
-			eddie.height = EDDIE_BODY1_HEIGHT;
-			draw(eddie); // Desenha cabeca
+				eddie.y -= EDDIE_BODY1_HEIGHT;
+				eddie.colorIndex = EDDIE_BODY;
+				eddie.data = eddie_body1;
+				eddie.width = EDDIE_BODY1_WIDTH;
+				eddie.height = EDDIE_BODY1_HEIGHT;
+				draw(eddie); // Desenha cabeca
+				
+				eddie.y -= EDDIE_HAT_HEIGHT;
+				eddie.colorIndex = EDDIE_HAT;
+				eddie.data = eddie_hat;
+				eddie.width = EDDIE_HAT_WIDTH;
+				eddie.height = EDDIE_HAT_HEIGHT;
+				draw(eddie);
+			}			
+						
 			
-			eddie.y -= EDDIE_HAT_HEIGHT;
-			eddie.colorIndex = EDDIE_HAT;
-			eddie.data = eddie_hat;
-			eddie.width = EDDIE_HAT_WIDTH;
-			eddie.height = EDDIE_HAT_HEIGHT;
-			draw(eddie);
 		}
 		
 		if(eddie.isMoving && eddie.dirY == NONE && jumpHeight == 0) // Eddie esta se movendo na horizontal(dirY = NONE) no chao(jumpHeight=0)

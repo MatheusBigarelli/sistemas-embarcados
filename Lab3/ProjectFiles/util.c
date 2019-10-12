@@ -233,9 +233,7 @@ void Eddie(void const *arg)
 				stopedMoving = true;
 			}
 		}
-		
 		handleEddieJump(&eddie);
-		
 		
 	}
 }
