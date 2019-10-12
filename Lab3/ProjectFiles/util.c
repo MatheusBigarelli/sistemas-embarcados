@@ -418,6 +418,6 @@ void Saida(void const *arg)
 	while(1)
 	{
 		song = songMario;
-		playSong(song);
+		//playSong(song);
 	}
 }
