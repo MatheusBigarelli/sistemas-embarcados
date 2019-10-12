@@ -92,17 +92,16 @@ void clearEddie(Image eddie)
 {
 	int i,j;
 	ColorIndex colorOnPreviousFrame;
-	int y = (127 - FLOOR_HEIGHT) - EDDIE_HEIGHT - (LADDER_HEIGHT + FLOOR_HEIGHT) * (eddie.areaOffset);
 	for (i = 0; i < EDDIE_HEIGHT; i++)
 	{
 		for (j = 0; j < EDDIE_WIDTH; j++)
 		{
-			if (buffer[0][i + y][eddie.x + j] != EMPTY)
+			if (buffer[0][i + eddie.y][eddie.x + j] != EMPTY)
 			{
-				colorOnPreviousFrame = buffer[1][i + y][eddie.x + j];
+				colorOnPreviousFrame = buffer[1][i + eddie.y][eddie.x + j];
 				GrContextForegroundSet(&sContext, palette[colorOnPreviousFrame]);
-				GrPixelDraw(&sContext, eddie.x + j, i + y);
-				buffer[0][i + y][eddie.x + j] = colorOnPreviousFrame;
+				GrPixelDraw(&sContext, eddie.x + j, i + eddie.y);
+				buffer[0][i + eddie.y][eddie.x + j] = colorOnPreviousFrame;
 			}
 		}
 	}

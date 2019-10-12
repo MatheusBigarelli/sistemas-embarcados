@@ -76,7 +76,7 @@ void drawLadder(Image img);
 void drawScore(void);
 
 Direction eddieCanGoToLadder(uint16_t eddieXPosition, uint8_t eddieAreaOffset);
-
+void handleEddieJump(Image* eddie);
 
 
 #endif

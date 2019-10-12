@@ -86,7 +86,7 @@ void intToString(int64_t value, char * pBuf, uint32_t len, uint32_t base, uint8_
 Direction joyDir = NONE;
 extern tContext sContext;
 bool joyMoving;
-int jumpHeight = 0;
+extern int jumpHeight;
 
 void Entrada(void const *arg)
 {
@@ -147,11 +147,10 @@ void Eddie(void const *arg)
 	Image eddie;	
 	bool first = true;
 	bool stopedMoving = false; // Usado para evitar flicker ao atualizar as pernas do Eddie
-	Direction longJump = NONE;
 	
 	eddie.x = initialXPosition;
-	eddie.y = 0;
-	eddie.areaOffset = initialAreaOffset;
+	eddie.areaOffset = initialAreaOffset;	
+	eddie.y = (127 - FLOOR_HEIGHT) - EDDIE_HEIGHT - (LADDER_HEIGHT + FLOOR_HEIGHT) * (eddie.areaOffset);
 	eddie.needsUpdate = true;
 	eddie.isMoving = false;
 	eddie.dirX = NONE;
@@ -175,11 +174,13 @@ void Eddie(void const *arg)
 			{
 				clearEddie(eddie);
 				eddie.areaOffset++;
+				eddie.y = (127 - FLOOR_HEIGHT) - EDDIE_HEIGHT - (LADDER_HEIGHT + FLOOR_HEIGHT) * (eddie.areaOffset);
 			}
 			if (joyDir == DOWN && eddieCanGoToLadder(eddie.x,eddie.areaOffset) == DOWN)
 			{
 				clearEddie(eddie);
 				eddie.areaOffset--;
+				eddie.y = (127 - FLOOR_HEIGHT) - EDDIE_HEIGHT - (LADDER_HEIGHT + FLOOR_HEIGHT) * (eddie.areaOffset);
 			}
 			
 			osMutexRelease(mid_displayMutex);
@@ -188,10 +189,6 @@ void Eddie(void const *arg)
 			if(joyDir == RIGHT)
 			{
 				eddie.x++;
-				if(eddie.dirY == RIGHT)
-				{
-					eddie.x += 0;
-				}
 				if(eddie.x > 128 - EDDIE_SHIRT_WIDTH)
 				{
 					eddie.x = 128 - EDDIE_SHIRT_WIDTH;
@@ -206,10 +203,6 @@ void Eddie(void const *arg)
 			if(joyDir == LEFT)
 			{
 				eddie.x--;
-				if(eddie.dirY == LEFT)
-				{
-					eddie.x += 0;
-				}
 				if(eddie.x < 1)
 				{
 					eddie.x = 1;
@@ -241,35 +234,7 @@ void Eddie(void const *arg)
 			}
 		}
 		
-		// Tratamento do pulo
-		if(jumpHeight>0 && jumpHeight < JUMP_LIMIT) 
-		{
-			if((joyDir == RIGHT || joyDir == LEFT) && longJump == NONE)
-			{
-				longJump = joyDir;
-			}
-			eddie.y--;
-			eddie.dirY = RIGHT; // Para cimam nao da pra usar UP, pois na funcao draw usa dirY para somar com indice i.
-			jumpHeight++;
-			eddie.needsUpdate = true;
-			eddie.isMoving = true;
-		}
-		else if (jumpHeight >= JUMP_LIMIT && jumpHeight < JUMP_LIMIT*2 - 1) // Eddie alcancou o limite do pulo
-		{
-			eddie.y++;
-			eddie.dirY = LEFT; // Para baixo
-			jumpHeight++;	//TODO: arrumar outro nome pra isso
-			eddie.needsUpdate = true;
-			eddie.isMoving = true;
-		}
-		else if(jumpHeight == 2*JUMP_LIMIT - 1)
-		{
-			eddie.y = 0;
-			eddie.dirY = NONE;
-			jumpHeight = 0;
-			eddie.isMoving = false;
-			longJump = NONE;
-		}
+		handleEddieJump(&eddie);
 		
 		
 	}
