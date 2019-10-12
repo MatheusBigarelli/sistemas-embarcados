@@ -331,10 +331,93 @@ void PainelDeInstrumentos(void const *arg)
 	}
 }
 
+
+
+uint16_t notes[2][14] = {
+    {sAb(1), sA(1), sBb(1), sB(1), 0, sC(1), sDb(1), sD(1), sEb(1), sE(1), 0, sF(1), sGb(1), sG(1)},
+    {sAb(2), sA(2), sBb(2), sB(2), 0, sC(2), sDb(2), sD(2), sEb(2), sE(2), 0, sF(2), sGb(2), sG(2)},
+};
+
+uint16_t getNote(uint8_t *ch)
+{
+    uint8_t scale = 0;
+    if (ch[0] == '^')
+        scale = 1;
+
+
+    if (ch[1] >= 'A' && ch[1] <= 'G')
+    {
+        if (ch[2] == 'b')
+            return notes[scale][2 * (ch[1] - 'A')];
+        else if (ch[2] == 'n')
+            return notes[scale][2 * (ch[1] - 'A')+1];
+    }
+
+    return 0;
+}
+
+
+uint32_t getPause(uint8_t ch)
+{
+    switch (ch) {
+    case '+':
+        return 0;
+    case ',':
+        return 500;
+    case '.':
+        return 1000;
+    case '_':
+        return 2000;
+    default:
+        return 5;
+    }
+}
+
+void playNote(uint16_t note, uint32_t dur)
+{
+	buzzer_per_set(note);
+	buzzer_write(true);
+	osDelay(dur);
+}
+
+void playSong(uint8_t *song) {
+    uint32_t note;
+    uint32_t dur;
+    uint32_t pause;
+	
+	dur = 1000;
+
+    
+     // A song is a collection of tones where each tone is
+     // a note, duration and pause, e.g.
+     // "E2,F4,"
+     
+
+    while(*song != '\0') {
+        note = getNote(song);
+		song += 3;
+		
+        pause = getPause(*song++);
+
+        playNote(note, dur);
+		
+		buzzer_write(false);
+		osDelay(pause);
+    }
+}
+
+
+
 void Saida(void const *arg)
 {
 	osStatus status;
+	uint8_t* song;
+	uint8_t songMario[SONG_SIZE] = {"^En,^En.^En_^Cn,^En_^Gn_-Nn_-Gn_-Nn_-Nn_"};
+	buzzer_vol_set(750);
+	
 	while(1)
 	{
+		song = songMario;
+		playSong(song);
 	}
 }
