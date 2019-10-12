@@ -32,25 +32,7 @@ void handleEddieJump(Image* eddie)
 				longJumpDir = joyDir;
 				longJump = 20;
 			}
-			eddie->y--;
-			eddie->dirY = RIGHT; // Para cimam nao da pra usar UP, pois na funcao draw usa dirY para somar com indice i.
-			jumpHeight++;
-			eddie->needsUpdate = true;
-			eddie->isMoving = true;
-		}
-		else if (jumpHeight >= JUMP_LIMIT && jumpHeight < JUMP_LIMIT*2 - 1) // Eddie alcancou o limite do pulo
-		{
-			eddie->y++;
-			eddie->dirY = LEFT; // Para baixo
-			jumpHeight++;	//TODO: arrumar outro nome pra isso
-			if(longJump != 0)
-			{
-				eddie->y--;
-				eddie->dirY = NONE; //Nao cai mais
-				jumpHeight--;	//TODO: arrumar outro nome pra isso
-				longJump--;
-			}
-			if(joyDir != RIGHT && joyDir != LEFT && longJumpDir != NONE) // Soltou o joystick no meio do pulo long
+			if(longJumpDir != NONE) // Soltou o joystick no meio do pulo long
 			{
 					if(longJumpDir == RIGHT)
 					{
@@ -80,7 +62,56 @@ void handleEddieJump(Image* eddie)
 						}	
 						eddie->dirX = LEFT;
 					}	
-				}
+			}
+			eddie->y--;
+			eddie->dirY = RIGHT; // Para cimam nao da pra usar UP, pois na funcao draw usa dirY para somar com indice i.
+			jumpHeight++;
+			eddie->needsUpdate = true;
+			eddie->isMoving = true;
+		}
+		else if (jumpHeight >= JUMP_LIMIT && jumpHeight < JUMP_LIMIT*2 - 1) // Eddie alcancou o limite do pulo/ esta caindo do pulo
+		{
+			eddie->y++;
+			eddie->dirY = LEFT; // Para baixo
+			jumpHeight++;	//TODO: arrumar outro nome pra isso
+			if(longJump != 0)
+			{
+				eddie->y--;
+				eddie->dirY = NONE; //Nao cai mais
+				jumpHeight--;	//TODO: arrumar outro nome pra isso
+				longJump--;
+			}
+			if(longJumpDir != NONE) // Soltou o joystick no meio do pulo long
+			{
+					if(longJumpDir == RIGHT)
+					{
+						eddie->x++;
+						if(eddie->x > 128 - EDDIE_SHIRT_WIDTH)
+						{
+							eddie->x = 128 - EDDIE_SHIRT_WIDTH;
+							eddie->isMoving = false;
+						}
+						else
+						{
+							eddie->isMoving = true;
+						}		
+						eddie->dirX = RIGHT;
+					}
+					if(longJumpDir == LEFT)
+					{
+						eddie->x--;
+						if(eddie->x < 1)
+						{
+							eddie->x = 1;
+							eddie->isMoving = false;
+						}
+						else
+						{
+							eddie->isMoving = true;
+						}	
+						eddie->dirX = LEFT;
+					}	
+			}
 			eddie->needsUpdate = true;
 			eddie->isMoving = true;
 		}
@@ -97,6 +128,10 @@ void handleEddieJump(Image* eddie)
 
 void handleEddieMovement(Image* eddie)
 {
+	if(jumpHeight != 0)
+	{
+		return;
+	}
 	if(joyMoving)
 		{
 			if (joyDir == UP && eddieCanGoToLadder(eddie->x,eddie->areaOffset) == UP)
@@ -111,10 +146,6 @@ void handleEddieMovement(Image* eddie)
 				eddie->areaOffset--;
 				eddie->y = (127 - FLOOR_HEIGHT) - EDDIE_HEIGHT - (LADDER_HEIGHT + FLOOR_HEIGHT) * (eddie->areaOffset);
 			}
-			
-			osMutexRelease(mid_displayMutex);
-			
-			
 			if(joyDir == RIGHT)
 			{
 				eddie->x++;
@@ -153,7 +184,6 @@ void handleEddieMovement(Image* eddie)
 		}
 		else
 		{
-			osMutexRelease(mid_displayMutex);
 			eddie->isMoving = false;
 			eddie->needsUpdate = false;
 			if(!stopedMoving)
@@ -193,9 +223,30 @@ void drawEddie(Image eddie)
 		{
 			if(eddie.dirY == RIGHT)
 			{
-				eddie.y++;
-				clearEddie(eddie);
-				eddie.y--;
+				if(eddie.dirX == RIGHT)
+				{
+					eddie.x--;	
+					eddie.y++;					
+					clearEddie(eddie);
+					eddie.x++;
+					eddie.y--;
+				}
+				if(eddie.dirX == LEFT)
+				{
+					eddie.x++;	
+					eddie.y++;					
+					clearEddie(eddie);
+					eddie.x--;
+					eddie.y--;
+				}
+				else
+				{
+					eddie.y++;					
+					clearEddie(eddie);
+					eddie.y--;
+				}
+				
+				
 			}
 			eddie.colorIndex = EDDIE_HAT;
 			eddie.data = eddie_hat;
@@ -276,6 +327,28 @@ void drawEddie(Image eddie)
 			eddie.data = eddie_body2;
 			eddie.width = EDDIE_BODY2_WIDTH;
 			eddie.height = EDDIE_BODY2_HEIGHT;
+			if(eddie.dirX == RIGHT)
+				{
+					eddie.x--;	
+					eddie.y--;					
+					clearEddie(eddie);
+					eddie.x++;
+					eddie.y++;
+				}
+				if(eddie.dirX == LEFT)
+				{
+					eddie.x++;	
+					eddie.y--;					
+					clearEddie(eddie);
+					eddie.x--;
+					eddie.y++;
+				}
+				else
+				{
+					eddie.y--;					
+					clearEddie(eddie);
+					eddie.y++;
+				}
 			if(eddieInitialY < eddieTopOffset - startToCutEddie ) 
 			{
 				eddie.y += EDDIE_HAT_HEIGHT + EDDIE_BODY1_HEIGHT + EDDIE_SHIRT_JUMPING_HEIGHT;

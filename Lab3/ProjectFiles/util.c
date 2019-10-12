@@ -160,16 +160,20 @@ void Eddie(void const *arg)
 		status = osMutexWait(mid_displayMutex, osWaitForever);
 		if(eddieCollidedWithEnemy)
 		{
-			
 			eddieCollidedWithEnemy = false;
 			clearEddie(eddie);
 			eddie.x = initialXPosition;
 			eddie.areaOffset = initialAreaOffset;
 		}
+		if(eddieCollectedItem)
+		{
+			eddieCollectedItem = false;
+		}
 		drawEddie(eddie);
 		
-		handleEddieMovement(&eddie);
 		handleEddieJump(&eddie);
+		handleEddieMovement(&eddie);
+		osMutexRelease(mid_displayMutex);
 		
 	}
 }

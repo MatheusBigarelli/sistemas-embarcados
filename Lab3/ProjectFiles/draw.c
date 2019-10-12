@@ -115,7 +115,7 @@ void draw(Image img)
 	ColorIndex previousBufferPixel;		  // Usando quando o objeto esta movendo e seu rastro deve ser apagado.
 	bool firstPixel = false;
 
-	if(img.isMoving)
+	if(img.isMoving) // Limpar o rastro
 	{
 		for (i = 0; i < img.height; i++)
 		{
