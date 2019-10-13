@@ -49,9 +49,9 @@ void clearPreviousScore()
 		}
 	}
 	currentScore+= 10;
-	if(currentScore == 60)
+	if(currentScore == 50)
 	{
-		currentScore = 0;
+		currentScore = 50;
 	}
 	totalScore += currentScore;
 	clearBoss = true;
