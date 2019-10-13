@@ -43,7 +43,8 @@
 /*ITEM IMAGE*/
 #define ITEM_HEIGHT 5
 #define ITEM_WIDTH 7
-
+#define ITEM_SCORE_HEIGHT 5
+#define ITEM_SCORE_WIDTH 4
 
 /*LADDER IMAGE*/
 #define LADDER_HEIGHT 21

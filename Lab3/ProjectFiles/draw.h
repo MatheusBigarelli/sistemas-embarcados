@@ -79,7 +79,8 @@ Direction eddieCanGoToLadder(uint16_t eddieXPosition, uint8_t eddieAreaOffset);
 void handleEddieJump(Image* eddie);
 void handleEddieMovement(Image* eddie);
 
-void updateItens(Image* item1, Image* item2);
+void updateItens();
 void collectItem(Image* item);
-
+void replaceItem(void const* arg);
+void clearPreviousScore();
 #endif

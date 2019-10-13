@@ -17,13 +17,12 @@ void initMap(void)
 	palette[EMPTY] = ClrBlack;
 	palette[LADDER] = 0x00EC9852;
 	palette[FLOOR] = 0x0048749F;
-	palette[ITEM] = 0x00C97ABB;
 	palette[ENEMY_LEGS] = ClrWhite;
 	palette[ENEMY_HEAD] = 0x006D8BBD;
 	palette[EDDIE_SHIRT] = 0x0049A042;
 	palette[EDDIE_HAT] = 0x0049919F;
 	palette[EDDIE_BODY] = 0x00DAE857;
-
+	palette[ITEM] = 0x00C97ABB;
 	for (i = 0; i < MAP_HEIGHT; i++)
 	{
 		for (j = 0; j < MAP_WIDTH; j++)
@@ -112,7 +111,6 @@ void clearEddie(Image eddie)
 	}
 }
 
-
 void blinkDisplay(void)
 {
 	int i,j;
@@ -199,7 +197,7 @@ void draw(Image img)
 			
 			checkColision(newIndex, currentIndex, img.areaOffset);
 
-			if (newIndex > currentIndex) // desenha apenas se tiver mais prioridade que o pixel atual
+			if (newIndex > currentIndex ) // desenha apenas se tiver mais prioridade que o pixel atual
 			{
 				GrContextForegroundSet(&sContext, palette[newIndex]);
 				GrPixelDraw(&sContext, img.x + j, i + img.y);				

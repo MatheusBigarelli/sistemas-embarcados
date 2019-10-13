@@ -52,6 +52,10 @@ osThreadDef(Saida, osPriorityNormal, 1, 0);
 osMutexId mid_displayMutex;
 osMutexDef(displayMutex);
 
+//Timer
+osTimerId timer_item;
+osTimerDef(clear_timer, replaceItem);
+
 /*----------------------------------------------------------------------------
  *    Initializations
  *---------------------------------------------------------------------------*/
@@ -74,6 +78,8 @@ void init_threads()
 	Saida_tid = osThreadCreate(osThread(Saida), NULL);
 	
 	mid_displayMutex = osMutexCreate(osMutex(displayMutex));
+	
+	timer_item = osTimerCreate(osTimer(clear_timer),osTimerOnce,NULL);
 }
 void init_all(){
 	cfaf128x128x16Init();

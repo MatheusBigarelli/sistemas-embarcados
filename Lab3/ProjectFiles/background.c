@@ -32,14 +32,17 @@ void drawLadder(Image img)
 	}
 	
 }
-
+uint16_t currentScore = 0;
+uint16_t totalScore = 0;
 void drawScore(void)
 {
 	int i, j, lifes = 3;
 	int lifeIndicatorLenght = 8;
+	char pbuffer[10];
 	int start;
+	intToString(totalScore, pbuffer, 10,10,4);
 	GrContextForegroundSet(&sContext, ClrWhite);
-	GrStringDrawCentered(&sContext, "00000", -1, 64, (sContext.psFont->ui8Height) / 2, true);
+	GrStringDrawCentered(&sContext, pbuffer, -1, 64, (sContext.psFont->ui8Height) / 2, true);
 	for (i = 0; i < lifes; i++)
 	{
 		start = 48 + i * (lifeIndicatorLenght + 3);

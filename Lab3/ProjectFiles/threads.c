@@ -77,7 +77,7 @@ void Eddie(void const *arg)
 {
 	osStatus status;
 	osEvent evt;
-	int initialXPosition = 0;
+	int initialXPosition = 1;
 	int initialAreaOffset = 3;
 	char pbufx[10];
 	Image eddie;	
@@ -110,10 +110,10 @@ void Eddie(void const *arg)
 			eddie.y++;
 			eddie.x = initialXPosition;
 			eddie.areaOffset = initialAreaOffset;
+			drawEddie(eddie);
 		}
 		if(eddieCollectedItem)
 		{
-			blinkDisplay();
 			eddieCollectedItem = false;
 		}
 		drawEddie(eddie);
@@ -138,7 +138,7 @@ void Inimigos(void const *arg)
 	enemy.needsUpdate = true;
 	enemy.isMoving = false;
 	enemy.dirX = RIGHT;
-	enemy.dirY = 0;
+	enemy.dirY = NONE;
 	while(1)
 	{
 		osSignalWait(SIGNAL_INPUT_READY, osWaitForever); // Espera ter alguma coisa na entrada
@@ -195,22 +195,21 @@ void Inimigos(void const *arg)
 	}
 }
 
+
+Image item1, item2;
 void ItensBrilhantes(void const *arg)
 {
 	osStatus status;
-	int i,numberOfItens =2,itemTopOffset;
-	Image itens[2];	
-	Image item1, item2;
+	int i,itemTopOffset;
 	char buffer[10];
 	item1.areaOffset = 0;
 	item1.x = 10;
 	item1.dirX = RIGHT;
+	item1.collected = false;
 	item2.areaOffset = 3;
 	item2.x = 60;
 	item2.dirX = RIGHT;
-	itens[0] = item1;
-	itens[1] = item2;
-	
+	item2.collected = false;
 	while(1)
 	{
 		osSignalWait(SIGNAL_INPUT_READY, osWaitForever); // Espera ter alguma coisa na entrada
@@ -218,22 +217,26 @@ void ItensBrilhantes(void const *arg)
 		
 		status = osMutexWait(mid_displayMutex, osWaitForever);	
 
-		for (i = 0; i < numberOfItens; i++)
+		if(item1.areaOffset == areaOfItemCollected)
 		{
-			if(itens[i].collected)continue;
-			if (areaOfItemCollected != itens[i].areaOffset)
-			{
-				itens[i].needsUpdate = true;
-				itens[i].isMoving = true;
-				drawItem(&itens[i]);			
-			}
-			else
-			{				
-				collectItem(&itens[i]);
-			}
-			
+			collectItem(&item1);
+			areaOfItemCollected = -1;
 		}
-		updateItens(&itens[0], &itens[1]);	
+		if(item2.areaOffset == areaOfItemCollected)
+		{
+			collectItem(&item2);
+			areaOfItemCollected = -1;
+		}
+			item1.needsUpdate = true;
+			item1.isMoving = true;
+			drawItem(&item1);
+			item2.needsUpdate = true;
+			item2.isMoving = true;
+			drawItem(&item2);
+		
+		
+		updateItens();
+		clearPreviousScore();
 		osMutexRelease(mid_displayMutex);		
 		osSignalSet(Saida_tid, SIGNAL_ITENS_READY);	
 	}		

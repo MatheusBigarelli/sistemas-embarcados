@@ -1,102 +1,180 @@
 #include "draw.h"
 
+extern osMutexId mid_displayMutex;
+
 extern uint8_t item[];
+extern uint8_t zero[];
+extern uint8_t one[];
+extern uint8_t two[];
+extern uint8_t three[];
+extern uint8_t four[];
+extern uint8_t five[];
+extern uint8_t six[];
+extern uint8_t seven[];
+extern uint8_t eight[];
+extern uint8_t nine[];
 
 extern uint32_t palette[9];
 
 extern char buffer[2][MAP_HEIGHT][MAP_WIDTH];
 
-void collectItem(Image* item)
+extern Image item1;
+extern Image item2;
+Image* itemBeingCleared;
+int previousScoreX,previousScoreY;
+extern Image ladderImage;
+bool shouldClearPreviousScore = false;
+
+extern uint16_t currentScore;
+extern uint16_t totalScore;
+extern bool clearBoss;
+
+void clearPreviousScore()
 {
 	int i,j;
-	for (i = 0; i < item->height; i++)
+	ColorIndex colorOnPreviousFrame;
+	if(shouldClearPreviousScore == false)
 	{
-		for (j = 0; j < item->width; j++)
+		return;
+	}
+	
+	for (i = 0; i < ITEM_SCORE_HEIGHT; i++)
+	{
+		for (j = 0; j < ITEM_SCORE_WIDTH*2; j++)
 		{
-				GrContextForegroundSet(&sContext, ClrBlack);
-				GrPixelDraw(&sContext, item->x + j, i + item->y);
-				buffer[0][i + item->y][item->x + j] = ClrBlack;		
+				colorOnPreviousFrame = buffer[1][i + previousScoreY][j + previousScoreX];
+				GrContextForegroundSet(&sContext, palette[colorOnPreviousFrame]);
+				GrPixelDraw(&sContext, previousScoreX + j, i + previousScoreY);
+				buffer[0][i + previousScoreY][j + previousScoreX] = colorOnPreviousFrame;
 		}
 	}
-	item->needsUpdate = true;
-	item->isMoving = false;
-	item->collected = true;
+	currentScore+= 10;
+	if(currentScore == 60)
+	{
+		currentScore = 0;
+	}
+	totalScore += currentScore;
+	clearBoss = true;
+	shouldClearPreviousScore = false;
 }
-void updateItens(Image* item1, Image* item2)
+void replaceItem(void const* arg) // Callback do timer_item
 {
 	int k;
-	if(item1->collected == false)
+	uint16_t otherAreaOffset;
+	uint16_t thisAreaOffset = itemBeingCleared->areaOffset;
+	
+	previousScoreY = (127 - FLOOR_HEIGHT - LADDER_HEIGHT) - (LADDER_HEIGHT + FLOOR_HEIGHT) * thisAreaOffset;
+	previousScoreX = itemBeingCleared->x;
+	shouldClearPreviousScore = true;
+	itemBeingCleared->x = 0;
+	if(item1.areaOffset == thisAreaOffset) // This eh o item1
 	{
-		if(item1->x == 0)
+		otherAreaOffset = item2.areaOffset;
+	}
+	else // This eh o item2
+	{
+		otherAreaOffset = item1.areaOffset;
+	}
+	for (k = -NUMBER_OF_AREAS + 1; k < NUMBER_OF_AREAS; k++)
+	{
+		if(k == 0) continue;
+		if(thisAreaOffset + k != otherAreaOffset && thisAreaOffset + k < NUMBER_OF_AREAS && thisAreaOffset + k >= 0)
 		{
-			clear(*item1);
-			item1->x = 127;
+			itemBeingCleared->areaOffset += k;
+			break;
 		}
-		if(item1->x == 128)
-		{
-			item1->x = 0;
-		}
-		if(item1->dirX == RIGHT)
-		{
-			item1->x++;
-		}
-		if(item1->dirX == LEFT)
-		{
-			item1->x--;
-		}
+	}	
+	itemBeingCleared->collected = false;	
+	itemBeingCleared->isMoving = true;
+	itemBeingCleared->needsUpdate = true;
+}
+
+extern osTimerId timer_item;
+void collectItem(Image* itemCollected)
+{
+	itemCollected->needsUpdate = false;
+	itemCollected->isMoving = false;
+	itemCollected->collected = true;
+	if(itemCollected->dirX == RIGHT)
+	{
+		itemCollected->x--;
+		clear(*itemCollected);
+		itemCollected->x++;
 	}
 	else
 	{
-		clear(*item1);
-		item1->x = 0;
-		for (k = -NUMBER_OF_AREAS + 1; k < NUMBER_OF_AREAS; k++)
-		{
-			if(k == 0) continue;
-			if(item1->areaOffset + k != item2->areaOffset && item1->areaOffset + k < NUMBER_OF_AREAS && item1->areaOffset + k >= 0)
-			{
-				item1->areaOffset += k;
-				break;
-			}
-		}	
-		item1->collected = false;	
+		itemCollected->x++;
+		clear(*itemCollected);
+		itemCollected->x--;
 	}
-	if(item2->collected == false)
+	itemBeingCleared = itemCollected;
+	osTimerStart(timer_item,3000*5);
+}
+void updateItens()
+{
+	if(item1.x == 0)
 	{
-		if(item2->x == 0)
+		if(item1.dirX == RIGHT)
 		{
-			clear(*item2);
-			item2->x = 127;
+			item1.x--;
+			clear(item1);
+			item1.x++;
 		}
-		if(item2->x == 128)
+		else
 		{
-			item2->x = 0;
+			item1.x++;
+			clear(item1);
+			item1.x--;
 		}
-		if(item2->dirX == RIGHT)
-		{
-			item2->x++;
-		}
-		if(item2->dirX == LEFT)
-		{
-			item2->x--;
-		}
+		
+		item1.x = 127;
 	}
-	else
+	if(item1.x == 128)
 	{
-		clear(*item2);
-		item2->x = 0;
-		for (k = -NUMBER_OF_AREAS + 1; k < NUMBER_OF_AREAS; k++)
+		item1.x = 0;
+	}
+	if(item1.dirX == RIGHT)
+	{
+		item1.x++;
+	}
+	if(item1.dirX == LEFT)
+	{
+		item1.x--;
+	}
+	if(item2.x == 0)
+	{
+		if(item2.dirX == RIGHT)
 		{
-			if(k == 0) continue;
-			if(item2->areaOffset + k != item1->areaOffset && item2->areaOffset + k < NUMBER_OF_AREAS && item2->areaOffset + k >= 0)
-			{
-				item2->areaOffset += k;
-				break;
-			}
+			item2.x--;
+			clear(item2);
+			item1.x++;
 		}
-		item2->collected = false;		
+		else
+		{
+			item2.x++;
+			clear(item2);
+			item1.x--;
+		}
+		
+		item2.x = 127;
+	}
+	if(item2.x == 128)
+	{
+		item2.x = 0;
+	}
+	if(item2.dirX == RIGHT)
+	{
+		item2.x++;
+	}
+	if(item2.dirX == LEFT)
+	{
+		item2.x--;
 	}
 }
+
 uint32_t currentColor = 0x00C97ABB;
+uint8_t* numbers[9] ={one,two,three,four,five,six,seven,eight,nine};
+
 void drawItem(Image* img)
 {
 	int i, j = 0, itemTopOffset;
@@ -104,11 +182,41 @@ void drawItem(Image* img)
 	itemTopOffset = (127 - FLOOR_HEIGHT - LADDER_HEIGHT) - (LADDER_HEIGHT + FLOOR_HEIGHT) * (img->areaOffset);
 	palette[ITEM] = currentColor;
 	img->colorIndex = ITEM;
-	img->data = item;
-	img->width = ITEM_WIDTH;
-	img->height = ITEM_HEIGHT;
-	img->y = itemTopOffset;
-	draw(*img);
+	if(img->collected)
+	{
+		if(img->dirX == RIGHT)
+		{
+			img->x--;
+			clear(*img);
+			img->x++;
+		}
+		else
+		{
+			img->x++;
+			clear(*img);
+			img->x--;
+		}
+		
+		img->width = ITEM_SCORE_WIDTH;
+		img->height = ITEM_SCORE_HEIGHT;
+		img->y = itemTopOffset;
+		img->data = numbers[currentScore/10];
+		draw(*img);
+		img->x += ITEM_SCORE_WIDTH;
+		img->data = zero;
+		draw(*img);
+		img->x -= ITEM_SCORE_WIDTH;
+		
+	}
+	else
+	{
+		img->data = item;
+		img->width = ITEM_WIDTH;
+		img->height = ITEM_HEIGHT;
+		img->y = itemTopOffset;
+		draw(*img);
+	}
+	
 	currentColor += 1;
 	if(currentColor == 0x00FFFFFF)
 	{
