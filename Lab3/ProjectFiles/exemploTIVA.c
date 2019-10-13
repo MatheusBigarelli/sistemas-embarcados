@@ -27,7 +27,7 @@
 #include "buzzer.h"
 
 #include "draw.h"
-#include "util.h"
+#include "threads.h"
 
 
 
@@ -35,11 +35,17 @@
 tContext sContext;
 
 //Threads
+osThreadId Entrada_tid;
 osThreadDef(Entrada, osPriorityNormal, 1, 0);
+osThreadId Eddie_tid;
 osThreadDef(Eddie, osPriorityNormal, 1, 0);
+osThreadId Inimigos_tid;
 osThreadDef(Inimigos, osPriorityNormal, 1, 0);
+osThreadId ItensBrilhantes_tid;
 osThreadDef(ItensBrilhantes, osPriorityNormal, 1, 0);
+osThreadId PainelDeInstrumentos_tid;
 osThreadDef(PainelDeInstrumentos, osPriorityNormal, 1, 0);
+osThreadId Saida_tid;
 osThreadDef(Saida, osPriorityNormal, 1, 0);
 
 //Mutex
@@ -49,15 +55,6 @@ osMutexDef(displayMutex);
 /*----------------------------------------------------------------------------
  *    Initializations
  *---------------------------------------------------------------------------*/
-
-void init_all(){
-	cfaf128x128x16Init();
-	joy_init();
-	buzzer_init(); 
-	button_init();
-	rgb_init();
-}
-
 void init_display(){
 	GrContextInit(&sContext, &g_sCfaf128x128x16);
 	
@@ -67,29 +64,35 @@ void init_display(){
 	GrContextForegroundSet(&sContext, ClrWhite);
 	GrContextBackgroundSet(&sContext, ClrBlack);
 }
-
 void init_threads()
 {
-	osThreadCreate(osThread(Entrada), NULL);
-	osThreadCreate(osThread(Eddie), NULL);
-	osThreadCreate(osThread(Inimigos), NULL);
-	osThreadCreate(osThread(ItensBrilhantes), NULL);
-  osThreadCreate(osThread(PainelDeInstrumentos), NULL);
-	osThreadCreate(osThread(Saida), NULL);
+	Entrada_tid = osThreadCreate(osThread(Entrada), NULL);
+	Eddie_tid = osThreadCreate(osThread(Eddie), NULL);
+	Inimigos_tid = osThreadCreate(osThread(Inimigos), NULL);
+	ItensBrilhantes_tid = osThreadCreate(osThread(ItensBrilhantes), NULL);
+  PainelDeInstrumentos_tid = osThreadCreate(osThread(PainelDeInstrumentos), NULL);
+	Saida_tid = osThreadCreate(osThread(Saida), NULL);
 	
 	mid_displayMutex = osMutexCreate(osMutex(displayMutex));
 }
+void init_all(){
+	cfaf128x128x16Init();
+	joy_init();
+	buzzer_init(); 
+	button_init();
+	init_display();
+	
+	initMap();	
+	
+	osKernelInitialize();
+	init_threads();
+}
+
 
 /*----------------------------------------------------------------------------
  *      Main
  *---------------------------------------------------------------------------*/
 int main (void) {
-	int counter=0;
-	char* pbuffer;
-	init_all();
-	init_display();
-	initMap();	
-	osKernelInitialize();
-	init_threads();
+	init_all();		
 	osKernelStart();
 }

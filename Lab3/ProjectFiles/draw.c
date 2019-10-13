@@ -29,7 +29,7 @@ void initMap(void)
 		for (j = 0; j < MAP_WIDTH; j++)
 		{
 			buffer[0][i][j] = EMPTY; // inicialmente nao tem nada no buffer
-			buffer[1][i][j] = EMPTY; // inicialmente nao tem nada no buffer
+			buffer[1][i][j] = EMPTY; // inicialmente nao tem nada no buffer anterior tb
 		}
 	}
 }
@@ -39,11 +39,11 @@ void checkColision(ColorIndex index1, ColorIndex index2, uint16_t areaOffset)
 	// As unicas colisoes que importam sao as do Eddie com Item/Inimigo
 	if(index1 == EDDIE_SHIRT || index1 == EDDIE_HAT || index1 == EDDIE_BODY) // index1 eh o Eddie
 	{
-		if(index2 == ITEM) // Eddie coletando item
-		{
-			areaOfItemCollected = areaOffset; // O Eddie so pode coletar o item que esta na mesma area que ele
-			eddieCollectedItem = true;
-		}
+//		if(index2 == ITEM) // Eddie coletando item
+//		{
+//			areaOfItemCollected = areaOffset; // O Eddie so pode coletar o item que esta na mesma area que ele
+//			eddieCollectedItem = true;
+//		}
 		if(index2 == ENEMY_HEAD || index2 == ENEMY_LEGS) // Eddie colidindo com inimigo
 		{
 			eddieCollidedWithEnemy = true;
@@ -108,6 +108,30 @@ void clearEddie(Image eddie)
 				GrPixelDraw(&sContext, eddie.x + j, i + eddie.y);
 				buffer[0][i + eddie.y][eddie.x + j] = colorOnPreviousFrame;
 			}
+		}
+	}
+}
+
+
+void blinkDisplay(void)
+{
+	int i,j;
+	ColorIndex currentIndex;	
+	GrContextForegroundSet(&sContext, ClrMagenta);
+	for (i = 0; i < MAP_HEIGHT; i++)
+	{
+		for (j = 0; j < MAP_WIDTH; j++)
+		{
+			GrPixelDraw(&sContext, j, i);
+		}
+	}
+	for (i = 0; i < MAP_HEIGHT; i++)
+	{
+		for (j = 0; j < MAP_WIDTH; j++)
+		{
+			currentIndex = buffer[0][i][j];
+			GrContextForegroundSet(&sContext, palette[currentIndex]);
+			GrPixelDraw(&sContext, j, i);
 		}
 	}
 }

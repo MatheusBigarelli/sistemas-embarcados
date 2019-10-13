@@ -60,7 +60,7 @@ void clear(Image img);
 void clearEddie(Image eddie);
 void draw(Image img);
 void checkColision(ColorIndex index1, ColorIndex index2, uint16_t areaOffset);
-
+void blinkDisplay(void);
 
 // As funcoes abaixo estao definidas nos respectivos .c e nao no draw.c
 void drawEddie(Image img);
