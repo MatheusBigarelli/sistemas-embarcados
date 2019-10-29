@@ -11,6 +11,8 @@
 #define SIGNAL_BACKGROUND_READY 0x010000
 #define SIGNAL_OUTPUT_READY 		0x100000
 
+#define SIGNAL_EDDIE_LADDER			0x200000
+
 // Definicoes das threads
 void Entrada(void const *arg);
 void Eddie(void const *arg);

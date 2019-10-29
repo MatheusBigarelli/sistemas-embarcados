@@ -31,6 +31,7 @@ typedef enum dir Direction;
 
 enum colors
 {
+	NOT_USED = -1,
 	EMPTY = 0,
 	LADDER,
 	FLOOR,

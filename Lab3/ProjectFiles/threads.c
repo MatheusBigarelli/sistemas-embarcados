@@ -8,7 +8,7 @@ uint8_t areaOfItemCollected = -1;
 bool stopedMoving = false; // Usado para evitar flicker ao atualizar as pernas do Eddie
 
 
-Image floorImage, ladderImage;
+Image floorImage, ladderImage, eddie, enemy;
 Direction joyDir = NONE;
 extern tContext sContext;
 bool joyMoving;
@@ -73,14 +73,15 @@ void Entrada(void const *arg)
 	}
 }
 
+
 void Eddie(void const *arg)
 {
 	osStatus status;
 	osEvent evt;
+	char pbufx[10];
+//	Image eddie;
 	int initialXPosition = 1;
 	int initialAreaOffset = 3;
-	char pbufx[10];
-	Image eddie;	
 	bool first = true;
 	
 	
@@ -101,13 +102,36 @@ void Eddie(void const *arg)
 		{
 			eddieCollidedWithEnemy = false;
 			clearEddie(eddie);
-			eddie.x--;
-			clearEddie(eddie);
-			eddie.y--;
-			clearEddie(eddie);
-			eddie.x++;
-			clearEddie(eddie);
-			eddie.y++;
+			
+			if (eddie.dirX == RIGHT)
+			{
+				eddie.x--;
+				if (eddie.dirY == UP)
+					eddie.y++;
+				else
+					eddie.y--;
+				clearEddie(eddie);
+				if (eddie.dirY == UP)
+					eddie.y--;
+				else
+					eddie.y++;
+				eddie.x++;
+			}
+			else if (eddie.dirX == LEFT)
+			{
+				eddie.x++;
+				if (eddie.dirY == UP)
+					eddie.y++;
+				else
+					eddie.y--;
+				clearEddie(eddie);
+				if (eddie.dirY == UP)
+					eddie.y--;
+				else
+					eddie.y++;
+				eddie.x--;
+			}
+			
 			eddie.x = initialXPosition;
 			eddie.areaOffset = initialAreaOffset;
 			drawEddie(eddie);
@@ -129,7 +153,7 @@ void Eddie(void const *arg)
 void Inimigos(void const *arg)
 {
 	osStatus status;
-	Image enemy;
+//	Image enemy;
 	int xOffset1 = 0;
 	Direction dir1 = RIGHT;
 	int xOffset2 = 20;
@@ -267,6 +291,7 @@ void Saida(void const *arg)
 	osStatus status;
 	uint8_t* song;
 	uint8_t songMario[SONG_SIZE] = {"^En,^En.^En_^Cn,^En_^Gn_-Nn_-Gn_-Nn_-Nn_"};
+	uint8_t songDied[] = {"^En,^Cn,-Gn.-Gn,-An,^Fn,^Fn,-An.-Bn,^An,^An,^An,^Gn,^Fn.^En,^Cn,-An,-Gn_^En,^Cn,-Gn.-Gn,-An,^Fn,^Fn,-An.-Bn,^Fn,^Fn,^Fn,^En,^Dn,^Cn.-Gn,-En,-Cn_-Nn_-Nn_"};
 	buzzer_vol_set(750);
 	
 	while(1)

@@ -4,12 +4,12 @@ extern bool eddieCollectedItem;
 extern bool eddieCollidedWithEnemy;
 extern uint8_t areaOfItemCollected;
 extern Image ladderImage;
-
+extern Image eddieImage;
 // Paleta de cores usada no jogo
 uint32_t palette[9];
 
 // buffer com 2 niveis de profundidade, guarda o frame atual e o anterior
-unsigned char buffer[2][MAP_HEIGHT][MAP_WIDTH]; 
+unsigned char buffer[3][MAP_HEIGHT][MAP_WIDTH]; 
 
 void initMap(void)
 {
@@ -29,10 +29,12 @@ void initMap(void)
 		{
 			buffer[0][i][j] = EMPTY; // inicialmente nao tem nada no buffer
 			buffer[1][i][j] = EMPTY; // inicialmente nao tem nada no buffer anterior tb
+			buffer[2][i][j] = NOT_USED;
 		}
 	}
 }
 
+extern Image eddie, enemy;
 void checkColision(ColorIndex index1, ColorIndex index2, uint16_t areaOffset)
 {
 	// As unicas colisoes que importam sao as do Eddie com Item/Inimigo
@@ -46,6 +48,7 @@ void checkColision(ColorIndex index1, ColorIndex index2, uint16_t areaOffset)
 		if(index2 == ENEMY_HEAD || index2 == ENEMY_LEGS) // Eddie colidindo com inimigo
 		{
 			eddieCollidedWithEnemy = true;
+			eddie.needsUpdate = true;
 		}		
 		if(index2 == LADDER)
 		{
@@ -57,6 +60,12 @@ void checkColision(ColorIndex index1, ColorIndex index2, uint16_t areaOffset)
 		if(index2 == LADDER)
 		{
 			ladderImage.needsUpdate = true;
+		}
+		if (index2 == EDDIE_SHIRT || index2 == EDDIE_HAT || index2 == EDDIE_BODY)
+		{
+			eddie.needsUpdate = true;
+			eddieCollidedWithEnemy = true;
+			enemy.needsUpdate = true;
 		}
 	}
 	else if(index1 == ITEM )
@@ -75,7 +84,7 @@ void checkColision(ColorIndex index1, ColorIndex index2, uint16_t areaOffset)
 void clear(Image img)
 {
 	int i,j;
-	ColorIndex current;
+	ColorIndex current, old;
 	for (i = 0; i < img.height; i++)
 	{
 		for (j = 0; j < img.width; j++)
@@ -83,10 +92,12 @@ void clear(Image img)
 			current = buffer[0][i + img.y][img.x + j];
 			if (current == img.colorIndex)
 			{
+				old = current;
 				current = buffer[1][i + img.y][img.x + j];
 				GrContextForegroundSet(&sContext, palette[current]);
 				GrPixelDraw(&sContext, img.x + j, i + img.y);
 				buffer[0][i + img.y][img.x + j] = current;
+				buffer[1][i + img.y][img.x + j] = old;
 			}			
 		}
 	}
@@ -154,6 +165,8 @@ void draw(Image img)
 					if(currentIndex == img.colorIndex)
 					{
 						previousBufferPixel = buffer[1][i + img.y][img.x + j - img.dirX];
+						if (previousBufferPixel == ITEM)
+							previousBufferPixel = EMPTY;
 						GrContextForegroundSet(&sContext, palette[previousBufferPixel]);
 						GrPixelDraw(&sContext, img.x + j - img.dirX, i + img.y);
 						buffer[0][i + img.y][img.x + j - img.dirX] = previousBufferPixel;
@@ -165,6 +178,8 @@ void draw(Image img)
 					if(currentIndex == img.colorIndex)
 					{
 						previousBufferPixel = buffer[1][i + img.y  + img.dirY][img.x + j];
+						if (previousBufferPixel == ITEM)
+							previousBufferPixel = EMPTY;
 						GrContextForegroundSet(&sContext, palette[previousBufferPixel]);
 						GrPixelDraw(&sContext, img.x + j, i + img.y  + img.dirY);
 						buffer[0][i + img.y  + img.dirY][img.x + j] = previousBufferPixel;
@@ -176,6 +191,8 @@ void draw(Image img)
 					if(currentIndex == img.colorIndex)
 					{
 						previousBufferPixel = buffer[1][i + img.y  + img.dirY][img.x + j - img.dirX];
+						if (previousBufferPixel == ITEM)
+							previousBufferPixel = EMPTY;
 						GrContextForegroundSet(&sContext, palette[previousBufferPixel]);
 						GrPixelDraw(&sContext, img.x + j - img.dirX, i + img.y  + img.dirY);
 						buffer[0][i + img.y  + img.dirY][img.x + j - img.dirX] = previousBufferPixel;
@@ -201,6 +218,9 @@ void draw(Image img)
 			{
 				GrContextForegroundSet(&sContext, palette[newIndex]);
 				GrPixelDraw(&sContext, img.x + j, i + img.y);				
+				
+				if (buffer[1][i + img.y][img.x + j] != EMPTY)
+					buffer[2][i + img.y][img.x + j] = buffer[1][i + img.y][img.x + j];
 
 				// Move o pixel atual para o "fundo" do buffer
 				buffer[1][i + img.y][img.x + j] = currentIndex;

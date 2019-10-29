@@ -63,6 +63,8 @@ void replaceItem(void const* arg) // Callback do timer_item
 	uint16_t otherAreaOffset;
 	uint16_t thisAreaOffset = itemBeingCleared->areaOffset;
 	
+	
+	
 	previousScoreY = (127 - FLOOR_HEIGHT - LADDER_HEIGHT) - (LADDER_HEIGHT + FLOOR_HEIGHT) * thisAreaOffset;
 	previousScoreX = itemBeingCleared->x;
 	shouldClearPreviousScore = true;

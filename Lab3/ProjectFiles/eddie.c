@@ -228,7 +228,8 @@ void handleEddieMovement(Image* eddie)
 
 void drawEddie(Image eddie)
 {
-	int i, j = 0, eddieTopOffset,eddieInitialY;
+	int eddieTopOffset,eddieInitialY;
+	int i, j = 0;
 	int deltay = 0;
 	int startToCutEddie = 2; //Problema <
 	bool first = true;
