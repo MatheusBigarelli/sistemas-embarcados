@@ -43,12 +43,12 @@ tContext sContext;
 
 void init_all(){
 	#if SIMULADOR == 0
-	cfaf128x128x16Init();
-	joy_init();
-	button_init();
-	rgb_init();
-	opt_init();
-	led_init();
+	// cfaf128x128x16Init();
+	// joy_init();
+	// button_init();
+	// rgb_init();
+	// opt_init();
+	// led_init();
 	PLL_Init();
 	SysTick_Init();
 	GPIO_Init();
