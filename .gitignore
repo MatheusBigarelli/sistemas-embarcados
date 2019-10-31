@@ -42,6 +42,7 @@ tools/openocd.git
 # Build files
 # define exception below if needed
 *.bat
+*.BAT
 *._ia
 *.__i
 *._ii

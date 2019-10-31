@@ -1,74 +1,192 @@
-#include "item.h"
+#include "draw.h"
 
-extern osMutexId context_mutex;
-extern tContext sContext;
+extern osMutexId mid_displayMutex;
 
-extern Item itens[NUM_ITENS];
+extern uint8_t item[];
+extern uint8_t zero[];
+extern uint8_t one[];
+extern uint8_t two[];
+extern uint8_t three[];
+extern uint8_t four[];
+extern uint8_t five[];
+extern uint8_t six[];
+extern uint8_t seven[];
+extern uint8_t eight[];
+extern uint8_t nine[];
 
+extern uint32_t palette[9];
 
-// Cannot use macro with rand() in initialization.
-int16_t ITEM_Y(int16_t X) { return (FLOOR_BASE_PIXEL+21*(X-1)+FLOOR_HEIGHT+1); }
+extern char buffer[2][MAP_HEIGHT][MAP_WIDTH];
 
-const uint8_t item_img[] = {
- 0x58,0x34,0x34,0xb4,0x6c,0x6c,0xcc,0x7c,0x7c,0x84,0x50,0x50,0xb4,0x6c,0x6c,0xcc,0x7c,0x7c,0x84,0x50,0x50
-,0xb8,0x70,0x70,0xe0,0x88,0x88,0xe0,0x88,0x88,0xdc,0x88,0x88,0xe0,0x88,0x88,0xe0,0x88,0x88,0xdc,0x84,0x84
-,0x40,0x28,0x28,0x94,0x58,0x58,0xd4,0x80,0x80,0xe0,0x88,0x88,0xdc,0x84,0x84,0xb4,0x6c,0x6c,0x64,0x3c,0x3c
-,0x00,0x00,0x00,0x0c,0x08,0x08,0x58,0x34,0x34,0xb8,0x70,0x70,0x84,0x50,0x50,0x20,0x14,0x14,0x00,0x00,0x00
-};	
+extern Image item1;
+extern Image item2;
+Image* itemBeingCleared;
+int previousScoreX,previousScoreY;
+extern Image ladderImage;
+bool shouldClearPreviousScore = false;
 
+extern uint16_t currentScore;
+extern uint16_t totalScore;
+extern bool clearBoss;
 
-uint32_t itemOneChannel[ITEM_PIXELS];
-void drawItem(Item item)
+void clearPreviousScore()
 {
-    uint16_t i, j;
-	uint32_t r, g, b;
-	uint32_t foreground;
+	int i,j;
+	ColorIndex colorOnPreviousFrame;
+	if(shouldClearPreviousScore == false)
+	{
+		return;
+	}
 	
-	j = 0;
-    for (i = 0; i < ITEM_PIXELS; i++)
-    {
-		r = item_img[3*i];
-		g = item_img[3*i+1];
-		b = item_img[3*i+2];
-		if (r > 10)
-			r = (r+item.glow_state[0]) % 256;
-		if (r < 10)
-			r = item_img[i];
-		
-		if (g > 10)
-			g = (g+item.glow_state[1]) % 256;
-		if (g < 10)
-			g = item_img[i];
-		
-		if (b > 10)
-			b = (b+item.glow_state[2]) % 256;
-		if (b < 10)
-			b = item_img[i];
-		
-		itemOneChannel[j] = (r << 16) + (g << 8) + b;
-        j++;
-    }
-    
-    GrContextBackgroundSet(&sContext, ClrBlack);
-    
+	for (i = 0; i < ITEM_SCORE_HEIGHT; i++)
+	{
+		for (j = 0; j < ITEM_SCORE_WIDTH*2; j++)
+		{
+				colorOnPreviousFrame = buffer[1][i + previousScoreY][j + previousScoreX];
+				GrContextForegroundSet(&sContext, palette[colorOnPreviousFrame]);
+				GrPixelDraw(&sContext, previousScoreX + j, i + previousScoreY);
+				buffer[0][i + previousScoreY][j + previousScoreX] = colorOnPreviousFrame;
+		}
+	}
+	currentScore+= 10;
+	if(currentScore == 50)
+	{
+		currentScore = 50;
+	}
+	totalScore += currentScore;
+	clearBoss = true;
+	shouldClearPreviousScore = false;
+}
+void replaceItem(void const* arg) // Callback do timer_item
+{
+	int k;
+	uint16_t otherAreaOffset;
+	uint16_t thisAreaOffset = itemBeingCleared->areaOffset;
 	
-	GrContextForegroundSet(&sContext, ClrBlack);
 	
+	
+<<<<<<< HEAD
 	if (item.last_x < item.x)
 	{
 		for (i = 0; i < ITEM_HEIGHT; i++)
 		{
 			GrPixelDraw(&sContext,(item.last_x)%128,(i+item.last_y)%128);
-		}
+=======
+	previousScoreY = (127 - FLOOR_HEIGHT - LADDER_HEIGHT) - (LADDER_HEIGHT + FLOOR_HEIGHT) * thisAreaOffset;
+	previousScoreX = itemBeingCleared->x;
+	shouldClearPreviousScore = true;
+	itemBeingCleared->x = 0;
+	if(item1.areaOffset == thisAreaOffset) // This eh o item1
+	{
+		otherAreaOffset = item2.areaOffset;
 	}
-	
+	else // This eh o item2
+	{
+		otherAreaOffset = item1.areaOffset;
+	}
+	for (k = -NUMBER_OF_AREAS + 1; k < NUMBER_OF_AREAS; k++)
+	{
+		if(k == 0) continue;
+		if(thisAreaOffset + k != otherAreaOffset && thisAreaOffset + k < NUMBER_OF_AREAS && thisAreaOffset + k >= 0)
+		{
+			itemBeingCleared->areaOffset += k;
+			break;
+>>>>>>> biga
+		}
+	}	
+	itemBeingCleared->collected = false;	
+	itemBeingCleared->isMoving = true;
+	itemBeingCleared->needsUpdate = true;
+}
+
+extern osTimerId timer_item;
+void collectItem(Image* itemCollected)
+{
+	itemCollected->needsUpdate = false;
+	itemCollected->isMoving = false;
+	itemCollected->collected = true;
+	if(itemCollected->dirX == RIGHT)
+	{
+		itemCollected->x--;
+		clear(*itemCollected);
+		itemCollected->x++;
+	}
 	else
 	{
+<<<<<<< HEAD
 		for (i = 0; i < ITEM_HEIGHT; i++)
 		{
 			GrPixelDraw(&sContext,((ITEM_WIDTH-1)+item.last_x)%128,(i+item.last_y)%128);
-		}
+=======
+		itemCollected->x++;
+		clear(*itemCollected);
+		itemCollected->x--;
 	}
+	itemBeingCleared = itemCollected;
+	osTimerStart(timer_item,3000*5);
+}
+void updateItens()
+{
+	if(item1.x == 0)
+	{
+		if(item1.dirX == RIGHT)
+		{
+			item1.x--;
+			clear(item1);
+			item1.x++;
+		}
+		else
+		{
+			item1.x++;
+			clear(item1);
+			item1.x--;
+>>>>>>> biga
+		}
+		
+		item1.x = 127;
+	}
+	if(item1.x == 128)
+	{
+		item1.x = 0;
+	}
+	if(item1.dirX == RIGHT)
+	{
+		item1.x++;
+	}
+	if(item1.dirX == LEFT)
+	{
+		item1.x--;
+	}
+	if(item2.x == 0)
+	{
+		if(item2.dirX == RIGHT)
+		{
+			item2.x--;
+			clear(item2);
+			item1.x++;
+		}
+		else
+		{
+			item2.x++;
+			clear(item2);
+			item1.x--;
+		}
+		
+		item2.x = 127;
+	}
+	if(item2.x == 128)
+	{
+		item2.x = 0;
+	}
+	if(item2.dirX == RIGHT)
+	{
+		item2.x++;
+	}
+	if(item2.dirX == LEFT)
+	{
+		item2.x--;
+	}
+<<<<<<< HEAD
 	
     for (i = 0; i < ITEM_HEIGHT; i++)
     {
@@ -128,6 +246,59 @@ void ItemThread(void const *args)
 				itens[i].glow_state[j] += ds;
 			}
 		}
+=======
+}
+
+uint32_t currentColor = 0x00C97ABB;
+uint8_t* numbers[9] ={one,two,three,four,five,six,seven,eight,nine};
+
+void drawItem(Image* img)
+{
+	int i, j = 0, itemTopOffset;
+	
+	itemTopOffset = (127 - FLOOR_HEIGHT - LADDER_HEIGHT) - (LADDER_HEIGHT + FLOOR_HEIGHT) * (img->areaOffset);
+	palette[ITEM] = currentColor;
+	img->colorIndex = ITEM;
+	if(img->collected)
+	{
+		if(img->dirX == RIGHT)
+		{
+			img->x--;
+			clear(*img);
+			img->x++;
+		}
+		else
+		{
+			img->x++;
+			clear(*img);
+			img->x--;
+		}
+		
+		img->width = ITEM_SCORE_WIDTH;
+		img->height = ITEM_SCORE_HEIGHT;
+		img->y = itemTopOffset;
+		img->data = numbers[currentScore/10];
+		draw(*img);
+		img->x += ITEM_SCORE_WIDTH;
+		img->data = zero;
+		draw(*img);
+		img->x -= ITEM_SCORE_WIDTH;
+		
+	}
+	else
+	{
+		img->data = item;
+		img->width = ITEM_WIDTH;
+		img->height = ITEM_HEIGHT;
+		img->y = itemTopOffset;
+		draw(*img);
+	}
+	
+	currentColor += 1;
+	if(currentColor == 0x00FFFFFF)
+	{
+		currentColor = 0x00C97ABB;
+>>>>>>> biga
 	}
 }
 

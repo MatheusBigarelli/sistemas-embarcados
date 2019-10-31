@@ -1,306 +1,476 @@
-#include "eddie.h"
+#include "draw.h"
+#include "stdlib.h"
 
-extern int16_t eddie_x, eddie_y;
-extern osMutexId context_mutex;
-extern tContext sContext;
+extern uint8_t eddie_hat[];
+extern uint8_t eddie_body1[];
+extern uint8_t eddie_body2[];
+extern uint8_t eddie_body_moving[];
+extern uint8_t eddie_body_moving2[];
+extern uint8_t eddie_shirt[];
+extern uint8_t eddie_shirt_jumping[];
 
-extern Eddie eddie;
-extern Ladder ladders[NUM_LADDERS];
-extern Enemy enemies[NUM_ENEMIES];
+extern osMutexId mid_displayMutex;
+extern bool joyMoving;
+extern bool stopedMoving;
 
-const uint8_t eddie_img[] = {	
- 0x04,0x04,0x08,0x3c,0x44,0x5c,0x8c,0x9c,0xc0,0xac,0xc0,0xe8,0xac,0xc0,0xe8,0x8c,0x9c,0xc0,0x38,0x40,0x5c,0x04,0x04,0x08
-,0x00,0x00,0x00,0x14,0x18,0x1c,0x9c,0xa0,0x58,0xe4,0xe4,0x74,0xe0,0xe4,0x70,0xb8,0xbc,0x64,0x54,0x54,0x34,0x08,0x08,0x04
-,0x04,0x08,0x04,0x18,0x2c,0x18,0x84,0x9c,0x44,0xb8,0xcc,0x58,0xb8,0xcc,0x58,0x94,0xa8,0x48,0x3c,0x50,0x24,0x08,0x0c,0x04
-,0x40,0x6c,0x40,0x54,0x90,0x54,0x5c,0x9c,0x5c,0x38,0x5c,0x34,0x18,0x28,0x18,0x2c,0x50,0x2c,0x50,0x8c,0x50,0x40,0x6c,0x40
-,0x58,0x94,0x58,0x5c,0x9c,0x5c,0x5c,0x9c,0x5c,0x28,0x40,0x28,0x00,0x00,0x00,0x1c,0x30,0x1c,0x58,0x98,0x58,0x58,0x94,0x58
-,0x54,0x94,0x54,0x5c,0x9c,0x5c,0x5c,0x9c,0x5c,0x28,0x44,0x28,0x00,0x00,0x00,0x1c,0x30,0x1c,0x58,0x98,0x58,0x58,0x94,0x58
-,0x54,0x94,0x54,0x5c,0x9c,0x5c,0x5c,0x9c,0x5c,0x2c,0x48,0x2c,0x00,0x00,0x00,0x0c,0x18,0x0c,0x30,0x50,0x30,0x30,0x50,0x30
-,0x54,0x90,0x54,0x5c,0x9c,0x5c,0x58,0x9c,0x5c,0x50,0x88,0x50,0x34,0x5c,0x34,0x1c,0x34,0x20,0x20,0x34,0x20,0x1c,0x2c,0x1c
-,0x1c,0x2c,0x1c,0x3c,0x64,0x38,0x68,0x98,0x50,0x7c,0xac,0x58,0x78,0xa8,0x58,0x68,0x94,0x50,0x38,0x60,0x38,0x18,0x2c,0x18
-,0x00,0x00,0x00,0x08,0x08,0x04,0x88,0x8c,0x38,0xcc,0xd0,0x50,0xcc,0xd0,0x50,0x88,0x8c,0x34,0x04,0x08,0x04,0x00,0x00,0x00
-,0x00,0x00,0x00,0x04,0x04,0x00,0x8c,0x8c,0x34,0xd0,0xd0,0x50,0xd0,0xd0,0x50,0x94,0x94,0x38,0x1c,0x1c,0x0c,0x18,0x18,0x08
-,0x00,0x00,0x00,0x04,0x04,0x00,0x8c,0x8c,0x34,0xd0,0xd0,0x50,0xd0,0xd0,0x50,0xc4,0xc4,0x4c,0xb0,0xb0,0x44,0xa8,0xa8,0x40
-};
+Direction currentDir;
+Direction lastFacingDir = NONE;
+bool eddieFeetUp = false;
 
+int jumpHeight = 0;
+extern Direction joyDir;
+int longJump = 0;
+Direction longJumpDir = NONE;
 
-uint32_t eddieOneChannel[EDDIE_PIXELS];
-void drawEddie(Eddie eddie)
+Direction eddieCanGoToLadder(uint16_t eddieXPosition, uint8_t eddieAreaOffset)
 {
-    int16_t i, j;
-	j = 0;
-    for (i = 0; i < EDDIE_PIXELS; i++)
-    {
-        eddieOneChannel[j] = (eddie_img[3*i]<<16) + (eddie_img[3*i+1]<<8) + (eddie_img[3*i+2]);
-        j++;
-    }
-    
-    GrContextBackgroundSet(&sContext, ClrBlack);
-
-	clearTrace(eddie);
-	
-	if (eddie.jump_state == ON_GROUND)
+	int i,j;
+	int ladderXPosition;
+	int ladderStarts[NUMBER_OF_AREAS][NUMBER_OF_LADDERS_IN_AREA] = {
+		{10, 70},
+		{60, 30},
+		{0, 50},
+		{100, 20}};
+	for (i = 0; i < NUMBER_OF_AREAS; i++)
 	{
-		for (i = 0; i < EDDIE_HEIGHT; i++)
+		for (j = 0; j < NUMBER_OF_LADDERS_IN_AREA; j++)
 		{
-			for (j = 0; j < EDDIE_WIDTH; j++)
+			ladderXPosition = ladderStarts[i][j];
+			if (eddieXPosition > ladderXPosition + 2 && eddieXPosition < (ladderXPosition + LADDER_WIDTH - 10)) // Alinhado com escada
 			{
-				// Espelha o Eddie.
-				if (eddie.last_face_direction == DIR_LEFT)
-					GrContextForegroundSet(&sContext, eddieOneChannel[i*EDDIE_WIDTH + (EDDIE_WIDTH-1)-j]);
-				else
-					GrContextForegroundSet(&sContext, eddieOneChannel[i*EDDIE_WIDTH + j]);
-				GrPixelDraw(&sContext,j+eddie.x,i+eddie.y);
+				if(eddieAreaOffset == i) // Escada no mesmo nivel que Eddie
+				{
+					return UP;
+				}
+				if(eddieAreaOffset == i + 1) // Escada logo abaixo do Eddie
+				{
+					return DOWN;
+				}
 			}
-		}
+			
+		}		
 	}
-	else if (eddie.jump_state == HIGH)
-	{
-		for (i = 0; i < EDDIE_HEIGHT; i++)
+	return NONE;
+	
+}
+
+void handleEddieJump(Image* eddie)
+{
+	// Tratamento do pulo
+		if(jumpHeight>0 && jumpHeight < JUMP_LIMIT) 
 		{
-			for (j = 0; j < EDDIE_WIDTH; j++)
+			if((joyDir == RIGHT || joyDir == LEFT) && longJump == 0)
 			{
-				// Espelha o Eddie.
-				if (eddie.last_face_direction == DIR_LEFT)
-					GrContextForegroundSet(&sContext, eddieOneChannel[i*EDDIE_WIDTH + (EDDIE_WIDTH-1)-j]);
+				longJumpDir = joyDir;
+				longJump = 20;
+			}
+			if(longJumpDir != NONE) // Soltou o joystick no meio do pulo long
+			{
+					if(longJumpDir == RIGHT)
+					{
+						eddie->x++;
+						if(eddie->x > 128 - EDDIE_SHIRT_WIDTH)
+						{
+							eddie->x = 128 - EDDIE_SHIRT_WIDTH;
+							eddie->isMoving = false;
+						}
+						else
+						{
+							eddie->isMoving = true;
+						}		
+						eddie->dirX = RIGHT;
+					}
+					if(longJumpDir == LEFT)
+					{
+						eddie->x--;
+						if(eddie->x < 1)
+						{
+							eddie->x = 1;
+							eddie->isMoving = false;
+						}
+						else
+						{
+							eddie->isMoving = true;
+						}	
+						eddie->dirX = LEFT;
+					}	
+			}
+			eddie->y--;
+			eddie->dirY = RIGHT; // Para cimam nao da pra usar UP, pois na funcao draw usa dirY para somar com indice i.
+			jumpHeight++;
+			eddie->needsUpdate = true;
+			eddie->isMoving = true;
+		}
+		else if (jumpHeight >= JUMP_LIMIT && jumpHeight < JUMP_LIMIT*2 - 1) // Eddie alcancou o limite do pulo/ esta caindo do pulo
+		{
+			eddie->y++;
+			eddie->dirY = LEFT; // Para baixo
+			jumpHeight++;	//TODO: arrumar outro nome pra isso
+			if(longJump != 0)
+			{
+				eddie->y--;
+				eddie->dirY = NONE; //Nao cai mais
+				jumpHeight--;	//TODO: arrumar outro nome pra isso
+				longJump--;
+			}
+			if(longJumpDir != NONE) // Soltou o joystick no meio do pulo long
+			{
+					if(longJumpDir == RIGHT)
+					{
+						eddie->x++;
+						if(eddie->x > 128 - EDDIE_SHIRT_WIDTH)
+						{
+							eddie->x = 128 - EDDIE_SHIRT_WIDTH;
+							eddie->isMoving = false;
+						}
+						else
+						{
+							eddie->isMoving = true;
+						}		
+						eddie->dirX = RIGHT;
+					}
+					if(longJumpDir == LEFT)
+					{
+						eddie->x--;
+						if(eddie->x < 1)
+						{
+							eddie->x = 1;
+							eddie->isMoving = false;
+						}
+						else
+						{
+							eddie->isMoving = true;
+						}	
+						eddie->dirX = LEFT;
+					}	
+			}
+			eddie->needsUpdate = true;
+			eddie->isMoving = true;
+		}
+		else if(jumpHeight == 2*JUMP_LIMIT - 1 )
+		{
+			eddie->dirY = NONE;
+			jumpHeight = 0;
+			eddie->isMoving = false;
+			longJump = 0;
+			longJumpDir = NONE;
+			eddie->needsUpdate = true;
+		}
+}
+
+void handleEddieMovement(Image* eddie)
+{
+	if(jumpHeight != 0)
+	{
+		return;
+	}
+	if(joyMoving)
+		{
+			if (joyDir == UP && eddieCanGoToLadder(eddie->x,eddie->areaOffset) == UP)
+			{
+				clearEddie(*eddie);
+				eddie->areaOffset++;
+				eddie->y = (127 - FLOOR_HEIGHT) - EDDIE_HEIGHT - (LADDER_HEIGHT + FLOOR_HEIGHT) * (eddie->areaOffset);
+			}
+			if (joyDir == DOWN && eddieCanGoToLadder(eddie->x,eddie->areaOffset) == DOWN)
+			{
+				clearEddie(*eddie);
+				eddie->areaOffset--;
+				eddie->y = (127 - FLOOR_HEIGHT) - EDDIE_HEIGHT - (LADDER_HEIGHT + FLOOR_HEIGHT) * (eddie->areaOffset);
+			}
+			if(joyDir == RIGHT)
+			{
+				eddie->x++;
+				if(eddie->x > 128 - EDDIE_SHIRT_WIDTH)
+				{
+					eddie->x = 128 - EDDIE_SHIRT_WIDTH;
+					eddie->isMoving = false;
+				}
 				else
-					GrContextForegroundSet(&sContext, eddieOneChannel[i*EDDIE_WIDTH + j]);
-				GrPixelDraw(&sContext,j+eddie.x,i*4/5+eddie.y);
+				{
+					eddie->isMoving = true;
+				}		
+				eddie->dirX = RIGHT;
+			}
+			if(joyDir == LEFT)
+			{
+				eddie->x--;
+				if(eddie->x < 1)
+				{
+					eddie->x = 1;
+					eddie->isMoving = false;
+				}
+				else
+				{
+					eddie->isMoving = true;
+				}	
+				eddie->dirX = LEFT;
+			}			
+			eddie->needsUpdate = true;
+			stopedMoving = false;
+			if( (joyDir == UP && eddieCanGoToLadder(eddie->x,eddie->areaOffset) != UP) || (joyDir == DOWN && eddieCanGoToLadder(eddie->x,eddie->areaOffset) != DOWN))
+			{
+				eddie->isMoving = false;
+				stopedMoving = true;
 			}
 		}
-		
-		// Print feet
-		for (j = 0; j < EDDIE_WIDTH; j++)
+		else
 		{
-			// Espelha o Eddie.
-			if (eddie.last_face_direction == DIR_LEFT)
-				GrContextForegroundSet(&sContext, eddieOneChannel[(EDDIE_HEIGHT-1)*EDDIE_WIDTH + (EDDIE_WIDTH-1)-j]);
-			else
-				GrContextForegroundSet(&sContext, eddieOneChannel[(EDDIE_HEIGHT-1)*EDDIE_WIDTH + j]);
-			GrPixelDraw(&sContext,j+eddie.x,i*4/5+eddie.y);
+			eddie->isMoving = false;
+			eddie->needsUpdate = false;
+			if(!stopedMoving)
+			{
+				eddie->needsUpdate = true;
+				stopedMoving = true;
+			}
 		}
+}
+
+void drawEddie(Image eddie)
+{
+	int eddieTopOffset,eddieInitialY;
+	int i, j = 0;
+	int deltay = 0;
+	int startToCutEddie = 2; //Problema <
+	bool first = true;
+	if(eddie.needsUpdate == false)
+	{
+		return; // Nao precisa fazer nada com o eddie.
 	}
 	else
 	{
-		for (i = 0; i < EDDIE_HEIGHT; i++)
+		
+		if(eddie.dirX != lastFacingDir && lastFacingDir != NONE)
+		{		
+			flipVert(eddie_hat, EDDIE_HAT_HEIGHT, EDDIE_HAT_WIDTH);
+			flipVert(eddie_body1, EDDIE_BODY1_HEIGHT, EDDIE_BODY1_WIDTH);
+			flipVert(eddie_shirt, EDDIE_SHIRT_HEIGHT, EDDIE_SHIRT_WIDTH);
+			flipVert(eddie_shirt_jumping, EDDIE_SHIRT_JUMPING_HEIGHT, EDDIE_SHIRT_JUMPING_WIDTH);
+			flipVert(eddie_body2, EDDIE_BODY2_HEIGHT, EDDIE_BODY2_WIDTH);
+			flipVert(eddie_body_moving, EDDIE_BODY_MOVING_HEIGHT, EDDIE_BODY_MOVING_WIDTH);
+			flipVert(eddie_body_moving2, EDDIE_BODY_MOVING2_HEIGHT, EDDIE_BODY_MOVING2_WIDTH);
+		}	
+		eddieTopOffset = (127 - FLOOR_HEIGHT) - EDDIE_HEIGHT - (LADDER_HEIGHT + FLOOR_HEIGHT) * (eddie.areaOffset);
+		eddieInitialY = eddie.y;
+		if(eddie.dirY != LEFT) // Eddie nao esta caindo do pulo, pode imprimir na ordem normal
 		{
-			for (j = 0; j < EDDIE_WIDTH; j++)
+			if(eddie.dirY == RIGHT)
 			{
-				// Espelha o Eddie.
-				if (eddie.last_face_direction == DIR_LEFT)
-					GrContextForegroundSet(&sContext, eddieOneChannel[i*EDDIE_WIDTH + (EDDIE_WIDTH-1)-j]);
+				if(eddie.dirX == RIGHT)
+				{
+					eddie.x--;	
+					eddie.y++;					
+					clearEddie(eddie);
+					eddie.x++;
+					eddie.y--;
+				}
+				if(eddie.dirX == LEFT)
+				{
+					eddie.x++;	
+					clearEddie(eddie);
+					eddie.x--;
+					eddie.y++;
+					
+					clearEddie(eddie);
+					
+					eddie.y--;
+				}
 				else
-					GrContextForegroundSet(&sContext, eddieOneChannel[i*EDDIE_WIDTH + j]);
-				GrPixelDraw(&sContext,j+eddie.x,i*3/5+eddie.y);
+				{
+					eddie.y++;					
+					clearEddie(eddie);
+					eddie.y--;
+				}
+				
+				
 			}
-		}
-		// Print feet
-		for (j = 0; j < EDDIE_WIDTH; j++)
-		{
-			// Espelha o Eddie.
-			if (eddie.last_face_direction == DIR_LEFT)
-				GrContextForegroundSet(&sContext, eddieOneChannel[(EDDIE_HEIGHT-1)*EDDIE_WIDTH + (EDDIE_WIDTH-1)-j]);
-			else
-				GrContextForegroundSet(&sContext, eddieOneChannel[(EDDIE_HEIGHT-1)*EDDIE_WIDTH + j]);
-			GrPixelDraw(&sContext,j+eddie.x,i*3/5+eddie.y);
-		}
-
-	}
-}
-
-
-
-void clearTrace(Eddie eddie)
-{
-	GrContextForegroundSet(&sContext, ClrBlack);	
-	deleteXTrace(eddie);
-	deleteYTrace(eddie);
-}
-
-
-void deleteXTrace(Eddie eddie)
-{
-	int16_t i;
-	
-	if (eddie.last_x < eddie.x)
-	{
-		for (i = 0; i < EDDIE_HEIGHT; i++)
-		{
-			GrPixelDraw(&sContext, eddie.last_x, i+eddie.last_y);
-			GrPixelDraw(&sContext, eddie.last_x+1, i+eddie.last_y);
-		}
-	}
-	
-	else if (eddie.last_x > eddie.x)
-	{
-		for (i = 0; i < EDDIE_HEIGHT; i++)
-		{
-			GrPixelDraw(&sContext, (EDDIE_WIDTH-1)+eddie.last_x, i+eddie.last_y);
-			GrPixelDraw(&sContext, (EDDIE_WIDTH-2)+eddie.last_x, i+eddie.last_y);
-		}
-	}
-}
-
-
-void deleteYTrace(Eddie eddie)
-{
-	int16_t i, j, trace_len;
-	
-	if (eddie.last_y < eddie.y)
-	{
-		for (i = 0; i < EDDIE_WIDTH; i++)
-		{
-			trace_len = EDDIE_HEIGHT * (1 - 1/5*(5-eddie.jump_state));
-			for (j = 0; j < trace_len; j++)
-				GrPixelDraw(&sContext, i+eddie.last_x, j+eddie.last_y);
-		}
-	}
-	
-	else //if (eddie.last_y > eddie.y)
-	{
-		for (i = 0; i < EDDIE_WIDTH; i++)
-		{
-			trace_len = EDDIE_HEIGHT * (1 - 1/5*(5-eddie.jump_state));
-			for (j = 0; j < trace_len; j++)
-				GrPixelDraw(&sContext, i+eddie.last_x, j+eddie.last_y);
-		}
-	}
-}
-
-
-
-void EddieThread(void const *args)
-{
-	int16_t x, y, roof, floor;
-	int16_t jump_direction;
-	uint8_t jump_state = ON_GROUND;
-	bool jump, jumping;
-	uint16_t air_time = INIT_AIR_TIME;
-	
-	
-	
-	Object obj_eddie, obj_ladder, obj_enemy;
-	
-	obj_eddie.width = EDDIE_WIDTH;
-	obj_eddie.height = EDDIE_HEIGHT;
-	
-	obj_ladder.width = LADDER_WIDTH;
-	obj_ladder.height = LADDER_HEIGHT;
-	
-	obj_enemy.width = ENEMY_WIDTH;
-	obj_enemy.height = ENEMY_HEIGHT;
-	
-	
-	eddie.x = EDDIE_BASE_X;
-	eddie.y = EDDIE_BASE_Y;
-	eddie.id = ID_EDDIE;
-	
-	while (1)
-	{		
-		obj_ladder.x = ladders[0].x;
-		obj_ladder.y = ladders[0].y;
-		
-		obj_eddie.x = eddie.x;
-		obj_eddie.y = eddie.y;
-		
-		if (eddie.jump_state == HIGH)
-			obj_eddie.height = 4/5*EDDIE_HEIGHT;
-		else if (eddie.jump_state == ROOF)
-			obj_eddie.height = 3/5*EDDIE_HEIGHT;
-		else
-			obj_eddie.height = EDDIE_HEIGHT;
-
-		obj_enemy.x = enemies[0].x;
-		obj_enemy.y = enemies[0].y;
-		if (objectCollidedWith(obj_eddie, obj_ladder))
-		{
-			eddie.x = EDDIE_BASE_X;
-			osSignalSet(osThreadId(PainelDeInstrumentos), );
-		}
-		if (objectCollidedWith(obj_eddie, obj_enemy))
-			eddie.x = EDDIE_BASE_X;
-		
-		if (eddie.x != eddie.last_x || eddie.y != eddie.last_y)
-		{
-			osMutexWait(context_mutex, osWaitForever);
-			drawEddie(eddie);
-			osMutexRelease(context_mutex);
-		}
-		
-		x = joy_read_x();
-		y = joy_read_y();
-		jump = button_read_s2();
-		x = x*200/0xFFF-100;
-		y = y*200/0xFFF-100;
-		
-		eddie.dx = 0;
-		if (x > 50)
-			eddie.dx = EDDIE_SPEED;
-		if (x < -50)
-			eddie.dx = -EDDIE_SPEED;
-		eddie.dy = 0;
-		
-		if (jump && !jumping)
-		{
-			jump_direction = eddie.dx;
-			jumping = true;
-			air_time = INIT_AIR_TIME;
-			roof = eddie.y - FREE_SPACE;
-			floor = eddie.y+EDDIE_HEIGHT;
-		}
-		if (jumping)
-		{
-			if (air_time >= INIT_AIR_TIME-(FLOOR_SIZE-EDDIE_HEIGHT))
-			{
-				eddie.jump_state = HIGH;
-				eddie.dy = -EDDIE_JUMP_SPEED;
-			}
-			else if (EDDIE_HEIGHT < air_time && air_time < INIT_AIR_TIME-(FLOOR_SIZE-EDDIE_HEIGHT))
-			{
-				eddie.jump_state = ROOF;
-				eddie.dy = 0;
-			}
-			else if (air_time <= EDDIE_HEIGHT)
-			{
-				eddie.jump_state = HIGH;
-				eddie.dy = EDDIE_JUMP_SPEED;
-			}
+			eddie.colorIndex = EDDIE_HAT;
+			eddie.data = eddie_hat;
+			eddie.width = EDDIE_HAT_WIDTH;
+			eddie.height = EDDIE_HAT_HEIGHT;
+			draw(eddie); // Desenha chapeu
 			
-			if (eddie.y + eddie.dy < roof)
+			eddie.colorIndex = EDDIE_BODY;
+			eddie.data = eddie_body1;
+			eddie.width = EDDIE_BODY1_WIDTH;
+			eddie.height = EDDIE_BODY1_HEIGHT;
+			eddie.y += EDDIE_HAT_HEIGHT;
+			draw(eddie); // Desenha cabeca
+			
+			eddie.colorIndex = EDDIE_SHIRT;
+			if(eddieInitialY < eddieTopOffset - startToCutEddie ) 
 			{
-				eddie.jump_state = ROOF;
-				eddie.dy = 0;
+				if(first)
+				{
+					eddie.data = eddie_shirt;
+					eddie.width = EDDIE_SHIRT_WIDTH;
+					eddie.height = EDDIE_SHIRT_HEIGHT + 2;
+					eddie.y += EDDIE_BODY1_HEIGHT;
+					clear(eddie); // Desenha camisa
+					eddie.data = eddie_shirt_jumping;
+					eddie.width = EDDIE_SHIRT_WIDTH;
+					eddie.height = EDDIE_SHIRT_JUMPING_HEIGHT;
+					draw(eddie); // Desenha camisa
+					eddie.y += EDDIE_SHIRT_HEIGHT;
+					eddie.colorIndex = EDDIE_BODY;			
+					eddie.data = eddie_body2;
+					eddie.width = EDDIE_BODY2_WIDTH;
+					eddie.height = EDDIE_BODY2_HEIGHT;
+					eddie.y -= 2;
+					draw(eddie);
+					first = false;
+				}
+				else
+				{
+					eddie.y += EDDIE_BODY1_HEIGHT;
+					eddie.data = eddie_shirt_jumping;
+					eddie.width = EDDIE_SHIRT_WIDTH;
+					eddie.height = EDDIE_SHIRT_JUMPING_HEIGHT;
+					draw(eddie); // Desenha camisa
+					eddie.y += EDDIE_SHIRT_JUMPING_HEIGHT;
+					eddie.colorIndex = EDDIE_BODY;			
+					eddie.data = eddie_body2;
+					eddie.width = EDDIE_BODY2_WIDTH;
+					eddie.height = EDDIE_BODY2_HEIGHT;
+					clear(eddie);
+					draw(eddie);
+				}
+				
 			}
-			// y grows down on display
-			if (eddie.y+EDDIE_HEIGHT + eddie.dy > floor)
+			else
 			{
-				eddie.jump_state = ON_GROUND;
-				eddie.dy = 0;
-			}
-			air_time--;
-			eddie.dx = jump_direction;
+				eddie.data = eddie_shirt;
+				eddie.width = EDDIE_SHIRT_WIDTH;
+				eddie.height = EDDIE_SHIRT_HEIGHT;
+				eddie.y += EDDIE_BODY1_HEIGHT;
+				draw(eddie); // Desenha camisa
+				eddie.y += EDDIE_SHIRT_HEIGHT;
+				eddie.colorIndex = EDDIE_BODY;
+			
+				eddie.data = eddie_body2;
+				eddie.width = EDDIE_BODY2_WIDTH;
+				eddie.height = EDDIE_BODY2_HEIGHT;
+				clear(eddie);
+				draw(eddie);
+			}			
+			
+			
+			
 		}
-		if (air_time == 0 && jumping)
+		else // Eddie caindo, imprime na ordem contraria(comecando dos pes)
 		{
-			eddie.jump_state = ON_GROUND;
-			jumping = false;
+			eddie.colorIndex = EDDIE_BODY;
+			eddie.data = eddie_body2;
+			eddie.width = EDDIE_BODY2_WIDTH;
+			eddie.height = EDDIE_BODY2_HEIGHT;
+			if(eddie.dirX == RIGHT)
+				{
+					eddie.x--;	
+					eddie.y--;					
+					clearEddie(eddie);
+					eddie.x++;
+					eddie.y++;
+				}
+				if(eddie.dirX == LEFT)
+				{
+					eddie.x++;	
+					eddie.y--;					
+					clearEddie(eddie);
+					eddie.x--;
+					eddie.y++;
+				}
+				else
+				{
+					eddie.y--;					
+					clearEddie(eddie);
+					eddie.y++;
+				}
+			if(eddieInitialY < eddieTopOffset - startToCutEddie ) 
+			{
+				eddie.y += EDDIE_HAT_HEIGHT + EDDIE_BODY1_HEIGHT + EDDIE_SHIRT_JUMPING_HEIGHT;
+				draw(eddie); // Desenha os pes			
+				eddie.colorIndex = EDDIE_SHIRT;
+				
+				eddie.y -= EDDIE_SHIRT_JUMPING_HEIGHT;
+				eddie.data = eddie_shirt_jumping;
+				eddie.width = EDDIE_SHIRT_WIDTH;
+				eddie.height = EDDIE_SHIRT_JUMPING_HEIGHT;
+				
+				draw(eddie); // Desenha a camisa
+			
+				eddie.y -= EDDIE_BODY1_HEIGHT;
+				eddie.colorIndex = EDDIE_BODY;
+				eddie.data = eddie_body1;
+				eddie.width = EDDIE_BODY1_WIDTH;
+				eddie.height = EDDIE_BODY1_HEIGHT;
+				draw(eddie); // Desenha cabeca
+				
+				eddie.y -= EDDIE_HAT_HEIGHT;
+				eddie.colorIndex = EDDIE_HAT;
+				eddie.data = eddie_hat;
+				eddie.width = EDDIE_HAT_WIDTH;
+				eddie.height = EDDIE_HAT_HEIGHT;
+				draw(eddie);
+				
+			}
+			else
+			{		
+				eddie.y--;
+				clearEddie(eddie);
+				eddie.y++;
+				
+				eddie.y += EDDIE_HAT_HEIGHT + EDDIE_BODY1_HEIGHT + EDDIE_SHIRT_HEIGHT;
+				draw(eddie); // Desenha os pes
+					
+				eddie.colorIndex = EDDIE_SHIRT;
+				
+				eddie.y -= EDDIE_SHIRT_HEIGHT;
+				eddie.data = eddie_shirt;
+				eddie.width = EDDIE_SHIRT_WIDTH;
+				eddie.height = EDDIE_SHIRT_HEIGHT;
+				
+				draw(eddie); // Desenha a camisa
+			
+				eddie.y -= EDDIE_BODY1_HEIGHT;
+				eddie.colorIndex = EDDIE_BODY;
+				eddie.data = eddie_body1;
+				eddie.width = EDDIE_BODY1_WIDTH;
+				eddie.height = EDDIE_BODY1_HEIGHT;
+				draw(eddie); // Desenha cabeca
+				
+				eddie.y -= EDDIE_HAT_HEIGHT;
+				eddie.colorIndex = EDDIE_HAT;
+				eddie.data = eddie_hat;
+				eddie.width = EDDIE_HAT_WIDTH;
+				eddie.height = EDDIE_HAT_HEIGHT;
+				draw(eddie);
+			}			
+						
+			
 		}
 		
-		eddie.last_x = eddie.x;
-		eddie.last_y = eddie.y;
-		
-		eddie.x += eddie.dx;
-		eddie.y += eddie.dy;
-		
-		if (eddie.x + EDDIE_WIDTH >= 128)
-			eddie.x = 128-EDDIE_WIDTH;
-		
-		if (eddie.x < 0)
-			eddie.x = 0;
-		
-		if (eddie.dx == EDDIE_SPEED)
-			eddie.last_face_direction = DIR_RIGHT;
-		else if (eddie.dx == -EDDIE_SPEED)
-			eddie.last_face_direction = DIR_LEFT;
+		if(eddie.isMoving && eddie.dirY == NONE && jumpHeight == 0) // Eddie esta se movendo na horizontal(dirY = NONE) no chao(jumpHeight=0)
+		{
+			if(eddieFeetUp)
+			{				
+				clear(eddie);
+				eddie.data = eddie_body_moving;
+				eddie.width = EDDIE_BODY_MOVING_WIDTH;
+				eddie.height = EDDIE_BODY_MOVING_HEIGHT;
+				draw(eddie);
+			}
+			else
+			{				
+				clear(eddie);
+				eddie.data = eddie_body_moving2;
+				eddie.width = EDDIE_BODY_MOVING2_WIDTH;
+				eddie.height = EDDIE_BODY_MOVING2_HEIGHT;
+				draw(eddie);
+			}
+			eddieFeetUp = !eddieFeetUp;
+			
+		}
+		lastFacingDir = eddie.dirX;
+		return;
 	}
 }

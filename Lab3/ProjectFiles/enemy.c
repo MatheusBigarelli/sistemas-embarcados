@@ -1,111 +1,99 @@
-#include "enemy.h"
+#include "draw.h"
 
-extern osMutexId context_mutex;
-extern tContext sContext;
+extern uint8_t head[] ;
+extern uint8_t legs[];
+extern uint8_t legsExtra[];
 
-extern Enemy enemies[NUM_ENEMIES];
+extern uint32_t palette[9];
 
+extern uint16_t currentScore;
 
-int16_t ENEMY_Y(int16_t X) { return (FLOOR_BASE_PIXEL+20*X-ENEMY_HEIGHT); }
-
-
-const uint8_t enemy_img[] = {
-0x1c,0x24,0x38,0x40,0x54,0x7c,0x58,0x74,0xac,0x64,0x84,0xc8,0x64,0x84,0xc4,0x54,0x6c,0xa4,0x38,0x48,0x70,0x14,0x1c,0x28
-,0x60,0x80,0xc0,0x54,0x70,0xa8,0x2c,0x3c,0x58,0x64,0x80,0xc4,0x58,0x74,0xb0,0x28,0x38,0x58,0x5c,0x78,0xb8,0x58,0x74,0xb0
-,0x34,0x48,0x6c,0x4c,0x5c,0x80,0x7c,0x8c,0xa8,0x3c,0x50,0x74,0x48,0x58,0x7c,0x84,0x90,0xb0,0x58,0x68,0x90,0x4c,0x5c,0x80
-,0x10,0x10,0x10,0x48,0x48,0x48,0xb4,0xb4,0xb4,0x10,0x10,0x0c,0x24,0x24,0x24,0xc4,0xc4,0xc4,0xbc,0xbc,0xbc,0xb0,0xb0,0xac
-,0xc0,0xc0,0xc0,0xd0,0xd0,0xd0,0xbc,0xbc,0xbc,0x10,0x10,0x10,0x08,0x08,0x08,0x2c,0x2c,0x2c,0x34,0x34,0x34,0x30,0x30,0x30
-};
-
-
-uint32_t enemyOneChannel[ENEMY_PIXELS];
-void drawEnemy(Enemy enemy)
+void drawSneaker(Image img)
 {
-    int i, j;
+	palette[ENEMY_HEAD] = 0x006D8BBD;
+	drawEnemy(img, 0);
+}
+bool clearBoss = false;
+
+void clearOldBoss(Image oldBoss, uint8_t extraHeight)
+{
+	int i, j = 0, sneakerHeight, headTopOffset;
 	
-	j = 0;
-    for (i = 0; i < ENEMY_PIXELS; i++)
-    {
-        enemyOneChannel[j] = (enemy_img[3*i]<<16) + (enemy_img[3*i+1]<<8) + (enemy_img[3*i+2]);
-        j++;
-    }
-    
-    GrContextBackgroundSet(&sContext, ClrBlack);
-    
-	
-	GrContextForegroundSet(&sContext, ClrBlack);
-	
-	
-	if (enemy.last_x < enemy.x)
+	sneakerHeight = HEAD_HEIGHT + LEGS_HEIGHT + extraHeight + 1; // O boss antigo tem 1 de altura a mais
+	headTopOffset = (127 - FLOOR_HEIGHT) - sneakerHeight - (LADDER_HEIGHT + FLOOR_HEIGHT) * (oldBoss.areaOffset);
+	oldBoss.colorIndex = ENEMY_HEAD;
+	oldBoss.data = head;
+	oldBoss.width = HEAD_WIDTH;
+	oldBoss.height = HEAD_HEIGHT;
+	oldBoss.y = headTopOffset;
+	if(oldBoss.dirX == RIGHT)
 	{
-		for (i = 0; i < ENEMY_HEIGHT; i++)
-		{
-			GrPixelDraw(&sContext, enemy.last_x, i+enemy.last_y);
-			GrPixelDraw(&sContext, enemy.last_x+1, i+enemy.last_y);
-		}
+		oldBoss.x--;
+		clear(oldBoss);
 	}
-	
-	else
+	if(oldBoss.dirX == LEFT)
 	{
-		for (i = 0; i < ENEMY_HEIGHT; i++)
-		{
-			GrPixelDraw(&sContext, enemy.last_x+ENEMY_WIDTH-1, i+enemy.last_y);
-			GrPixelDraw(&sContext, enemy.last_x+ENEMY_WIDTH-2, i+enemy.last_y);
-		}
+		oldBoss.x++;
+		clear(oldBoss);
 	}
-	
-    for (i = 0; i < ENEMY_HEIGHT; i++)
-    {
-        for (j = 0; j < ENEMY_WIDTH; j++)
-        {
-			if (enemy.feet_state == LEFT_FOOT_UP)
-				GrContextForegroundSet(&sContext, enemyOneChannel[i*ENEMY_WIDTH + j]);
-			else
-				GrContextForegroundSet(&sContext, enemyOneChannel[i*ENEMY_WIDTH + (ENEMY_WIDTH-1)-j]);
-            GrPixelDraw(&sContext,j+enemy.x,i+enemy.y);
-        }
-    }
+	oldBoss.colorIndex = ENEMY_LEGS;
+	oldBoss.data = legsExtra;
+	oldBoss.width = LEGS_EXTRA_WIDTH;
+	oldBoss.height = LEGS_EXTRA_HEIGHT;
+	for (i = 0; i < extraHeight; i++)
+	{
+		oldBoss.y = headTopOffset + HEAD_HEIGHT + i;		
+		clear(oldBoss);
+	}	
+	if(extraHeight == 0)
+	{
+		oldBoss.colorIndex = ENEMY_LEGS;
+		oldBoss.data = legs;
+		oldBoss.width = LEGS_WIDTH;
+		oldBoss.height = LEGS_HEIGHT;
+		oldBoss.y = headTopOffset + HEAD_HEIGHT + extraHeight;
+		clear(oldBoss);
+	}
 }
 
-
-void EnemyThread(void const *args)
+void drawBoss(Image img)
 {
-	uint8_t i, j;
-	int16_t dx[] = {2, 2}, last_x[] = {20, 65}, last_y[] = {80, 45};
-	bool feet_states[] = {LEFT_FOOT_UP, RIGHT_FOOT_UP};
-	uint8_t feet_time = 0;
-	
-	for (i = 0; i < NUM_ENEMIES; i++)
+	int a;
+	palette[ENEMY_HEAD] = 0x00AA814E; // Altera a cor da cabeca para identificar como chefao
+	if(clearBoss)
 	{
-		enemies[i].x = 30*i;
-		enemies[i].y = ENEMY_Y(FLOOR(1+i));
-		enemies[i].last_x = enemies[i].x;
-		enemies[i].last_y = enemies[i].y;
-		enemies[i].feet_state = LEFT_FOOT_UP;
-		enemies[i].speed = 2;
+		clearOldBoss(img,5 - currentScore/10);
 	}
+	drawEnemy(img, 5 - currentScore/10);
+}
+
+void drawEnemy(Image img, uint8_t extraHeight)
+{
+	int i, j = 0, sneakerHeight, headTopOffset;
 	
-	while(1)
+	sneakerHeight = HEAD_HEIGHT + LEGS_HEIGHT + extraHeight;
+	headTopOffset = (127 - FLOOR_HEIGHT) - sneakerHeight - (LADDER_HEIGHT + FLOOR_HEIGHT) * (img.areaOffset) ;
+	img.colorIndex = ENEMY_HEAD;
+	img.data = head;
+	img.width = HEAD_WIDTH;
+	img.height = HEAD_HEIGHT;
+	img.y = headTopOffset;
+	draw(img);
+	img.colorIndex = ENEMY_LEGS;
+	img.data = legsExtra;
+	img.width = LEGS_EXTRA_WIDTH;
+	img.height = LEGS_EXTRA_HEIGHT;
+	for (i = 0; i < extraHeight; i++)
 	{
-		for (i = 0; i < NUM_ENEMIES; i++)
-		{
-			osMutexWait(context_mutex, osWaitForever);
-			drawEnemy(enemies[i]);
-			osMutexRelease(context_mutex);
+		img.y = headTopOffset + HEAD_HEIGHT + i;
 		
-			enemies[i].last_x = enemies[i].x;
-			enemies[i].last_y = enemies[i].y;
-			enemies[i].x += enemies[i].speed;
-			if (enemies[i].x >= 128-ENEMY_WIDTH)
-				enemies[i].speed *= -1;
-			if (enemies[i].x <= 0)
-				enemies[i].speed *= -1;
-			feet_time = (feet_time+1) % 10;
-			if (feet_time == 0)
-			{
-				for (j = 0; j < NUM_ENEMIES; j++)
-					enemies[j].feet_state = !enemies[j].feet_state;
-			}
-		}
-	}
+		draw(img);
+	}	
+	flipVert(legs, LEGS_HEIGHT, LEGS_WIDTH);
+	img.colorIndex = ENEMY_LEGS;
+	img.data = legs;
+	img.width = LEGS_WIDTH;
+	img.height = LEGS_HEIGHT;
+	img.y = headTopOffset + HEAD_HEIGHT + extraHeight;
+	draw(img);
 }
