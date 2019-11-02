@@ -1,6 +1,6 @@
 /**
  * Arquivo .h para device driver da UART
- * 
+ *
  * Matheus Bigarelli
  * Victor Belinello
  */
@@ -9,7 +9,8 @@
 #define __UART__
 
 #include "util.h"
-
+#include <stdio.h>
+#include <stdlib.h>
 //*****************************************************************************
 //
 // System Control registers (SYSCTL)
@@ -45,12 +46,32 @@
 #define UART0_PP_R          (*((volatile uint32_t *)0x4000CFC0))
 #define UART0_CC_R          (*((volatile uint32_t *)0x4000CFC8))
 
+//*****************************************************************************
+//
+// NVIC registers (NVIC)
+//
+//*****************************************************************************
+#define NVIC_EN0_R              (*((volatile uint32_t *)0xE000E100))
+#define NVIC_PRI1_R             (*((volatile uint32_t *)0xE000E404))
+
+
 // Portas utilizadas no programa
 #define UART_ALL_PORTS 0x01
 
+enum ID
+{
+    MainMenu,
+		WaveformMenu,
+    FreqMenu,
+    AmpMenu,
+    GanttMenu
+}typedef ID;
+
 extern void UART_init(void);
 extern unsigned char UART0_RxChar(void);
-extern void UART0_TxChar(unsigned char data);
-extern void UART0_TxString(unsigned char *data);
+extern void UART0_TxChar(char data);
+extern void UART0_TxString(char *data);
+extern void UART0_PrintMenu(ID menuID);
+void clearUART(void);
 
 #endif
