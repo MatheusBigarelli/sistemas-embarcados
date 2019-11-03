@@ -14,6 +14,7 @@
 #include "cmsis_os.h"
 #include "TM4C129.h"                    // Device header
 #include <stdbool.h>
+#include <stdint.h>
 #include "grlib/grlib.h"
 
 /*----------------------------------------------------------------------------
@@ -31,6 +32,7 @@
 #include "thread.h"
 
 #include "uart.h"
+#include "mypwm.h"
 #include "utils.h"
 
 
@@ -49,23 +51,41 @@ void init_all(){
 	// rgb_init();
 	// opt_init();
 	// led_init();
-	PLL_Init();
-	SysTick_Init();
-	GPIO_Init();
-	UART_init();
+	//PLL_Init();
+	//SysTick_Init();
+	//GPIO_Init();
+	//UART_init();
+	pwmInit();
 	#endif
 }
 /*----------------------------------------------------------------------------
  *      Main
  *---------------------------------------------------------------------------*/
 int main (void) {
-	osKernelInitialize();
+	// osKernelInitialize();
 	
-	createThreads();
-	createTimer();
+	// createThreads();
+	// createTimer();
 
 	//Initializing all peripherals
-	init_all();
+	// init_all();
 
-	osKernelStart();
+	// osKernelStart();
+
+
+	//------------------------------------
+	uint32_t configuration;
+
+	init_all();
+	configuration = PWM_GEN_MODE_DOWN |
+					PWM_GEN_MODE_NO_SYNC;// |
+//					PWM_GEN_MODE_DBG_RUN |
+//					PWM_GEN_MODE_GEN_NO_SYNC;
+
+	pwmClockSet(PWM_SYSCLK_DIV_64);
+	pwmGenConfigure(configuration);
+	pwmPulseWidthSet(1, PWM2_LOAD/2); // 50%
+	pwmGenPeriodSet(65535);
+	pwmGenEnable();
+	pwmOutputEnable();
 }
