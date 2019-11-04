@@ -51,10 +51,10 @@ void init_all(){
 	// rgb_init();
 	// opt_init();
 	// led_init();
-	//PLL_Init();
-	//SysTick_Init();
-	//GPIO_Init();
-	//UART_init();
+	PLL_Init();
+	SysTick_Init();
+	GPIO_Init();
+	UART_init();
 	pwmInit();
 	#endif
 }
@@ -62,30 +62,13 @@ void init_all(){
  *      Main
  *---------------------------------------------------------------------------*/
 int main (void) {
-	// osKernelInitialize();
+	osKernelInitialize();
 	
-	// createThreads();
-	// createTimer();
+	createThreads();
+	//createTimer();
 
-	//Initializing all peripherals
-	// init_all();
-
-	// osKernelStart();
-
-
-	//------------------------------------
-	uint32_t configuration;
-
+	// Initializing all peripherals
 	init_all();
-	configuration = PWM_GEN_MODE_DOWN |
-					PWM_GEN_MODE_NO_SYNC;// |
-//					PWM_GEN_MODE_DBG_RUN |
-//					PWM_GEN_MODE_GEN_NO_SYNC;
 
-	pwmClockSet(PWM_SYSCLK_DIV_64);
-	pwmGenConfigure(configuration);
-	pwmPulseWidthSet(1, PWM2_LOAD/2); // 50%
-	pwmGenPeriodSet(65535);
-	pwmGenEnable();
-	pwmOutputEnable();
+	osKernelStart();
 }

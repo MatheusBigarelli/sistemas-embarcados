@@ -16,7 +16,7 @@ osTimerDef(tidTimer, Timer);
 void createThreads(void)
 {
     osThreadCreate(osThread(UART), NULL);
-    osThreadCreate(osThread(Display), NULL);
+    //osThreadCreate(osThread(Display), NULL);
     osThreadCreate(osThread(SignalGenerator), NULL);
 }
 

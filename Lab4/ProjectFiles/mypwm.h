@@ -31,34 +31,24 @@ typedef signed int int32_t;
 // Registrador para verificar se a porta já está pronta
 #define SYSCTL_RCGCGPIO_R (*((volatile uint32_t *) 0x400FE608))
 // Registrador para ativar clock para o módulo do PWM
-#define SYSCTL_RCGCPWM    (*((volatile uint32_t *) 0x400FE640))
+#define SYSCTL_RCGCPWM_R (*((volatile uint32_t *)0x400FE640))
+
 
 /****************************************************
  * 
  * GPIO Defines das Portas
  *
 *****************************************************/
+// Defines GPIO
+// Usando pino G1 para PWM
+#define GPIO_RCGC_PORTG 64
+#define GPIO_PORTG_BITS 2
 
-#define GPIO_DATA       0x000 // Offset do registrador de dados das portas GPIO
-#define GPIO_DIR        0x400 // Offset do registrador de direção (entrada ou saída) das portas GPIO
-#define GPIO_ALTFUN     0x420 // Offset do registrador de função alternativa das portas GPIO
-#define GPIO_DIGEN      0x51C // Offset do registrador de digital enable das portas GPIO
-#define GPIO_AMSEL      0x528 // Offset do registrador de modo analógico das portas GPIO
-#define GPIO_PORTCTL    0x52C // Offset do registrador de configuração das portas GPIO
-
-#define GPIO_PORTG_BASE         0x4005E000 // Endereço da porta F do GPIO no barramento de alta velocidade
-#define GPIO_PORTG_DATA_R       (*((volatile uint32_t *)(GPIO_PORTG_BASE + GPIO_DATA)))
-#define GPIO_PORTG_DIR_R        (*((volatile uint32_t *)(GPIO_PORTG_BASE + GPIO_DIR)))
-#define GPIO_PORTG_ALTFUN_R     (*((volatile uint32_t *)(GPIO_PORTG_BASE + GPIO_ALTFUN)))
-#define GPIO_PORTG_DIGEN_R      (*((volatile uint32_t *)(GPIO_PORTG_BASE + GPIO_DIGEN)))
-#define GPIO_PORTG_AMSEL_R      (*((volatile uint32_t *)(GPIO_PORTG_BASE + GPIO_AMSEL)))
-#define GPIO_PORTG_PORTCTL_R    (*((volatile uint32_t *)(GPIO_PORTG_BASE + GPIO_PORTCTL)))
-
-#define GPIO_RCGC_PORTG         64 // Ativando clock na porta F no RCGC_GPIO
-#define GPIO_PORTG_M0PWM5_BIT   6 // Bit 6 do PCTL para ativar o M0_PWM2
-#define GPIO_PORTG1             1 // Ativar função alternativa no pino 1 da porta F
-
-
+#define GPIO_PORTG_AHB_AMSEL_R (*((volatile uint32_t *)0x4005E528))
+#define GPIO_PORTG_AHB_PCTL_R (*((volatile uint32_t *)0x4005E52C))
+#define GPIO_PORTG_AHB_DIR_R (*((volatile uint32_t *)0x4005E400))
+#define GPIO_PORTG_AHB_AFSEL_R (*((volatile uint32_t *)0x4005E420))
+#define GPIO_PORTG_AHB_DEN_R (*((volatile uint32_t *)0x4005E51C))
 
 /****************************************************
  * 
@@ -204,6 +194,26 @@ typedef signed int int32_t;
 // Fim do trecho copiado
 
 #define M0PWM5 0x20
+
+
+
+
+
+
+
+
+#define PWM0_CC_R               (*((volatile uint32_t *)0x40028FC8))
+#define PWM0_2_CTL_R            (*((volatile uint32_t *)0x400280C0))
+#define PWM0_2_GENB_R           (*((volatile uint32_t *)0x400280E4))
+#define PWM0_2_LOAD_R           (*((volatile uint32_t *)0x400280D0))
+#define PWM0_2_CMPB_R           (*((volatile uint32_t *)0x400280DC))
+#define PWM0_ENABLE_R           (*((volatile uint32_t *)0x40028008))
+
+
+
+
+
+
 
 
 /****************************************************

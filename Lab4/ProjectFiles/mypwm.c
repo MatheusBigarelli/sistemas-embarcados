@@ -14,32 +14,20 @@ void pwmInit(void)
 
 void configureGPIOPort(void)
 {
-    //1a. Ativar o clock para a porta setando o bit correspondente no registrador RCGCGPIO
-    SYSCTL_RCGCGPIO_R |= GPIO_RCGC_PORTG;
-
-    //1b.   ap�s isso verificar no PRGPIO se a porta est� pronta para uso.
-    while ( (SYSCTL_PRGPIO_R & GPIO_RCGC_PORTG) != (GPIO_RCGC_PORTG) );
-
-    // 2. Limpar o AMSEL para desabilitar a anal�gica.
-    GPIO_PORTG_AMSEL_R = 0x00;
-
-    // 3. Selecionar módulo 0 do pwm0.
-    GPIO_PORTG_PORTCTL_R = GPIO_PORTG_M0PWM5_BIT;
-
-    // 4. Setar bit AFSEL para selecionar modo de função alternativa.
-    GPIO_PORTG_ALTFUN_R = GPIO_PORTG1;
-
-    // 5. Setar os bits de DEN para habilitar I/O digital.
-    GPIO_PORTG_DIGEN_R = GPIO_PORTG1;
-
-    // 6. Setar como saída.?
-    GPIO_PORTG_DIR_R = 1;
+	SYSCTL_RCGCGPIO_R |= GPIO_RCGC_PORTG;
+	while((SYSCTL_PRGPIO_R & (GPIO_RCGC_PORTG) ) != (GPIO_RCGC_PORTG) ){};
+	
+	GPIO_PORTG_AHB_AMSEL_R = 0x00;
+	GPIO_PORTG_AHB_PCTL_R = 0x60; // PWM
+	GPIO_PORTG_AHB_DIR_R = GPIO_PORTG_BITS;
+	GPIO_PORTG_AHB_AFSEL_R = GPIO_PORTG_BITS;
+	GPIO_PORTG_AHB_DEN_R = GPIO_PORTG_BITS;
 }
 
 void configurePWMDependencies(void)
 {
     // Ativando clock do módulo do PWM.
-    SYSCTL_RCGCPWM |= 1;
+    SYSCTL_RCGCPWM_R |= 0x1;
 }
 
 
@@ -58,19 +46,21 @@ void pwmGenConfigure(uint32_t configuration)
                               PWM_X_CTL_GENAUPD_M |
                               PWM_X_CTL_GENAUPD_M |
                               PWM_X_CTL_LOADUPD | PWM_X_CTL_CMPAUPD |
-                              PWM_X_CTL_CMPBUPD) | // Até aqui tudo foi zerado
-                              configuration); // Com o OU lógico com configuration,
-                              // a configuração passada foi setada no registrador
-                              // de controle do gerador
+                              PWM_X_CTL_CMPAUPD) | // Até aqui tudo foi zerado
+                            configuration); // Com o OU lógico com configuration,
+                            // a configuração passada foi setada no registrador
+                            // de controle do gerador
 
     
     if (configuration & PWM_X_CTL_MODE)
     {
+        // Se estiver na configuração de UP/DOWN.
         PWM2_GENB = (PWM_X_GENB_ACTCMPBU_ONE |
                      PWM_X_GENB_ACTCMPBD_ZERO);
     }
     else
     {
+        // Se estiver na configuração DOWN.
         PWM2_GENB = (PWM_X_GENB_ACTLOAD_ONE |
                      PWM_X_GENB_ACTCMPBD_ZERO);
     }
@@ -79,7 +69,7 @@ void pwmGenConfigure(uint32_t configuration)
 
 void pwmClockSet(uint32_t clock)
 {
-    PWM_CC = PWM_CC & ~(PWM_CC_USEPWM | PWM_CC_PWMDIV_M) | clock;
+    PWM_CC = (PWM_CC & ~(PWM_CC_USEPWM | PWM_CC_PWMDIV_M)) | clock;
 }
 
 void pwmGenPeriodSet(uint32_t period)
@@ -138,4 +128,9 @@ void pwmPulseWidthSet(uint32_t ui32PWMOut, uint32_t pulseWidth)
 void pwmOutputEnable()
 {
     PWM_ENABLE |= M0PWM5;
+}
+
+void pwmOutputDisable()
+{
+    PWM_ENABLE &= ~M0PWM5;
 }
