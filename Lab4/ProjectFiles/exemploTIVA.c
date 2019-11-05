@@ -52,10 +52,9 @@ void init_all(){
 	// opt_init();
 	// led_init();
 	PLL_Init();
-	SysTick_Init();
 	GPIO_Init();
 	UART_init();
-	pwmInit();
+	PWM_Init();
 	#endif
 }
 /*----------------------------------------------------------------------------
