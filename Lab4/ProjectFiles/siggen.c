@@ -15,9 +15,9 @@ void SignalGenerator(const void* args)
 		/****************************
 		 *  Onda triangular.
 		 ****************************/
-		dutyCycle += increment;
-		if (dutyCycle <= 0.1 || 0.90 <= dutyCycle)
-			increment = -increment;
+		// dutyCycle += increment;
+		// if (dutyCycle <= 0.1 || 0.90 <= dutyCycle)
+		// 	increment = -increment;
 
 
 		/****************************
@@ -62,7 +62,12 @@ void SignalGenerator(const void* args)
 		// 	dutyCycle = 0.05; // Linha necessária para a precisão do float não
 		// 					  // distorcer a onda.
 		// n++;
-			
+
+		/****************************
+		 *  Onda dente de serra.
+		 ****************************/
+		dutyCycle = n/256.0;
+		n++;
 	}
 }
 
