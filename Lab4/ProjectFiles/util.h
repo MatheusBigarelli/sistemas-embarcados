@@ -8,7 +8,9 @@
 
 #include "cmsis_os.h"
 
-#define SIGGEN_TRIGGER_TIME 100
+#include "TM4C129.h"
+
+#define SIGGEN_TRIGGER_TIME 10
 
 #define SIG_CMD_READY 0x00000000
 

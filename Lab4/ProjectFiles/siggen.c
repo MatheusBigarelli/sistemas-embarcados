@@ -1,17 +1,74 @@
 #include "siggen.h"
 
-void SignalGenerator(void const* args)
-{	
-	double dutyCycle = 0.50, increment = 0.01; // Define duty cycle
-	
-    PWM0_CC_R = 0x100; // Divide por 2 o clock do sistema (Ex.: 80/2=40Mhz)
-    PWM0_2_CTL_R = 0x0;
-    PWM0_2_GENB_R = 0x80c;
-    PWM0_2_LOAD_R = 1600; // Usando o modo count down
-    PWM0_2_CMPB_R = PWM0_2_LOAD_R * (1 - dutyCycle);
+void SignalGenerator(const void* args)
+{
+	uint8_t n = 0;
+	float dutyCycle = 0.0, increment = 0.01;
+	setPeriod(1000);
+	while (1)
+	{
+		osSignalWait(SIG_UPDATE_PWM, osWaitForever);
+		#if SIMULADOR == 0
+		setDutyCycle(dutyCycle);
+		#endif
 
-	
-	makeSinosoid();
+		/****************************
+		 *  Onda triangular.
+		 ****************************/
+		dutyCycle += increment;
+		if (dutyCycle <= 0.1 || 0.90 <= dutyCycle)
+			increment = -increment;
+
+
+		/****************************
+		 *  Onda senoidal.
+		 ****************************/
+		// dutyCycle = (1+sin(2*3.1415*5 * n/256.0)) / 2.0;
+		// n++;
+
+		
+		/****************************
+		 *  Onda quadrada.
+		 ****************************/
+		// if (n > 128)
+		// 	dutyCycle = 0.95;
+		// else
+		// 	dutyCycle = 0.05;
+		// n++;
+
+		
+		/****************************
+		 *  Onda trapezoidal.
+		 *  Número de fases: 4
+		 * 		- Up
+		 * 		- Corte
+		 * 		- Down
+		 * 		- Corte
+		 * 
+		 *  256/4 = 2**8 / 2**2 = 2**6 = 64
+		 *  Valor médio: 0.50
+		 * 	Valor de corte alto: 0.80?
+		 *  Valor de corte baixo: 0.30?
+		 ****************************/
+		// if (0 < n && n < 64)
+		// 	dutyCycle += increment;
+		// // else if (64 <= n && n < 128)
+		// // 	NOP;
+		// else if (128 <= n && n < 192)
+		// 	dutyCycle -= increment;
+		// // else if (192 <= n && n < 256)
+		// // 	NOP;
+		// if (n == 0)
+		// 	dutyCycle = 0.05; // Linha necessária para a precisão do float não
+		// 					  // distorcer a onda.
+		// n++;
+			
+	}
+}
+
+void timerCallback(const void* args)
+{
+	osSignalSet(tidSignalGenerator, SIG_UPDATE_PWM);
 }
 
 void makeSawTooth(void)
@@ -26,10 +83,9 @@ void makeSawTooth(void)
     {	
 		osDelay(t/numSamples);
 		dutyCycle = (double)(n)/(double)numSamples;
-		n = (n+1) % numSamples;
-			
-		PWM0_2_CMPB_R = PWM0_2_LOAD_R * (1 - dutyCycle);
-    }
+		n = (n + 1) % numSamples;
+		setDutyCycle(dutyCycle);
+	}
 }
 
 void makeSinosoid(void)
@@ -37,13 +93,13 @@ void makeSinosoid(void)
 	uint16_t n = 0;
 	float f = WAVE_FREQUENCY(50);
 	double dutyCycle = 0.50; // Define duty cycle
+
+	setPeriod(1000);
     while (true)
     {		
-		dutyCycle = (sin(2*3.1415*f/65536*n) + 1)/2;
-		
+		dutyCycle = (sin(2*3.1415*f/65536*n) + 1)/2;	
 		n++;
-			
-		PWM0_2_CMPB_R = PWM0_2_LOAD_R * (1 - dutyCycle);
+		setDutyCycle(dutyCycle);
     }
 }
 
@@ -51,8 +107,30 @@ void makeSinosoid(void)
 
 void makeSquare(void)
 {
-	
-	
+	float dutyCycle = 1;
+	setPeriod(1000);
+	while(true)
+	{
+		setDutyCycle(0.1);
+		// osDelay(10);
+		setDutyCycle(0.9);
+		// osDelay(10);
+	}
+}
+
+
+void makeTriangular(void)
+{
+	float dutyCycle = 0, increment = 0.01;
+	setPeriod(1000);
+	while(true)
+	{
+		setDutyCycle(dutyCycle);
+		dutyCycle += increment;
+		if (dutyCycle <= 0.01 || 0.99 <= dutyCycle)
+			increment = -increment;
+		osDelay(10);
+	}
 }
 
 

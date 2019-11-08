@@ -63,11 +63,12 @@ void init_all(){
 int main (void) {
 	osKernelInitialize();
 	
-	createThreads();
-	//createTimer();
-
 	// Initializing all peripherals
 	init_all();
+	
+	createThreads();
+	createTimer();
+
 
 	osKernelStart();
 }
