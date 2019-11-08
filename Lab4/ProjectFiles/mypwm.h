@@ -47,5 +47,5 @@ typedef signed int int32_t;
 extern void PWM_Init(void);
 extern void setDutyCycle(float dutyCycle);
 extern void PWM_Enable(void);
-
+extern void setPeriod(uint16_t period);
 #endif

@@ -1,27 +1,29 @@
 #include "thread.h"
 
-osThreadId tidUART;
 osThreadDef(UART, osPriorityNormal, 1, 0);
+osThreadId tidUART;
 
-osThreadId tidDisplay;
 osThreadDef(Display, osPriorityNormal, 1, 0);
+osThreadId tidDisplay;
 
-osThreadId tidSignalGenerator;
 osThreadDef(SignalGenerator, osPriorityNormal, 1, 0);
+osThreadId tidSignalGenerator;
 
+osTimerDef(Timer, timerCallback);
 osTimerId tidTimer;
-osTimerDef(tidTimer, Timer);
 
 
 void createThreads(void)
 {
-    osThreadCreate(osThread(UART), NULL);
+	#if SIMULADOR == 0
+    tidUART = osThreadCreate(osThread(UART), NULL);
+    tidSignalGenerator = osThreadCreate(osThread(SignalGenerator), NULL);
     //osThreadCreate(osThread(Display), NULL);
-    osThreadCreate(osThread(SignalGenerator), NULL);
+	#endif
 }
 
 void createTimer(void)
 {
-    osTimerCreate(osTimer(tidTimer), osTimerPeriodic, NULL);
+    tidTimer = osTimerCreate(osTimer(Timer), osTimerPeriodic, NULL);
     osTimerStart(tidTimer, SIGGEN_TRIGGER_TIME);
 }

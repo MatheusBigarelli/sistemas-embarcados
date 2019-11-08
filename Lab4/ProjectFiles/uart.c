@@ -9,7 +9,7 @@
 ID currentMenu = MainMenu;
 bool updateMenu = true;
 bool parameterChanged = false;
-void UART(void const* args)
+void UART(const void* args)
 {
 	UART0_TxString("Digite o numero e pressione ENTER\r\n");
     while (true)
