@@ -36,7 +36,19 @@ typedef signed int int32_t;
 #define PWM0_2_CMPB_R           (*((volatile uint32_t *)0x400280DC))
 #define PWM0_ENABLE_R           (*((volatile uint32_t *)0x40028008))
 
+#define PWM0_ENABLE_M0PWM5       (0x1 << 5) // Macro para identificar o M0PWM5.
 
+#define PWM_X_ENABLE            0x1 // Macro para ativar um módulo de PWM.
+
+#define PWM_PERIOD_MAX          0x10000
+#define PWM_PERIOD_MIN          0x00000
+
+#define PWM_SYSCLK_DIV2         0x100
+#define PWM_SYSCLK_DIV4         0x101
+#define PWM_SYSCLK_DIV8         0x102
+#define PWM_SYSCLK_DIV16        0x103
+#define PWM_SYSCLK_DIV32        0x104
+#define PWM_SYSCLK_DIV64        0x105
 
 
 /****************************************************
@@ -47,5 +59,6 @@ typedef signed int int32_t;
 extern void PWM_Init(void);
 extern void setDutyCycle(float dutyCycle);
 extern void PWM_Enable(void);
+extern void PWM_Disable(void);
 extern void setPeriod(uint16_t period);
 #endif
