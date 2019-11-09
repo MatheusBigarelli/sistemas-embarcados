@@ -68,7 +68,7 @@ int main (void) {
 	
 	createThreads();
 	createTimer();
-
+	createMemPool();
 
 	osKernelStart();
 }

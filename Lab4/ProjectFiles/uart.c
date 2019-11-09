@@ -6,15 +6,25 @@
  * Param: Nenhum
  * Ret: Nenhum
  */
-ID currentMenu = MainMenu;
-bool updateMenu = true;
-bool parameterChanged = false;
+extern osPoolId uartPool_id;
+
 void UART(const void* args)
 {
-	UART0_TxString("Digite o numero e pressione ENTER\r\n");
+		osStatus  status;
+		UART_MEM_BLOCK_t *pMem = (UART_MEM_BLOCK_t*)osPoolCAlloc(uartPool_id);
+	//	UART0_TxString("Digite o numero e pressione ENTER\r\n");
+		
+		if(pMem)
+		{
+			pMem->currentMenu = MainMenu;
+			pMem->updateMenu = true;
+			pMem->parameterChanged = false;
+			pMem->bufferIndex = 0;
+		}
+		UART0_PrintMenu(pMem->currentMenu);
     while (true)
     {
-		UART0_PrintMenu(currentMenu);
+		
     }
 }
 
@@ -60,18 +70,19 @@ void UART_init(void)
 }
 /* Variaveis utilizadas pelo handler da UART */
 // Buffer para armazenar o que foi recebido na UART
-char buffer[16] = "";
+//char buffer[16] = "";
 // Indice para o buffer do receptor da UART, deve ser declarado externamente, pois o buffer pode ser preenchido(incrementalmente) em diferentes chamadas do UART0_Handler
-int i = 0;
+//int i = 0;
 void resetBuffer(void)
 {
 	int k;
+	UART_MEM_BLOCK_t *pMem =(UART_MEM_BLOCK_t*)osPoolCAlloc(uartPool_id);
 	for(k = 0; k < 16; k++) // limpa o buffer
 	{
-		buffer[k] = 0;
+		pMem->buffer[k] = 0;
 	}
 	
-	i = 0; // Reinicia o indice do buffer
+	pMem->bufferIndex = 0; // Reinicia o indice do buffer
 }
 /* Funcao: void UART0_Handler(void)
  * Handler da interrupcao do receptor da UART
@@ -83,44 +94,46 @@ void UART0_Handler(void) //Do modo como foi configurado esse handler sera chamad
 	char c;
 	int k;
 	char newParameterStr[16];
-
+	UART_MEM_BLOCK_t *pMem =(UART_MEM_BLOCK_t*)osPoolCAlloc(uartPool_id);
 	c = UART0_DR_R & 0xFF;
 	
-	if(i == 16) //Buffer cheio
+	
+	if(pMem->bufferIndex == 16) //Buffer cheio
 	{
-		i = 0;
+		pMem->bufferIndex = 0;
 	}
 	if(c == '\r') // Enter pressionado
 	{
 		//buffer contem um comando
-		if(currentMenu == MainMenu) // O comando eh de mudanca para um sub-menu
+		if(pMem->currentMenu == MainMenu) // O comando eh de mudanca para um sub-menu
 		{
 			/*Esse comando deve ser do tipo <1 numeros + ENTER>
 			 * Se forem digitados varias teclas elas serao ignoradas e apenas a ultima (antes do ENTER) sera considerada
 			 */
-			currentMenu = (ID)(buffer[i-1] - '0'); // '1' - '0' em decimal = 49 - 48 = 1, '2' - '0' = 50 - 48 = 2 ...
+			pMem->currentMenu = (ID)(pMem->buffer[pMem->bufferIndex-1] - '0'); // '1' - '0' em decimal = 49 - 48 = 1, '2' - '0' = 50 - 48 = 2 ...
 			//currentMenu = GanttMenu;
-			updateMenu = true;  //Sinaliza que menu deve ser atualizado
-			UART0_PrintMenu(currentMenu);
+			pMem->updateMenu = true;  //Sinaliza que menu deve ser atualizado
+			UART0_PrintMenu(pMem->currentMenu);
 		}
 		else // O comando configurou um parametro(frequencia, amplitude ou mostrar Gantt), agora deve voltar para menu principal
 		{
-			currentMenu = MainMenu; // Volta para menu principal
-			updateMenu = true; //Sinaliza que menu deve ser atualizado
-			parameterChanged = true; // Sinaliza que um parametro de configuracao foi alterado(possivelmente)
-			for(k = 0; k < i;k++)
+			pMem->currentMenu = MainMenu; // Volta para menu principal
+			pMem->updateMenu = true; //Sinaliza que menu deve ser atualizado
+			pMem->parameterChanged = true; // Sinaliza que um parametro de configuracao foi alterado(possivelmente)
+			for(k = 0; k < pMem->bufferIndex;k++)
 			{
-				newParameterStr[k] = buffer[k];
+				newParameterStr[k] = pMem->buffer[k];
 			}
 			UART0_TxString(newParameterStr);
-			UART0_PrintMenu(currentMenu);
+			UART0_PrintMenu(pMem->currentMenu);
 		}
+		
 		resetBuffer(); //Necessario?
 	}
 	else
 	{
-		buffer[i] = c;
-		i++;
+		pMem->buffer[pMem->bufferIndex] = c;
+		pMem->bufferIndex++;
 	}
 }
 
@@ -146,16 +159,17 @@ void clearUART(void)
 void UART0_PrintMenu(ID menuID)
 {
 	int k;
-	if(updateMenu == false)
+	UART_MEM_BLOCK_t *pMem =(UART_MEM_BLOCK_t*)osPoolCAlloc(uartPool_id);
+	if(pMem->updateMenu == false)
 	{
 		return;
 	}
-    clearUART();
-	if(parameterChanged)
+  UART0_TxString("\r\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
+	if(pMem->parameterChanged)
 	{
-		parameterChanged = false;
+		pMem->parameterChanged = false;
 		UART0_TxString("Valor configurado: ");
-		UART0_TxString(buffer);
+		UART0_TxString(pMem->buffer);
 		UART0_TxString("\r\n");
 	}
     switch (menuID) {
@@ -190,7 +204,7 @@ void UART0_PrintMenu(ID menuID)
         default:
         UART0_TxString("Como\r\n");
     }
-	updateMenu = false; // Menu foi atualizado, desativa flag de atualizacao
+	pMem->updateMenu = false; // Menu foi atualizado, desativa flag de atualizacao
 }
 /* Funcao: void UART0_TxChar(char data)
  * Envia para UART um caractere
@@ -199,6 +213,9 @@ void UART0_PrintMenu(ID menuID)
  */
 void UART0_TxChar(char data)
 {
+		if(SIMULADOR == 1){
+					return;
+		}
     while ((UART0_FR_R & 0X20) > 0); // FIFO cheia
 
     UART0_DR_R = data;
@@ -210,8 +227,12 @@ void UART0_TxChar(char data)
  */
 void UART0_TxString(char *data)
 {
+	
     size_t size = strlen((char *)data);
     int i = 0;
+		if(SIMULADOR == 1){
+					return;
+		}
     for (i = 0; i < size; i++)
 	{
        UART0_TxChar(data[i]);

@@ -11,6 +11,9 @@
 #include "util.h"
 #include <stdio.h>
 #include <stdlib.h>
+
+#include "mem_pool.h"
+
 //*****************************************************************************
 //
 // System Control registers (SYSCTL)
@@ -58,14 +61,6 @@
 // Portas utilizadas no programa
 #define UART_ALL_PORTS 0x01
 
-enum ID
-{
-    MainMenu,
-		WaveformMenu,
-    FreqMenu,
-    AmpMenu,
-    GanttMenu
-}typedef ID;
 
 extern void UART_init(void);
 extern unsigned char UART0_RxChar(void);
