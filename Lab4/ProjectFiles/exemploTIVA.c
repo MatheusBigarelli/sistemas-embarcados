@@ -36,18 +36,14 @@
 #include "utils.h"
 
 
-//To print on the screen
-tContext sContext;
 
 /*----------------------------------------------------------------------------
  *    Initializations
  *---------------------------------------------------------------------------*/
 
 void init_all(){
-	#if SIMULADOR == 0
-	// cfaf128x128x16Init();
-	// joy_init();
-	// button_init();
+#if SIMULADOR == 0
+	cfaf128x128x16Init();
 	// rgb_init();
 	// opt_init();
 	// led_init();

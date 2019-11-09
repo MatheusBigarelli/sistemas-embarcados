@@ -18,7 +18,7 @@ void createThreads(void)
 	#if SIMULADOR == 0
     tidUART = osThreadCreate(osThread(UART), NULL);
     tidSignalGenerator = osThreadCreate(osThread(SignalGenerator), NULL);
-    //osThreadCreate(osThread(Display), NULL);
+    osThreadCreate(osThread(Display), NULL);
 	#endif
 }
 

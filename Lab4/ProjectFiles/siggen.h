@@ -9,12 +9,11 @@
 
 #include "mypwm.h"
 
-#define WAVE_FREQUENCY(X) (20.0*X/3.35)
-#define SIG_UPDATE_PWM 0x00000001
+#define N 65536.0
 
+float updateDutyCycle(uint8_t waveform, uint16_t n, uint16_t k);
 
-
-extern void makeSinosoid(void);
+extern void makeSinusoid(void);
 extern void makeSawTooth(void);
 extern void makeSquare(void);
 extern void makeTriangular(void);
