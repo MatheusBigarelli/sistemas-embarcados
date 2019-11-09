@@ -427,16 +427,6 @@
               <FileType>1</FileType>
               <FilePath>.\mypwm.c</FilePath>
             </File>
-            <File>
-              <FileName>mem_pool.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\mem_pool.c</FilePath>
-            </File>
-            <File>
-              <FileName>mem_pool.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\mem_pool.h</FilePath>
-            </File>
           </Files>
         </Group>
         <Group>
@@ -955,16 +945,6 @@
               <FileName>mypwm.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\mypwm.c</FilePath>
-            </File>
-            <File>
-              <FileName>mem_pool.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\mem_pool.c</FilePath>
-            </File>
-            <File>
-              <FileName>mem_pool.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\mem_pool.h</FilePath>
             </File>
           </Files>
         </Group>

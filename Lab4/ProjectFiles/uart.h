@@ -9,10 +9,8 @@
 #define __UART__
 
 #include "util.h"
-#include <stdio.h>
-#include <stdlib.h>
 
-#include "mem_pool.h"
+#include "thread.h"
 
 //*****************************************************************************
 //
@@ -60,13 +58,25 @@
 
 // Portas utilizadas no programa
 #define UART_ALL_PORTS 0x01
-
+enum ID
+{
+    MainMenu,
+	WaveformMenu,
+    FreqMenu,
+    AmpMenu,
+    GanttMenu
+}typedef ID;
 
 extern void UART_init(void);
 extern unsigned char UART0_RxChar(void);
 extern void UART0_TxChar(char data);
 extern void UART0_TxString(char *data);
-extern void UART0_PrintMenu(ID menuID);
+extern void UART0_PrintMenu(ID currentMenu);
+
 void clearUART(void);
+
+bool checkChar(char c);
+bool isCommand(char *buffer, int size);
+void clearBuffer(char *buffer, int *size);
 
 #endif

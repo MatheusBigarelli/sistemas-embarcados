@@ -30,7 +30,7 @@
 #include "led.h"
 
 #include "thread.h"
-
+#include "gpio.h"
 #include "uart.h"
 #include "mypwm.h"
 #include "utils.h"
@@ -68,7 +68,7 @@ int main (void) {
 	
 	createThreads();
 	createTimer();
-	createMemPool();
+	createMailQueue();
 
 	osKernelStart();
 }
