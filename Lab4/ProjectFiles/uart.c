@@ -1,20 +1,52 @@
 #include "uart.h"
 #include <string.h>
+#include <stdlib.h>
 
 /* Funcao: void UART(void const* args)
  * Thread UART
  * Param: Nenhum
  * Ret: Nenhum
  */
-ID currentMenu = MainMenu;
-bool updateMenu = true;
-bool parameterChanged = false;
+
 void UART(const void* args)
 {
-	UART0_TxString("Digite o numero e pressione ENTER\r\n");
+	bool flag = false;
+	osStatus  status;
+	osEvent evt;
+	char receveidChar = 'h';
+	char buffer[32];
+	int currentIndex = 0;
+	signalConfig_t config;
+//	UART0_TxString("Digite o numero e pressione ENTER\r\n");
+
+	ID currentMenu = MainMenu;
+	bool updateMenu = true;
+	osMessagePut(qidUARTMsgBox, (uint8_t)receveidChar, osWaitForever);
+	UART0_PrintMenu(currentMenu);
     while (true)
-    {
-		UART0_PrintMenu(currentMenu);
+    {		
+		evt = osMessageGet(qidUARTMsgBox, osWaitForever);
+		if(evt.status == osEventMessage)
+		{
+			receveidChar = (char)evt.value.p;
+			if( checkChar(receveidChar) )
+			{
+				buffer[currentIndex] = receveidChar;
+				currentIndex++;
+			}
+			if( isCommand(buffer, currentIndex) )
+			{
+				if(currentMenu == MainMenu) // O comando eh de mudanca para sub-menu (pois esta no menu principal)
+				{
+					currentMenu = (ID)(buffer[currentIndex-1 - 1] - '0'); // '1' - '0' em decimal = 49 - 48 = 1, '2' - '0' = 50 - 48 = 2 ...
+				} else { // O comando configurou um parametro(frequencia, amplitude ou mostrar Gantt), agora deve voltar para menu principal
+					currentMenu = MainMenu;
+				}
+				clearBuffer(buffer, &currentIndex); //currentIndex eh passado por referencia para ser zerado dentro da funcao tambem
+				UART0_PrintMenu(currentMenu);
+			}
+			
+		}
     }
 }
 
@@ -58,21 +90,6 @@ void UART_init(void)
     NVIC_PRI1_R = 0x0 << 13; // Seta prioridade 0 para interrupcao no bit 13 dentro do registrador PRI1 (Pagina 159 do datasheet)
     NVIC_EN0_R = 0x1 << 5; // Ativa o 5 bit no primeiro registrador de Enable do NVIC (Pagina 154 do datasheet)
 }
-/* Variaveis utilizadas pelo handler da UART */
-// Buffer para armazenar o que foi recebido na UART
-char buffer[16] = "";
-// Indice para o buffer do receptor da UART, deve ser declarado externamente, pois o buffer pode ser preenchido(incrementalmente) em diferentes chamadas do UART0_Handler
-int i = 0;
-void resetBuffer(void)
-{
-	int k;
-	for(k = 0; k < 16; k++) // limpa o buffer
-	{
-		buffer[k] = 0;
-	}
-	
-	i = 0; // Reinicia o indice do buffer
-}
 /* Funcao: void UART0_Handler(void)
  * Handler da interrupcao do receptor da UART
  * Param: Nenhum
@@ -83,45 +100,9 @@ void UART0_Handler(void) //Do modo como foi configurado esse handler sera chamad
 	char c;
 	int k;
 	char newParameterStr[16];
-
 	c = UART0_DR_R & 0xFF;
-	
-	if(i == 16) //Buffer cheio
-	{
-		i = 0;
-	}
-	if(c == '\r') // Enter pressionado
-	{
-		//buffer contem um comando
-		if(currentMenu == MainMenu) // O comando eh de mudanca para um sub-menu
-		{
-			/*Esse comando deve ser do tipo <1 numeros + ENTER>
-			 * Se forem digitados varias teclas elas serao ignoradas e apenas a ultima (antes do ENTER) sera considerada
-			 */
-			currentMenu = (ID)(buffer[i-1] - '0'); // '1' - '0' em decimal = 49 - 48 = 1, '2' - '0' = 50 - 48 = 2 ...
-			//currentMenu = GanttMenu;
-			updateMenu = true;  //Sinaliza que menu deve ser atualizado
-			UART0_PrintMenu(currentMenu);
-		}
-		else // O comando configurou um parametro(frequencia, amplitude ou mostrar Gantt), agora deve voltar para menu principal
-		{
-			currentMenu = MainMenu; // Volta para menu principal
-			updateMenu = true; //Sinaliza que menu deve ser atualizado
-			parameterChanged = true; // Sinaliza que um parametro de configuracao foi alterado(possivelmente)
-			for(k = 0; k < i;k++)
-			{
-				newParameterStr[k] = buffer[k];
-			}
-			UART0_TxString(newParameterStr);
-			UART0_PrintMenu(currentMenu);
-		}
-		resetBuffer(); //Necessario?
-	}
-	else
-	{
-		buffer[i] = c;
-		i++;
-	}
+	UART0_TxChar(c);
+	osMessagePut(qidUARTMsgBox, (uint8_t)c, 0);
 }
 
 /* Funcao: void clearUART(void)
@@ -131,11 +112,11 @@ void UART0_Handler(void) //Do modo como foi configurado esse handler sera chamad
  */
 void clearUART(void)
 {
-//		UART0_TxChar(27);
-//		UART0_TxChar(12);
-//        // Os comandos anteriores removendo o proximo caractere(por que?)
-//		UART0_TxChar('1'); // Escreve 1 apenas para corrigir o comportamento acima
-	UART0_TxString("\r\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
+	UART0_TxChar(27);
+	UART0_TxChar(12);
+	// Os comandos anteriores removendo o proximo caractere(por que?)
+	UART0_TxChar('1'); // Escreve 1 apenas para corrigir o comportamento acima
+	//UART0_TxString("\r\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
 
 }
 /* Funcao: void UART0_PrintMenu(uint8_t menuID)
@@ -143,55 +124,43 @@ void clearUART(void)
  * Param: menuID -> Indica qual menu deve ser apresentado
  * Ret: Nenhum
  */
-void UART0_PrintMenu(ID menuID)
+void UART0_PrintMenu(ID currentMenu)
 {
-	int k;
-	if(updateMenu == false)
-	{
-		return;
-	}
-    clearUART();
-	if(parameterChanged)
-	{
-		parameterChanged = false;
-		UART0_TxString("Valor configurado: ");
-		UART0_TxString(buffer);
-		UART0_TxString("\r\n");
-	}
-    switch (menuID) {
-        case MainMenu:
+	clearUART();
+
+	switch (currentMenu) {
+		case MainMenu:
 		UART0_TxString("****Menu Principal****\r\n");
-        UART0_TxString("1)Mudar forma de onda\r\n");
-        UART0_TxString("2)Mudar frequencia\r\n");
-        UART0_TxString("3)Mudar amplitude\r\n");
-        UART0_TxString("4)Imprimir Gantt\r\n");
-        break;
-        case WaveformMenu:
+		UART0_TxString("1)Mudar forma de onda\r\n");
+		UART0_TxString("2)Mudar frequencia\r\n");
+		UART0_TxString("3)Mudar amplitude\r\n");
+		UART0_TxString("4)Imprimir Gantt\r\n");
+		break;
+		case WaveformMenu:
 		UART0_TxString("****Menu Forma de Onda****\r\n");
-        UART0_TxString("1)Senoidal\r\n");
-        UART0_TxString("2)Triangular\r\n");
-        UART0_TxString("3)Dente-de-serra\r\n");
-        UART0_TxString("4)Quadrada\r\n");
-        UART0_TxString("5)Trapezoidal\r\n");
-        break;
-        case FreqMenu:
+		UART0_TxString("1)Senoidal\r\n");
+		UART0_TxString("2)Triangular\r\n");
+		UART0_TxString("3)Dente-de-serra\r\n");
+		UART0_TxString("4)Quadrada\r\n");
+		UART0_TxString("5)Trapezoidal\r\n");
+		break;
+		case FreqMenu:
 		UART0_TxString("****Menu Frequencia****\r\n");
-        UART0_TxString("Informe f [0-200Hz]\r\n");
-        break;
-        case AmpMenu:
+		UART0_TxString("Informe f [0-200Hz]\r\n");
+		break;
+		case AmpMenu:
 		UART0_TxString("****Menu Amplitude****\r\n");
-        UART0_TxString("Informe A [0-33V]\r\n");
-        UART0_TxString("A amplitude sera dividida por 10.\r\n");
-        break;
-        case GanttMenu:
+		UART0_TxString("Informe A [0-33V]\r\n");
+		UART0_TxString("A amplitude sera dividida por 10.\r\n");
+		break;
+		case GanttMenu:
 		UART0_TxString("****Menu Gantt****\r\n");
-        UART0_TxString("1)Voltar\r\n");
-        break;
-        default:
-        UART0_TxString("Como\r\n");
-    }
-	updateMenu = false; // Menu foi atualizado, desativa flag de atualizacao
-}
+		UART0_TxString("1)Voltar\r\n");
+		break;
+		default:
+		UART0_TxString("Nao devia estar aqui\r\n");
+	}
+}	
 /* Funcao: void UART0_TxChar(char data)
  * Envia para UART um caractere
  * Param: data -> Caractere a ser enviado
@@ -199,6 +168,9 @@ void UART0_PrintMenu(ID menuID)
  */
 void UART0_TxChar(char data)
 {
+		if(SIMULADOR == 1){
+					return;
+		}
     while ((UART0_FR_R & 0X20) > 0); // FIFO cheia
 
     UART0_DR_R = data;
@@ -212,9 +184,61 @@ void UART0_TxString(char *data)
 {
     size_t size = strlen((char *)data);
     int i = 0;
+		if(SIMULADOR == 1){
+					return;
+		}
     for (i = 0; i < size; i++)
 	{
        UART0_TxChar(data[i]);
 	}
 
+}
+
+/* Funcao: bool checkChar(char c)
+ * Verifica se o caractere c eh valido (uma numero ou tecla ENTER)
+ * Param: c -> caractere sendo testado
+ * Ret: true se for valido, false caso contrario
+ */
+bool checkChar(char c)
+{
+	if(c == '\r'){ // Tecla ENTER
+		return true;
+	}
+	if(c < 48 || c > 57){ //Numeros estao entre 48 e 57, qualquer coisa fora desse intervalo nao eh valido
+		return false;
+	}
+	return true;
+}
+
+/* Funcao: bool isCommand(char *buffer, int size)
+ * Verifica se o buffer contem um comando valido, baseado no menu em que o usuario estao 
+ * Param: buffer -> string possivelmente contendo um comando
+		  size -> tamanho do buffer
+ * Ret: true se for comando valido, false caso contrario
+ */
+bool isCommand(char *buffer, int size)
+{
+	if(size < 2){ // Comando deve ter pelo menos 2 teclas (1 numero + ENTER)
+		return false;
+	}
+	if(buffer[size-1] != '\r'){ // Um comando deve terminar em ENTER
+		return false;
+	}
+	return true;
+}
+
+/* Funcao: void clearBuffer(char *buffer, int *size)
+ * Limpa o buffer preenchendo com (int)0, nao o caractere '0'
+ * Param: buffer -> buffer para ser zerado
+		  size -> endereco para tamanho do buffer (sera zerado dentro da funcao tambem)
+ * Ret: Nenhum
+ */
+void clearBuffer(char *buffer, int *size)
+{
+	int k;
+	for(k = 0; k < *size; k++) // limpa o buffer
+	{
+		buffer[k] = 0;
+	}
+	*size = 0;
 }

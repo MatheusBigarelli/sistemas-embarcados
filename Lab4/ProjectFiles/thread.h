@@ -12,5 +12,25 @@ extern osThreadId tidSignalGenerator;
 
 extern void createThreads(void);
 extern void createTimer(void);
+extern void createMailQueue(void);
+
+typedef enum
+{
+	SINUSOIDAL,
+	TRIANGULAR,
+	SAWTOOTH,
+	SQUARE,
+	TRAPEZOIDAL
+}WAVEFORMS;
+
+typedef struct
+{
+	double amplitude;
+	double frequency;
+	WAVEFORMS waveform;	
+}signalConfig_t;
+
+
+extern osMessageQId qidUARTMsgBox;
 
 #endif
