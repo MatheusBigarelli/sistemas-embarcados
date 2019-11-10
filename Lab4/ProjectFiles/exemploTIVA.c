@@ -21,13 +21,7 @@
  * include libraries from drivers
  *----------------------------------------------------------------------------*/
 
-#include "rgb.h"
 #include "cfaf128x128x16.h"
-#include "opt.h"
-#include "buttons.h"
-#include "buzzer.h"
-#include "joy.h"
-#include "led.h"
 
 #include "thread.h"
 #include "gpio.h"
@@ -44,9 +38,6 @@
 void init_all(){
 #if SIMULADOR == 0
 	cfaf128x128x16Init();
-	// rgb_init();
-	// opt_init();
-	// led_init();
 	PLL_Init();
 	GPIO_Init();
 	UART_init();
@@ -63,7 +54,6 @@ int main (void) {
 	init_all();
 	
 	createThreads();
-	createTimer();
 	createMailQueue();
 
 	osKernelStart();

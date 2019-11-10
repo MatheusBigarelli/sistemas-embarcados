@@ -25,14 +25,19 @@ void Display(void const* args)
             sigConfigMail = event.value.p;
             if (sigConfigMail != NULL)
             {
-                if (waveform != sigConfigMail->waveform)
+                if (sigConfigMail->changedParameter == WAVEFORM)
                 {
-                    waveform = updateWaveform(&sContext, waveform, sigConfigMail->waveform);
+                    waveform = updateWaveformDisplay(&sContext, waveform, sigConfigMail->waveform);
                 }
 
-                if (frequency != sigConfigMail->frequency)
+                if (sigConfigMail->changedParameter == FREQUENCY)
                 {
-                    frequency = updateFrequency(&sContext, frequency, sigConfigMail->frequency);
+                    frequency = updateFrequencyDisplay(&sContext, frequency, sigConfigMail->frequency);
+                }
+
+                if (sigConfigMail->changedParameter == AMPLITUDE)
+                {
+                    amplitude = updateAmplitudeDisplay(&sContext, amplitude, sigConfigMail->amplitude);
                 }
 
                 osMailFree(qidDisplayMailQueue, sigConfigMail);
@@ -340,7 +345,7 @@ void clearWaveform(tContext* sContext, WAVEFORMS waveform)
     GrContextForegroundSet(sContext, ClrWhite);
 }
 
-WAVEFORMS updateWaveform(tContext* sContext, WAVEFORMS oldWaveform, WAVEFORMS newWaveform)
+WAVEFORMS updateWaveformDisplay(tContext* sContext, WAVEFORMS oldWaveform, WAVEFORMS newWaveform)
 {
     // Ondas válidas
     if (SINUSOIDAL <= newWaveform && newWaveform <= SAWTOOTH)
@@ -354,7 +359,7 @@ WAVEFORMS updateWaveform(tContext* sContext, WAVEFORMS oldWaveform, WAVEFORMS ne
     return oldWaveform;
 }
 
-float updateFrequency(tContext* sContext, float oldFrequency, float newFrequency)
+float updateFrequencyDisplay(tContext* sContext, float oldFrequency, float newFrequency)
 {
     // Frequências válidas
     if (0 < newFrequency && newFrequency <= 200)
@@ -371,5 +376,25 @@ void clearFrequency(tContext* sContext, float frequency)
 {
     GrContextForegroundSet(sContext, ClrBlack);
     printFrequency(sContext, frequency);
+    GrContextForegroundSet(sContext, ClrWhite);
+}
+
+float updateAmplitudeDisplay(tContext* sContext, float oldAmplitude, float newAmplitude)
+{
+    // Frequências válidas
+    if (0 < newAmplitude && newAmplitude <= 3.3)
+    {
+        clearAmplitude(sContext, oldAmplitude);
+        printAmplitude(sContext, newAmplitude);
+        return newAmplitude;
+    }
+
+    return oldAmplitude;
+}
+
+void clearAmplitude(tContext* sContext, float amplitude)
+{
+    GrContextForegroundSet(sContext, ClrBlack);
+    printAmplitude(sContext, amplitude);
     GrContextForegroundSet(sContext, ClrWhite);
 }

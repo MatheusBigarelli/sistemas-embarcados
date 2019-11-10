@@ -78,5 +78,6 @@ void clearUART(void);
 bool checkChar(char c);
 bool isCommand(char *buffer, int size);
 void clearBuffer(char *buffer, int *size);
+float extractNumberFromCommand(char *buffer, int size, ID menu);
 
 #endif

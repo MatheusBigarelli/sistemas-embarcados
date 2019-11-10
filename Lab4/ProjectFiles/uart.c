@@ -43,21 +43,42 @@ void UART(const void* args)
 					switch (currentMenu)
 					{
 						case WaveformMenu:
+							// Mandando info para thread do display
 							config = osMailAlloc(qidDisplayMailQueue, osWaitForever);
 							config->waveform = buffer[0] - '1'; // No menu a primeira onda é índice 1.
+							config->changedParameter = WAVEFORM;
 							osMailPut(qidDisplayMailQueue, config);
+							// Mandando info para thread do gerador de sinal.
+							config = osMailAlloc(qidSigGenMailQueue, osWaitForever);
+							config->waveform = buffer[0] - '1'; // No menu a primeira onda é índice 1.
+							config->changedParameter = WAVEFORM;
+							osMailPut(qidSigGenMailQueue, config);
 							break;
 						case FreqMenu:
+							// Mandando info para thread do display.
 							config = osMailAlloc(qidDisplayMailQueue, osWaitForever);
-							config->frequency = 100;
+							config->frequency = extractNumberFromCommand(buffer, currentIndex, FreqMenu);
+							config->changedParameter = FREQUENCY;
 							osMailPut(qidDisplayMailQueue, config);
+							// Mandando info para thread do gerador de sinal.
+							config = osMailAlloc(qidSigGenMailQueue, osWaitForever);
+							config->frequency = extractNumberFromCommand(buffer, currentIndex, FreqMenu);
+							config->changedParameter = FREQUENCY;
+							osMailPut(qidSigGenMailQueue, config);
 							break;
 						case AmpMenu:
+							// Mandando info para thread do display.
+							config = osMailAlloc(qidDisplayMailQueue, osWaitForever);
+							config->amplitude = extractNumberFromCommand(buffer, currentIndex, AmpMenu);
+							config->changedParameter = AMPLITUDE;
+							osMailPut(qidDisplayMailQueue, config);
+							// Mandando info para thread do gerador de sinal.
+							config = osMailAlloc(qidSigGenMailQueue, osWaitForever);
+							config->amplitude = extractNumberFromCommand(buffer, currentIndex, AmpMenu);
+							config->changedParameter = AMPLITUDE;
+							osMailPut(qidSigGenMailQueue, config);
 							break;
 						default:
-							config = osMailAlloc(qidDisplayMailQueue, osWaitForever);
-							config->waveform = 4; // No menu a primeira onda é índice 1.
-							osMailPut(qidDisplayMailQueue, config);
 					}
 					currentMenu = MainMenu;
 				}
@@ -260,4 +281,31 @@ void clearBuffer(char *buffer, int *size)
 		buffer[k] = 0;
 	}
 	*size = 0;
+}
+
+float extractNumberFromCommand(char *buffer, int size, ID menu)
+{
+	int i;
+	char aux[4];
+	int numberOfDigits = size - 1; // Descontando o ENTER do buffer o restante sao numeros.
+	if (numberOfDigits > 2 && menu == AmpMenu)
+	{ // A amplitude vai no maximo ate 33(ou seja, 2 digitos), lembrando que o usuario digita 33, mas eh configura 3.3V
+		return 3.3;
+	}
+	if (numberOfDigits > 3 && menu == FreqMenu)
+	{ // A frequencia vai no maximo ate 200(ou seja, 3 digitos)
+		return 200;
+	}
+	for (i = 0; i < numberOfDigits; i++)
+	{
+		aux[i] = buffer[i];
+	}
+	if (menu == AmpMenu)
+	{
+		return atof(aux) / 10.0;
+	}
+	if (menu == FreqMenu)
+	{
+		return atof(aux);
+	}
 }

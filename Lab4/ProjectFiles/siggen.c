@@ -20,12 +20,17 @@ void SignalGenerator(const void* args)
 	 * A constante 10^6 deve-se ao fato do valor
 	 * timeForDCChange estar em us.
 	 * */
-	uint8_t waveform = SINUSOIDAL;
+	uint8_t waveform = TRIANGULAR;
 	uint16_t n = 0, k = 1, adjust = 9; // Os valores de k e adjust serão explicados abaixo.
 	uint32_t tick; // Último tick pego (último tempo analisado).
 	uint32_t timeForDCChange = 10; // Tempo entre duas mudanças no dutycycle em us.
 	float dutyCycle = 0.05;
-	setPeriod(1000);
+	float frequency = 1.52;
+	float amplitude = 3.3;
+	osEvent event;
+	SignalConfig_t* sigConfigMail;
+
+	setPeriod(100);
 	tick = osKernelSysTick();
 
 	/**
@@ -47,8 +52,31 @@ void SignalGenerator(const void* args)
 	 * */
 	while (1)
 	{
-		// Checagem de sinal para troca de parâmetros
-		osSignalWait(SIG_WAVEFORM_CHANGE, SIG_INSTANT_CHECK_TIME);
+		event = osMailGet(qidSigGenMailQueue, MAIL_INSTANT_CHECK_TIME);
+		if (event.status == osEventMail)
+		{
+			sigConfigMail = event.value.p;
+			if (sigConfigMail != NULL)
+			{
+				if (sigConfigMail->changedParameter == WAVEFORM)
+				{
+					waveform = updateWaveformPWM(waveform, sigConfigMail->waveform);
+				}
+
+				if (sigConfigMail->changedParameter == FREQUENCY)
+				{
+					k = updateFrequencyPWM(&frequency, sigConfigMail->frequency, k);
+				}
+
+				if (sigConfigMail->changedParameter == AMPLITUDE)
+				{
+					amplitude = updateAmplitudePWM(amplitude, sigConfigMail->amplitude);
+				}
+
+				osMailFree(qidSigGenMailQueue, sigConfigMail);
+			}
+		}
+
 		// Loop de espera.
 		// Como o timer não tem resolução menor que 1 ms,
 		// teremos de usar espera ocupada com base no 
@@ -56,20 +84,19 @@ void SignalGenerator(const void* args)
 		// gerador de sinal.
 		while ((osKernelSysTick() - tick) < osKernelSysTickMicroSec(timeForDCChange)) ;
 		tick = osKernelSysTick();
-		// osSignalWait(SIG_UPDATE_PWM, osWaitForever);
 		#if SIMULADOR == 0
 		setDutyCycle(dutyCycle);
 		#endif
 
-		dutyCycle = updateDutyCycle(waveform, n, k*adjust);
+		dutyCycle = updateDutyCycle(waveform, amplitude, n, k*adjust);
 
 		n++;
 	}
 }
 
-float updateDutyCycle(uint8_t waveform, uint16_t n, uint16_t k)
+float updateDutyCycle(uint8_t waveform, float amplitude, uint16_t n, uint16_t k)
 {
-	float dutyCycle = 0.5, increment = 0.01;
+	float dutyCycle = 0.5;
 	// O valor de n deve ser atualizado para corresponder
 	// à frequência desejada.
 	// Como a onda deve ser periódica, a multiplicação deve
@@ -84,10 +111,10 @@ float updateDutyCycle(uint8_t waveform, uint16_t n, uint16_t k)
 			break;
 
 		case TRIANGULAR:
-			if (dutyCycle <= 0.1)
-				dutyCycle += increment;
-			if (0.90 <= dutyCycle)
-				dutyCycle = -increment;
+			if (n < N/2.0)
+				dutyCycle = 2 * n / N;
+			else
+				dutyCycle = 2 - 2 * n / N;
 			break;
 
 		case TRAPEZOIDAL:
@@ -98,19 +125,16 @@ float updateDutyCycle(uint8_t waveform, uint16_t n, uint16_t k)
 			 * 		- Down
 			 * 		- Corte
 			 * 
-			 *  256/4 = 2**8 / 2**2 = 2**6 = 64
+			 *  65536/4 = 2**16 / 2**2 = 2**14
 			 ****************************/
 			if (0 < n && n < N/4.0) // Um quarto da onda a amplitude aumenta.
-				dutyCycle += increment;
-			// else if (N/4 <= n && n < N*2/4) // O segundo quarto se mantém.
-			// 	NOP;
+				dutyCycle = 4 * n / N;
+			else if (N/4 <= n && n < N*2/4) // O segundo quarto se mantém.
+				dutyCycle = 0.95;
 			else if (N*2.0/4.0 <= n && n < N*3.0/4.0) // No terceiro quarto a amplitude diminui.
-				dutyCycle -= increment;
-			// else if (N*3/4 <= n && n < N) // No último quarto a amplitude se mantém novamente.
-			// 	NOP;
-			if (n == 0)
-				dutyCycle = 0.05; // Linha necessária para a precisão do float não
-								  // distorcer a onda.
+				dutyCycle = 3 - 4*n/N;
+			else if (N*3/4 <= n && n < N) // No último quarto a amplitude se mantém novamente.
+				dutyCycle = 0.05;
 			break;
 
 		case SQUARE:
@@ -127,74 +151,40 @@ float updateDutyCycle(uint8_t waveform, uint16_t n, uint16_t k)
 			dutyCycle = n / N;
 	}
 
+	dutyCycle = dutyCycle * amplitude / MAX_AMPLITUDE;
 	return dutyCycle;
 }
 
-void timerCallback(const void* args)
+WAVEFORMS updateWaveformPWM(WAVEFORMS oldWaveform, WAVEFORMS newWaveform)
 {
-	// osSignalSet(tidSignalGenerator, SIG_UPDATE_PWM);
+	if (SINUSOIDAL <= newWaveform && newWaveform <= SAWTOOTH)
+	{
+		return newWaveform;
+	}
+
+	return oldWaveform;
 }
 
-void makeSawTooth(void)
+uint16_t updateFrequencyPWM(float* oldFrequency, float newFrequency, uint16_t oldK)
 {
-	uint16_t n = 0;
-	double dutyCycle; // Define duty cycle
-	float f = 1;
-	float t = 1.0/f;
-	uint16_t numSamples = 1000;
+	uint16_t k;
 	
-    while (true)
-    {	
-		osDelay(t/numSamples);
-		dutyCycle = (double)(n)/(double)numSamples;
-		n = (n + 1) % numSamples;
-		setDutyCycle(dutyCycle);
-	}
+	// Range de frequências inválidas
+	if (newFrequency < 1.52 || newFrequency > 200)
+		return oldK;
+
+	*oldFrequency = newFrequency;
+	k = newFrequency/1.52;
+	return k;
 }
 
-void makeSinusoid(void)
+float updateAmplitudePWM(float oldAmplitude, float newAmplitude)
 {
-	uint16_t n = 0;
-	float f = 50;
-	double dutyCycle = 0.50; // Define duty cycle
-
-	setPeriod(1000);
-    while (true)
-    {		
-		dutyCycle = (sin(2*3.1415*f/65536*n) + 1)/2;	
-		n++;
-		setDutyCycle(dutyCycle);
-    }
-}
-
-
-
-void makeSquare(void)
-{
-	float dutyCycle = 1;
-	setPeriod(1000);
-	while(true)
+	if (0 < newAmplitude && newAmplitude <= 33)
 	{
-		setDutyCycle(0.1);
-		// osDelay(10);
-		setDutyCycle(0.9);
-		// osDelay(10);
+		return newAmplitude;
 	}
+
+	return MAX_AMPLITUDE;
 }
-
-
-void makeTriangular(void)
-{
-	float dutyCycle = 0, increment = 0.01;
-	setPeriod(1000);
-	while(true)
-	{
-		setDutyCycle(dutyCycle);
-		dutyCycle += increment;
-		if (dutyCycle <= 0.01 || 0.99 <= dutyCycle)
-			increment = -increment;
-		osDelay(10);
-	}
-}
-
 

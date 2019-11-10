@@ -55,9 +55,10 @@ extern void drawSquare(tContext *sContext);
 extern void drawSaw(tContext *sContext);
 extern void plot(tContext *sContext, uint8_t x[WAVE_DISPLAY_WIDTH], uint8_t y[WAVE_DISPLAY_HEIGHT]);
 extern void clearWaveform(tContext *sContext, WAVEFORMS waveform);
-extern WAVEFORMS updateWaveform(tContext* sContext, WAVEFORMS oldWaveform, WAVEFORMS newWaveform);
-extern float updateFrequency(tContext* sContext, float oldFrequency, float newFrequency);
+extern WAVEFORMS updateWaveformDisplay(tContext* sContext, WAVEFORMS oldWaveform, WAVEFORMS newWaveform);
+extern float updateFrequencyDisplay(tContext* sContext, float oldFrequency, float newFrequency);
 extern void clearFrequency(tContext *sContext, float frequency);
-
+extern float updateAmplitudeDisplay(tContext *sContext, float oldAmplitude, float newAmplitude);
+extern void clearAmplitude(tContext *sContext, float amplitude);
 
 #endif

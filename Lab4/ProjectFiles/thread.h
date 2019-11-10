@@ -6,12 +6,10 @@
 extern void UART(const void *args);
 extern void Display(const void *args);
 extern void SignalGenerator(const void *args);
-extern void timerCallback(const void *args);
 
 extern osThreadId tidSignalGenerator;
 
 extern void createThreads(void);
-extern void createTimer(void);
 extern void createMailQueue(void);
 
 extern osMessageQId qidUARTMsgBox;

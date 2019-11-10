@@ -9,9 +9,6 @@ osThreadId tidDisplay;
 osThreadDef(SignalGenerator, osPriorityNormal, 1, 0);
 osThreadId tidSignalGenerator;
 
-osTimerDef(Timer, timerCallback);
-osTimerId tidTimer;
-
 osMessageQDef(uartMsgBox, 1, char);
 osMessageQId qidUARTMsgBox;
 
@@ -29,12 +26,6 @@ void createThreads(void)
     tidSignalGenerator = osThreadCreate(osThread(SignalGenerator), NULL);
     osThreadCreate(osThread(Display), NULL);
     #endif
-}
-
-void createTimer(void)
-{
-    tidTimer = osTimerCreate(osTimer(Timer), osTimerPeriodic, NULL);
-    osTimerStart(tidTimer, SIGGEN_TRIGGER_TIME);
 }
 
 void createMailQueue(void)
