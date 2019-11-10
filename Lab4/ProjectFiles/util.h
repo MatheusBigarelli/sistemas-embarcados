@@ -31,6 +31,10 @@
     SIG_WAVEFORM_SQR |\
     SIG_WAVEFORM_SAW )
 
+
+#define MAX_SIG_CFG_MAILS 3
+
+
 #define SIMULADOR 0
 
 typedef enum
@@ -41,5 +45,12 @@ typedef enum
     SQUARE,
     SAWTOOTH
 } WAVEFORMS;
+
+typedef struct
+{
+    float amplitude;
+    float frequency;
+    WAVEFORMS waveform;
+} SignalConfig_t;
 
 #endif

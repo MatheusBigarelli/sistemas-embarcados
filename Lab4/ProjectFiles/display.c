@@ -4,24 +4,40 @@ void Display(void const* args)
 {
     //To print on the screen
     tContext sContext;
+
+    osEvent event;
+    SignalConfig_t* sigConfigMail;
     
-    uint8_t waveform = TRIANGULAR;
+    WAVEFORMS waveform = TRIANGULAR;
     float frequency = 15.21, amplitude = 1.5;
 	
-    // Inicialização do display.
     displayInit(&sContext);
-
     printHeader(&sContext);
-
     printFrequency(&sContext, frequency);
-
     printAmplitude(&sContext, amplitude);
-
     drawWaveform(&sContext, waveform);
 
     while (true)
     {
+        event = osMailGet(qidDisplayMailQueue, osWaitForever);
+        if (event.status == osEventMail)
+        {
+            sigConfigMail = event.value.p;
+            if (sigConfigMail != NULL)
+            {
+                if (waveform != sigConfigMail->waveform)
+                {
+                    waveform = updateWaveform(&sContext, waveform, sigConfigMail->waveform);
+                }
 
+                if (frequency != sigConfigMail->frequency)
+                {
+                    frequency = updateFrequency(&sContext, frequency, sigConfigMail->frequency);
+                }
+
+                osMailFree(qidDisplayMailQueue, sigConfigMail);
+            }
+        }
     }
 }
 
@@ -164,8 +180,7 @@ void intToString(int64_t value, char *pBuf, uint32_t len, uint32_t base, uint8_t
     } while (value > 0);
 }
 
-
-void drawWaveform(tContext* sContext, uint8_t waveform)
+void drawWaveform(tContext *sContext, WAVEFORMS waveform)
 {
 
     switch (waveform)
@@ -318,4 +333,43 @@ void plot(tContext* sContext, uint8_t x[WAVE_DISPLAY_WIDTH], uint8_t y[WAVE_DISP
         GrPixelDraw(sContext, x[i], y[i]);
 }
 
+void clearWaveform(tContext* sContext, WAVEFORMS waveform)
+{
+    GrContextForegroundSet(sContext, ClrBlack);
+    drawWaveform(sContext, waveform);
+    GrContextForegroundSet(sContext, ClrWhite);
+}
 
+WAVEFORMS updateWaveform(tContext* sContext, WAVEFORMS oldWaveform, WAVEFORMS newWaveform)
+{
+    // Ondas válidas
+    if (SINUSOIDAL <= newWaveform && newWaveform <= SAWTOOTH)
+    {
+        clearWaveform(sContext, oldWaveform);
+        drawWaveform(sContext, newWaveform);
+        return newWaveform;
+    }
+    
+    // Número dado não é uma forma de onda válida.
+    return oldWaveform;
+}
+
+float updateFrequency(tContext* sContext, float oldFrequency, float newFrequency)
+{
+    // Frequências válidas
+    if (0 < newFrequency && newFrequency <= 200)
+    {
+        clearFrequency(sContext, oldFrequency);
+        printFrequency(sContext, newFrequency);
+        return newFrequency;
+    }
+
+    return oldFrequency;
+}
+
+void clearFrequency(tContext* sContext, float frequency)
+{
+    GrContextForegroundSet(sContext, ClrBlack);
+    printFrequency(sContext, frequency);
+    GrContextForegroundSet(sContext, ClrWhite);
+}

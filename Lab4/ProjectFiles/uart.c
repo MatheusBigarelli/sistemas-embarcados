@@ -16,7 +16,7 @@ void UART(const void* args)
 	char receveidChar = 'h';
 	char buffer[32];
 	int currentIndex = 0;
-	signalConfig_t config;
+	SignalConfig_t* config;
 //	UART0_TxString("Digite o numero e pressione ENTER\r\n");
 
 	ID currentMenu = MainMenu;
@@ -40,6 +40,25 @@ void UART(const void* args)
 				{
 					currentMenu = (ID)(buffer[currentIndex-1 - 1] - '0'); // '1' - '0' em decimal = 49 - 48 = 1, '2' - '0' = 50 - 48 = 2 ...
 				} else { // O comando configurou um parametro(frequencia, amplitude ou mostrar Gantt), agora deve voltar para menu principal
+					switch (currentMenu)
+					{
+						case WaveformMenu:
+							config = osMailAlloc(qidDisplayMailQueue, osWaitForever);
+							config->waveform = buffer[0] - '1'; // No menu a primeira onda é índice 1.
+							osMailPut(qidDisplayMailQueue, config);
+							break;
+						case FreqMenu:
+							config = osMailAlloc(qidDisplayMailQueue, osWaitForever);
+							config->frequency = 100;
+							osMailPut(qidDisplayMailQueue, config);
+							break;
+						case AmpMenu:
+							break;
+						default:
+							config = osMailAlloc(qidDisplayMailQueue, osWaitForever);
+							config->waveform = 4; // No menu a primeira onda é índice 1.
+							osMailPut(qidDisplayMailQueue, config);
+					}
 					currentMenu = MainMenu;
 				}
 				clearBuffer(buffer, &currentIndex); //currentIndex eh passado por referencia para ser zerado dentro da funcao tambem
@@ -140,9 +159,9 @@ void UART0_PrintMenu(ID currentMenu)
 		UART0_TxString("****Menu Forma de Onda****\r\n");
 		UART0_TxString("1)Senoidal\r\n");
 		UART0_TxString("2)Triangular\r\n");
-		UART0_TxString("3)Dente-de-serra\r\n");
+		UART0_TxString("3)Trapezoidal\r\n");
 		UART0_TxString("4)Quadrada\r\n");
-		UART0_TxString("5)Trapezoidal\r\n");
+		UART0_TxString("5)Dente-de-serra\r\n");
 		break;
 		case FreqMenu:
 		UART0_TxString("****Menu Frequencia****\r\n");

@@ -14,15 +14,8 @@ extern void createThreads(void);
 extern void createTimer(void);
 extern void createMailQueue(void);
 
-
-typedef struct
-{
-	double amplitude;
-	double frequency;
-	WAVEFORMS waveform;	
-}signalConfig_t;
-
-
 extern osMessageQId qidUARTMsgBox;
+extern osMailQId qidDisplayMailQueue;
+extern osMailQId qidSigGenMailQueue;
 
 #endif
