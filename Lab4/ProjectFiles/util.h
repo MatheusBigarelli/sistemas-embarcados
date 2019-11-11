@@ -18,6 +18,8 @@
 
 #define SIMULADOR 0
 
+#define MAX_ACTIVATIONS 50
+
 typedef enum
 {
     SINUSOIDAL,
@@ -41,5 +43,12 @@ typedef struct
     WAVEFORMS waveform;
     PARAMETERS changedParameter;
 } SignalConfig_t;
+
+
+typedef struct
+{
+	char name[16];
+	double lastTick;
+} GanttInfo_t;
 
 #endif

@@ -9,6 +9,13 @@ extern void SignalGenerator(const void *args);
 
 extern osThreadId tidSignalGenerator;
 
+
+extern void tickCounter(uint32_t* previousTick, char* name);
+
+extern GanttInfo_t activationSeq[MAX_ACTIVATIONS];
+extern uint32_t currentActivation;
+extern bool activationSequenceFull;
+
 extern void createThreads(void);
 extern void createMailQueue(void);
 

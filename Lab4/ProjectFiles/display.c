@@ -7,9 +7,10 @@ void Display(void const* args)
 
     osEvent event;
     SignalConfig_t* sigConfigMail;
+	uint32_t lastTick = osKernelSysTick();
     
     WAVEFORMS waveform = TRIANGULAR;
-    float frequency = 15.21, amplitude = 1.5;
+    float frequency = 1.52, amplitude = 3.3;
 	
     displayInit(&sContext);
     printHeader(&sContext);
@@ -43,6 +44,8 @@ void Display(void const* args)
                 osMailFree(qidDisplayMailQueue, sigConfigMail);
             }
         }
+		
+		tickCounter(&lastTick,"Display");
     }
 }
 

@@ -19,7 +19,7 @@ void PWM_Init(void)
     GPIO_PORTG_AHB_AFSEL_R = GPIO_PORTG_BITS; // Sinaliza que os pinos serao usados com funcao alternativa. O pino G1 alternativamente funciona comoM0PWM5
     GPIO_PORTG_AHB_DEN_R = GPIO_PORTG_BITS;   // Ativa os pinos
 
-    PWM0_CC_R = PWM_SYSCLK_DIV2;    // Divide por 2 o clock do sistema (Ex.: 80/2=40Mhz)
+    PWM0_CC_R = PWM_SYSCLK_DIV2;    // Divide por 2 o clock do sistema (Ex.: 120/2=60Mhz)
     PWM0_2_CTL_R = ~PWM_X_ENABLE;    // Desabilita a saída do gerador.
     PWM0_2_GENB_R = 0x80c;    // Seta a opção de @TODO encontrar opção no datasheet
 
@@ -28,8 +28,9 @@ void PWM_Init(void)
 
 void setPeriod(uint16_t period)
 {
+	
     if (PWM_PERIOD_MIN < period && period < PWM_PERIOD_MAX)
-        PWM0_2_LOAD_R = period; // Usando o modo count down
+        PWM0_2_LOAD_R = 60*period; // Usando o modo count down
 }
 
 void setDutyCycle(float dutyCycle)

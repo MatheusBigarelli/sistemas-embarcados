@@ -17,6 +17,7 @@ void UART(const void* args)
 	char buffer[32];
 	int currentIndex = 0;
 	SignalConfig_t* config;
+	uint32_t lastTick = osKernelSysTick();
 //	UART0_TxString("Digite o numero e pressione ENTER\r\n");
 
 	ID currentMenu = MainMenu;
@@ -85,8 +86,9 @@ void UART(const void* args)
 				clearBuffer(buffer, &currentIndex); //currentIndex eh passado por referencia para ser zerado dentro da funcao tambem
 				UART0_PrintMenu(currentMenu);
 			}
-			
 		}
+		
+		tickCounter(&lastTick,"UART");
     }
 }
 
@@ -106,8 +108,8 @@ void UART_init(void)
     UART0_CTL_R = 0x0;
 
     //Escrever Baud-Rate para 19200 bps
-    UART0_IBRD_R = 260;
-    UART0_FBRD_R = 27;
+    UART0_IBRD_R = 390;
+    UART0_FBRD_R = 40;
 
     //Configurando UARTLCRH
     UART0_LCRH_R |= 0x60; // 8bits, Ativa FIFO, 1 stop bit, sem paridade
@@ -195,12 +197,51 @@ void UART0_PrintMenu(ID currentMenu)
 		break;
 		case GanttMenu:
 		UART0_TxString("****Menu Gantt****\r\n");
+		printGanttDiagram();
 		UART0_TxString("1)Voltar\r\n");
 		break;
 		default:
 		UART0_TxString("Nao devia estar aqui\r\n");
 	}
-}	
+}
+
+void printGanttDiagram(void)
+{
+	int i, max;
+	char buffer[64];
+	osThreadId id;
+	UART0_TxString("gantt\r\n");
+	UART0_TxString("\t title A Gantt Diagram\r\n");
+	UART0_TxString("\t dateFormat SSS\r\n");
+	UART0_TxString("\t axisFormat %L\r\n");
+	
+	if(activationSequenceFull){
+		max = MAX_ACTIVATIONS;
+	}
+	else{
+		max = currentActivation;
+	}
+	
+	UART0_TxString("section Threads\r\n");
+	for(i = 0; i < max; i++){
+		UART0_TxString("\t");
+		UART0_TxString(activationSeq[i].name);
+		UART0_TxString("\t:");
+		if(i == 0){
+			UART0_TxString("000, ");
+			intToString(activationSeq[i].lastTick,buffer,64,10,3);
+		}
+		else{
+			intToString(activationSeq[i-1].lastTick,buffer,64,10,3);
+			UART0_TxString(buffer);
+			UART0_TxString(", ");
+			intToString(activationSeq[i].lastTick,buffer,64,10,3);
+		}
+		UART0_TxString(buffer);
+		UART0_TxString("\r\n");
+	}
+	UART0_TxString("\r\n");
+}
 /* Funcao: void UART0_TxChar(char data)
  * Envia para UART um caractere
  * Param: data -> Caractere a ser enviado

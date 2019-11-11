@@ -80,4 +80,11 @@ bool isCommand(char *buffer, int size);
 void clearBuffer(char *buffer, int *size);
 float extractNumberFromCommand(char *buffer, int size, ID menu);
 
+
+extern void floatToString(float value, char *pBuf, uint32_t len, uint32_t base, uint8_t zeros, uint8_t precision);
+extern void intToString(int64_t value, char *pBuf, uint32_t len, uint32_t base, uint8_t zeros);
+
+
+void printGanttDiagram(void);
+
 #endif

@@ -38,7 +38,7 @@
 void init_all(){
 #if SIMULADOR == 0
 	cfaf128x128x16Init();
-	PLL_Init();
+	//PLL_Init();
 	GPIO_Init();
 	UART_init();
 	PWM_Init();

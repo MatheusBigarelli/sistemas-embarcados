@@ -1,5 +1,7 @@
 #include "siggen.h"
 
+uint32_t tickG;
+
 void SignalGenerator(const void* args)
 {
 	/**
@@ -20,19 +22,24 @@ void SignalGenerator(const void* args)
 	 * A constante 10^6 deve-se ao fato do valor
 	 * timeForDCChange estar em us.
 	 * */
-	uint8_t waveform = TRIANGULAR;
-	uint16_t n = 0, k = 1, adjust = 9; // Os valores de k e adjust serão explicados abaixo.
+	uint8_t waveform = SINUSOIDAL;
+	uint16_t n = 0;
+	float k = 1, adjust = 1; // Os valores de k e adjust serão explicados abaixo.
 	uint32_t tick; // Último tick pego (último tempo analisado).
 	uint32_t timeForDCChange = 10; // Tempo entre duas mudanças no dutycycle em us.
 	float dutyCycle = 0.05;
-	float frequency = 1.52;
+	float frequency = 10;
 	float amplitude = 3.3;
+	uint8_t flag = 1;
 	osEvent event;
 	SignalConfig_t* sigConfigMail;
+	uint32_t lastTick = osKernelSysTick();
 
-	setPeriod(100);
+
+	setPeriod(10);
 	tick = osKernelSysTick();
-
+	tickG = osKernelSysTick();
+	
 	/**
 	 * Vamos utilizar um período base de espera de 10 us
 	 * e um número de valores N de 2^16 na onda.
@@ -88,15 +95,18 @@ void SignalGenerator(const void* args)
 		setDutyCycle(dutyCycle);
 		#endif
 
-		dutyCycle = updateDutyCycle(waveform, amplitude, n, k*adjust);
+		dutyCycle = updateDutyCycle(waveform, amplitude, n, k);
 
 		n++;
+		if (!n)
+			tickG = osKernelSysTick();
+		tickCounter(&lastTick,"SigGen");
 	}
 }
 
 float updateDutyCycle(uint8_t waveform, float amplitude, uint16_t n, uint16_t k)
 {
-	float dutyCycle = 0.5;
+	float dutyCycle = 0.5, increment = 1/N;
 	// O valor de n deve ser atualizado para corresponder
 	// à frequência desejada.
 	// Como a onda deve ser periódica, a multiplicação deve
@@ -107,7 +117,7 @@ float updateDutyCycle(uint8_t waveform, float amplitude, uint16_t n, uint16_t k)
 	switch (waveform)
 	{
 		case SINUSOIDAL:
-			dutyCycle = (1+sin(2*3.1415 * n/N)) / 2.0;
+			dutyCycle = (1+sin(2*3.1415 * k*(osKernelSysTick()-tickG)/osKernelSysTickFrequency)) / 2.0;
 			break;
 
 		case TRIANGULAR:
@@ -174,7 +184,7 @@ uint16_t updateFrequencyPWM(float* oldFrequency, float newFrequency, uint16_t ol
 		return oldK;
 
 	*oldFrequency = newFrequency;
-	k = newFrequency/1.52;
+	k = newFrequency;
 	return k;
 }
 
@@ -187,4 +197,8 @@ float updateAmplitudePWM(float oldAmplitude, float newAmplitude)
 
 	return MAX_AMPLITUDE;
 }
+
+
+
+
 
