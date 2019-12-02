@@ -63,7 +63,10 @@ void init_sidelong_menu(){
 /*----------------------------------------------------------------------------
  *      Main
  *---------------------------------------------------------------------------*/
-int main (void) {
+int main (void)
+{
+	osEvent event;
+
 	osKernelInitialize();
 
 	#if SIMULADOR == 0
@@ -72,10 +75,30 @@ int main (void) {
 	#endif
 
 	createThreads();
+	createTimers();
 
 	osKernelStart();
 
 	tidMain = osGetThreadId();
 
+	while (true)
+	{
+		schedule();
+		
+		// Manda informações para onde precisa.
+		// HINT: send info display uart.
+		mailMan();
+	}
+
 	return 0;
+}
+
+void schedule(void)
+{
+
+}
+
+void mailMan()
+{
+
 }

@@ -14,28 +14,28 @@ osTimerId tidTimerA;
 
 osThreadDef(ThreadB, osPriorityNormal, 1, 0);
 osThreadId tidThreadB;
-osTimerDef(TimerA, callbackTimer);
-osTimerId tidTimerA;
+osTimerDef(TimerB, callbackTimer);
+osTimerId tidTimerB;
 
 osThreadDef(ThreadC, osPriorityNormal, 1, 0);
 osThreadId tidThreadC;
-osTimerDef(TimerA, callbackTimer);
-osTimerId tidTimerA;
+osTimerDef(TimerC, callbackTimer);
+osTimerId tidTimerC;
 
 osThreadDef(ThreadD, osPriorityNormal, 1, 0);
 osThreadId tidThreadD;
-osTimerDef(TimerA, callbackTimer);
-osTimerId tidTimerA;
+osTimerDef(TimerD, callbackTimer);
+osTimerId tidTimerD;
 
 osThreadDef(ThreadE, osPriorityNormal, 1, 0);
 osThreadId tidThreadE;
-osTimerDef(TimerA, callbackTimer);
-osTimerId tidTimerA;
+osTimerDef(TimerE, callbackTimer);
+osTimerId tidTimerE;
 
 osThreadDef(ThreadF, osPriorityNormal, 1, 0);
 osThreadId tidThreadF;
-osTimerDef(TimerA, callbackTimer);
-osTimerId tidTimerA;
+osTimerDef(TimerF, callbackTimer);
+osTimerId tidTimerF;
 
 osThreadId tidMain;
 
@@ -53,11 +53,11 @@ void createThreads()
 void createTimers()
 {
     tidTimerA = osTimerCreate(osTimer(TimerA), osTimerPeriodic, (void*) SIG_THREAD_A);
-    tidTimerA = osTimerCreate(osTimer(TimerA), osTimerPeriodic, (void*) SIG_THREAD_B);
-    tidTimerA = osTimerCreate(osTimer(TimerA), osTimerPeriodic, (void*) SIG_THREAD_C);
-    tidTimerA = osTimerCreate(osTimer(TimerA), osTimerPeriodic, (void*) SIG_THREAD_D);
-    tidTimerA = osTimerCreate(osTimer(TimerA), osTimerPeriodic, (void*) SIG_THREAD_E);
-    tidTimerA = osTimerCreate(osTimer(TimerA), osTimerPeriodic, (void*) SIG_THREAD_F);
+    tidTimerB = osTimerCreate(osTimer(TimerB), osTimerPeriodic, (void*) SIG_THREAD_B);
+    tidTimerC = osTimerCreate(osTimer(TimerC), osTimerPeriodic, (void*) SIG_THREAD_C);
+    tidTimerD = osTimerCreate(osTimer(TimerD), osTimerPeriodic, (void*) SIG_THREAD_D);
+    tidTimerE = osTimerCreate(osTimer(TimerE), osTimerPeriodic, (void*) SIG_THREAD_E);
+    tidTimerF = osTimerCreate(osTimer(TimerF), osTimerPeriodic, (void*) SIG_THREAD_F);
 }
 
 void callbackTimer(const void* args)
@@ -70,6 +70,11 @@ void callbackTimer(const void* args)
 
 void threadYield()
 {
-
+    // Diminuir prioridade da thread atual
+    osSetPriority(osThreadGetId(), osPriorityIdle);
+    // Aumentar prioridade do escalonador
+    osSetPriority(tidMain, osPriorityNormal);
+    
+    osThreadYield();
 }
 
