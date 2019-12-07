@@ -7,6 +7,9 @@ void ThreadD(const void *args);
 void ThreadE(const void *args);
 void ThreadF(const void *args);
 
+void Display(const void *args);
+
+
 osThreadDef(ThreadA, osPriorityNormal, 1, 0);
 osThreadId tidThreadA;
 osTimerDef(TimerA, callbackTimer);
@@ -39,6 +42,9 @@ osTimerId tidTimerF;
 
 osThreadId tidMain;
 
+osThreadDef(Display, osPriorityNormal, 1, 0);
+osThreadId tidDisplay;
+
 osMessageQDef(uartMsgBox, 1, char);
 
 void createThreads()
@@ -48,7 +54,11 @@ void createThreads()
     tidThreadC = osThreadCreate(osThread(ThreadC), NULL);
     tidThreadD = osThreadCreate(osThread(ThreadD), NULL);
     tidThreadE = osThreadCreate(osThread(ThreadE), NULL);
-    tidThreadF = osThreadCreate(osThread(ThreadF), NULL);    
+    tidThreadF = osThreadCreate(osThread(ThreadF), NULL);
+    
+    #if SIMULADOR == 0
+    tidDisplay = osThreadCreate(osThread(Display), NULL);
+    #endif
 }
 
 void createTimers()

@@ -432,6 +432,11 @@
               <FileType>5</FileType>
               <FilePath>.\tm4c1294ncpdt.h</FilePath>
             </File>
+            <File>
+              <FileName>display.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\display.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -955,6 +960,11 @@
               <FileName>tm4c1294ncpdt.h</FileName>
               <FileType>5</FileType>
               <FilePath>.\tm4c1294ncpdt.h</FilePath>
+            </File>
+            <File>
+              <FileName>display.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\display.c</FilePath>
             </File>
           </Files>
         </Group>
