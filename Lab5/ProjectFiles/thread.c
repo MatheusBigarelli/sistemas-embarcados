@@ -4,42 +4,42 @@
 void Display(const void *args);
 
 
-osThreadDef(ThreadA, osPriorityBelowNormal, 1, 0);
+osThreadDef(ThreadA, osPriorityIdle, 1, 0);
 osThreadId tidThreadA;
 osTimerDef(TimerA, callbackTimer);
 osTimerId tidTimerA;
 
-osThreadDef(ThreadB, osPriorityBelowNormal, 1, 0);
+osThreadDef(ThreadB, osPriorityIdle, 1, 0);
 osThreadId tidThreadB;
 osTimerDef(TimerB, callbackTimer);
 osTimerId tidTimerB;
 
-osThreadDef(ThreadC, osPriorityBelowNormal, 1, 0);
+osThreadDef(ThreadC, osPriorityIdle, 1, 0);
 osThreadId tidThreadC;
 osTimerDef(TimerC, callbackTimer);
 osTimerId tidTimerC;
 
-osThreadDef(ThreadD, osPriorityBelowNormal, 1, 0);
+osThreadDef(ThreadD, osPriorityIdle, 1, 0);
 osThreadId tidThreadD;
 osTimerDef(TimerD, callbackTimer);
 osTimerId tidTimerD;
 
-osThreadDef(ThreadE, osPriorityBelowNormal, 1, 0);
+osThreadDef(ThreadE, osPriorityIdle, 1, 0);
 osThreadId tidThreadE;
 osTimerDef(TimerE, callbackTimer);
 osTimerId tidTimerE;
 
-osThreadDef(ThreadF, osPriorityBelowNormal, 1, 0);
+osThreadDef(ThreadF, osPriorityIdle, 1, 0);
 osThreadId tidThreadF;
 osTimerDef(TimerF, callbackTimer);
 osTimerId tidTimerF;
 
-osThreadDef(UART, osPriorityBelowNormal, 1, 0);
+osThreadDef(UART, osPriorityIdle, 1, 0);
 osThreadId tidUART;
 
 osThreadId tidMain;
 
-osThreadDef(Display, osPriorityBelowNormal, 1, 0);
+osThreadDef(Display, osPriorityIdle, 1, 0);
 osThreadId tidDisplay;
 osMailQDef(uartMailQ, 1, Gantt_Info);
 osMailQId qidUartMailQueue;
@@ -86,7 +86,8 @@ void threadSwitch(osThreadId tid)
     // Aumentar a prioridade da thread escolhida.
     // Fazer isso já troca a thread para a que tiver
     // a maior prioridade.
-    osThreadSetPriority(tid, osPriorityHigh);
+    osThreadSetPriority(tid, osPriorityNormal);
+    osThreadSetPriority(tidMain, osPriorityIdle);
 }
 
 void threadYield()
@@ -94,6 +95,7 @@ void threadYield()
     // Diminuir prioridade da thread atual
     // Ao fazer isso a thread já é retirada caso exista
     // uma thread com prioridade maior
-    osThreadSetPriority(osThreadGetId(), osPriorityBelowNormal);
+    osThreadSetPriority(osThreadGetId(), osPriorityIdle);
+    osThreadSetPriority(tidMain, osPriorityNormal);
 }
 
