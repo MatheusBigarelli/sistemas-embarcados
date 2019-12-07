@@ -141,40 +141,24 @@ THREAD_INDEX signalToIndex(uint32_t signal)
 }
 
 
+void initThreadInfo(THREAD_INDEX tindex, uint32_t durationInTicks, int32_t staticPriority, char charId, osThreadId id)
+{
+    threadsInfo[tindex].durationInTicks = durationInTicks;
+    threadsInfo[tindex].staticPriority = staticPriority;
+    threadsInfo[tindex].charId = charId;
+    threadsInfo[tindex].id = id;
+}
+
 void initThreadsInfo()
 {
 	int i;
 	// O -1 eh para evitar o escalonador
-    threadsInfo[THREAD_A_INDEX].durationInTicks = 0x0682;
-    threadsInfo[THREAD_A_INDEX].staticPriority = 10;
-    threadsInfo[THREAD_A_INDEX].charId = 'A';
-    threadsInfo[THREAD_A_INDEX].id = tidThreadA;
-    
-    threadsInfo[THREAD_B_INDEX].durationInTicks = 0x49AB;
-    threadsInfo[THREAD_B_INDEX].staticPriority = 0;
-    threadsInfo[THREAD_B_INDEX].charId = 'B';
-    threadsInfo[THREAD_B_INDEX].id = tidThreadB;
-    
-    threadsInfo[THREAD_C_INDEX].durationInTicks = 0x15F5;
-    threadsInfo[THREAD_C_INDEX].staticPriority = -30;
-    threadsInfo[THREAD_C_INDEX].charId = 'C';
-    threadsInfo[THREAD_C_INDEX].id = tidThreadC;
-    
-    threadsInfo[THREAD_D_INDEX].durationInTicks = 0x0CF0;
-    threadsInfo[THREAD_D_INDEX].staticPriority = 0;
-    threadsInfo[THREAD_D_INDEX].charId = 'D';
-    threadsInfo[THREAD_D_INDEX].id = tidThreadD;
-    
-    threadsInfo[THREAD_E_INDEX].durationInTicks = 0x1E29;
-    threadsInfo[THREAD_E_INDEX].staticPriority = -30;
-    threadsInfo[THREAD_E_INDEX].charId = 'E';
-    threadsInfo[THREAD_E_INDEX].id = tidThreadE;
-    
-    threadsInfo[THREAD_F_INDEX].durationInTicks = 0x2829;
-    threadsInfo[THREAD_F_INDEX].staticPriority = -100;
-    threadsInfo[THREAD_F_INDEX].charId = 'F';
-    threadsInfo[THREAD_F_INDEX].id = tidThreadF;
-    
+    initThreadInfo(THREAD_A_INDEX, 0x0682, 10, 'A', tidThreadA);
+    initThreadInfo(THREAD_B_INDEX, 0x49AB, 0, 'B', tidThreadB);
+    initThreadInfo(THREAD_C_INDEX, 0x15F5, -30, 'C', tidThreadC);
+    initThreadInfo(THREAD_D_INDEX, 0x0CF0, 0, 'D', tidThreadD);
+    initThreadInfo(THREAD_E_INDEX, 0x1E29, -30, 'E', tidThreadE);
+    initThreadInfo(THREAD_F_INDEX, 0x2829, -100, 'F', tidThreadF);    
     
 	for(i=0;i<TOTAL_THREADS - 1;i++){
 		threadsInfo[i].currentState = READY;
