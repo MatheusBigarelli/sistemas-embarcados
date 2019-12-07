@@ -88,6 +88,7 @@ int main (void)
 
 	tidMain = osThreadGetId();
 	clearUART();
+	initThreadsInfo();
 	while (true)
 	{
 		schedule();
@@ -95,28 +96,54 @@ int main (void)
 		// Manda informações para onde precisa.
 		// HINT: send info display uart.
 		//mailMan();
-		event = osSignalWait(SIG_GANTT, 0);
-		if(event.status == osEventSignal){
-			// Recebeu SIG_GANTT
-			// Envia as informações necessárias para thread UART montar Gantt
-			info = osMailAlloc(qidUartMailQueue, osWaitForever);
-			info->ids[0] = 0;
-			info->durations[0] = 100;
-			osMailPut(qidUartMailQueue, info);
-		}
+//		event = osSignalWait(SIG_GANTT, 0);
+//		if(event.status == osEventSignal){
+//			// Recebeu SIG_GANTT
+//			// Envia as informações necessárias para thread UART montar Gantt
+//			info = osMailAlloc(qidUartMailQueue, osWaitForever);
+//			info->ids[0] = 0;
+//			info->durations[0] = 100;
+//			osMailPut(qidUartMailQueue, info);
+//		}
 	}
 
 	return 0;
 }
 
+
+void calculateInternalPriorities()
+{
+	int i;
+	// O -1 eh para evitar o escalonador
+	for(i=0;i<TOTAL_THREADS - 1;i++)
+    {
+		
+	}
+}
+//Baseado nas prioridades internas aplica as prioridades do CMSIS = {osPriorityNormal, osPriorityIdle}
+osThreadId aplyPriorityFromCMSIS()
+{
+    int i, lowestPrio = 999;
+    volatile char charId;
+    osThreadId lowestId;
+    // Lembrar que a prioridade interna de menor valor eh a mais alta
+    for(i = 0; i < TOTAL_THREADS - 1; i++)
+    {
+        if(threadsInfo[i].currentState != WAITING && threadsInfo[i].dinamicPriority < lowestPrio)//Se thread estiver esperando nao considera ela
+        {
+            lowestId = threadsInfo[i].id;
+            lowestPrio = threadsInfo[i].dinamicPriority;
+            charId = threadsInfo[i].charId;
+        }
+    }
+    
+    return lowestId; // Retorna osThreadId da tarefa mais prioritaria
+}
 void schedule()
 {
-	threadSwitch(tidThreadA);
-	threadSwitch(tidThreadF);
-	threadSwitch(tidThreadB);
-	threadSwitch(tidThreadE);
-	threadSwitch(tidThreadC);
-	threadSwitch(tidThreadD);
+    osThreadId lowestId = aplyPriorityFromCMSIS();
+	threadSwitch(lowestId);
+	
 }
 
 void mailMan()

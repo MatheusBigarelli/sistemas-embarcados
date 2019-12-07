@@ -40,5 +40,8 @@ extern void createMailQueue();
 void threadSwitch(osThreadId tid);
 extern void threadYield();
 
+// Baseado no SIGNAL retorna o indice no vetor de threads
+THREAD_INDEX signalToIndex(uint32_t signal);
+void initThreadsInfo();
 
 #endif
