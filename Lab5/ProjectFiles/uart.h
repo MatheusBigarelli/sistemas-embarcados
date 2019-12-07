@@ -8,7 +8,7 @@
 #ifndef __UART__
 #define __UART__
 
-#include "util.h"
+#include "thread.h"
 #include "tm4c1294ncpdt.h"
 
 #define GPIO_PORTA_BITS 0x03
@@ -18,7 +18,7 @@ extern void GPIO_Init(void);
 // Portas utilizadas no programa
 #define UART_ALL_PORTS 0x01
 
-
+extern void UART(void const* args);
 extern void UART_init(void);
 extern unsigned char UART0_RxChar(void);
 extern void UART0_TxChar(char data);

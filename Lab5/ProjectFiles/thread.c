@@ -1,11 +1,5 @@
 #include "thread.h"
-
-void ThreadA(const void *args);
-void ThreadB(const void *args);
-void ThreadC(const void *args);
-void ThreadD(const void *args);
-void ThreadE(const void *args);
-void ThreadF(const void *args);
+#include "matematica.h"
 
 void Display(const void *args);
 
@@ -40,12 +34,15 @@ osThreadId tidThreadF;
 osTimerDef(TimerF, callbackTimer);
 osTimerId tidTimerF;
 
+osThreadDef(UART, osPriorityNormal, 1, 0);
+osThreadId tidUART;
+
 osThreadId tidMain;
 
 osThreadDef(Display, osPriorityNormal, 1, 0);
 osThreadId tidDisplay;
-
-osMessageQDef(uartMsgBox, 1, char);
+osMailQDef(uartMailQ, 1, Gantt_Info);
+osMailQId qidUartMailQueue;
 
 void createThreads()
 {
@@ -57,6 +54,7 @@ void createThreads()
     tidThreadF = osThreadCreate(osThread(ThreadF), NULL);
     
     #if SIMULADOR == 0
+    tidUART = osThreadCreate(osThread(UART), NULL);
     tidDisplay = osThreadCreate(osThread(Display), NULL);
     #endif
 }
@@ -71,6 +69,10 @@ void createTimers()
     tidTimerF = osTimerCreate(osTimer(TimerF), osTimerPeriodic, (void*) SIG_THREAD_F);
 }
 
+void createMailQueue()
+{
+    qidUartMailQueue = osMailCreate(osMailQ(uartMailQ), NULL);
+}
 
 void callbackTimer(const void* args)
 {

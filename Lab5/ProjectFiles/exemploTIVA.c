@@ -66,6 +66,8 @@ void init_sidelong_menu(){
  *---------------------------------------------------------------------------*/
 int main (void)
 {
+	Gantt_Info* info;
+	
 	osEvent event;
 
 	osKernelInitialize();
@@ -77,11 +79,12 @@ int main (void)
 
 	createThreads();
 	createTimers();
-
+	createMailQueue();
+	
 	osKernelStart();
 
 	tidMain = osThreadGetId();
-	UART0_TxString("Hi\r\n");
+	clearUART();
 	while (true)
 	{
 		//schedule();
@@ -89,6 +92,15 @@ int main (void)
 		// Manda informações para onde precisa.
 		// HINT: send info display uart.
 		//mailMan();
+		event = osSignalWait(SIG_GANTT, osWaitForever);
+		if(event.status == osEventSignal){
+			// Recebeu SIG_GANTT
+			// Envia as informações necessárias para thread UART montar Gantt
+			info = osMailAlloc(qidUartMailQueue, osWaitForever);
+			info->ids[0] = 0;
+			info->durations[0] = 100;
+			osMailPut(qidUartMailQueue, info);
+		}
 	}
 
 	return 0;

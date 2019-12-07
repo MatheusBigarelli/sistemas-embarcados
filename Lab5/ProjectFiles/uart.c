@@ -29,6 +29,26 @@ void GPIO_Init(void)
     GPIO_PORTA_AHB_DEN_R = GPIO_PORTA_BITS;
 }
 
+void UART(void const* arg)
+{
+	osEvent event;
+	Gantt_Info* info;
+	while(1)
+	{
+		
+		event = osMailGet(qidUartMailQueue, osWaitForever);
+		if(event.status == osEventMail){
+			info = (Gantt_Info*)event.value.p;
+			if(info != NULL){
+				clearUART();
+				printGanttDiagram();
+				osMailFree(qidUartMailQueue, info);
+			}
+		}
+		
+	}
+}
+
 /* Funcao: void UART_init(void)
  * Inicializa o periferico UART
  * Param: Nenhum
@@ -89,10 +109,7 @@ void UART0_Handler(void) //Do modo como foi configurado esse handler sera chamad
 	int k;
 	char newParameterStr[16];
 	c = UART0_DR_R & 0xFF;
-	clearUART();
-	printGanttDiagram();
-	//UART0_TxChar(c);
-	//osMessagePut(qidUARTMsgBox, (uint8_t)c, 0);
+	osSignalSet(tidMain, SIG_GANTT);
 }
 
 /* Funcao: void clearUART(void)
