@@ -23,8 +23,7 @@ void ThreadA(const void *args)
             sum += 2 * x + 2;
         }
         timeInTicks = osKernelSysTick() - initialTimeTick;
-        threadsInfo[THREAD_A_INDEX].currentState = WAITING; // Thread ja terminou de executar, agora espera ate periodo chegar 
-        threadYield();
+        moveThreadToWaiting(THREAD_A_INDEX);
     }
 }
 
@@ -41,8 +40,7 @@ void ThreadB(const void *args)
             sum += (2 << (int)n) / factorial(n);
         }
         timeInTicks = osKernelSysTick() - initialTimeTick;
-        threadsInfo[THREAD_B_INDEX].currentState = WAITING; // Thread ja terminou de executar, agora espera ate periodo chegar 
-        threadYield();
+        moveThreadToWaiting(THREAD_B_INDEX);
     }
 }
 
@@ -59,22 +57,24 @@ void ThreadC(const void *args)
             sum += (n + 1) / n;
         }
         timeInTicks = osKernelSysTick() - initialTimeTick;
-        threadsInfo[THREAD_C_INDEX].currentState = WAITING; // Thread ja terminou de executar, agora espera ate periodo chegar 
-        threadYield();
+        moveThreadToWaiting(THREAD_C_INDEX);
     }
 }
 
 // 0xCF0 ticks
 void ThreadD(const void *args)
 {
-    double sum;
+    double n, sum;
     volatile uint32_t initialTimeTick = osKernelSysTick(), timeInTicks;
     while (true)
     {
-        sum = 1 + 5 / factorial(3) + 5 / factorial(5) + 5 / factorial(7) + 5 / factorial(9);
+        sum = 1;
+        for(n = 3; n <= 9; n += 2)
+        {
+            sum += 5/factorial(n);
+        }
         timeInTicks = osKernelSysTick() - initialTimeTick;
-        threadsInfo[THREAD_D_INDEX].currentState = WAITING; // Thread ja terminou de executar, agora espera ate periodo chegar 
-        threadYield();
+        moveThreadToWaiting(THREAD_D_INDEX);
     }
 }
 
@@ -91,8 +91,7 @@ void ThreadE(const void *args)
             sum += x * (3.14159265358979323846 * 3.14159265358979323846);
         }
         timeInTicks = osKernelSysTick() - initialTimeTick;
-        threadsInfo[THREAD_E_INDEX].currentState = WAITING; // Thread ja terminou de executar, agora espera ate periodo chegar 
-        threadYield();
+        moveThreadToWaiting(THREAD_E_INDEX);
     }
 }
 
@@ -109,7 +108,6 @@ void ThreadF(const void *args)
             sum += y*y*y / (1 << (int)y);
         }
         timeInTicks = osKernelSysTick() - initialTimeTick;
-        threadsInfo[THREAD_F_INDEX].currentState = WAITING; // Thread ja terminou de executar, agora espera ate periodo chegar 
-        threadYield();
+        moveThreadToWaiting(THREAD_F_INDEX);
     }
 }

@@ -114,6 +114,12 @@ void threadYield()
     osThreadSetPriority(tidMain, osPriorityNormal);
 }
 
+void moveThreadToWaiting(THREAD_INDEX tindex) // Chamado quando thread termina de executar 
+{
+    threadsInfo[tindex].currentState = WAITING; // Thread ja terminou de executar, agora espera ate periodo chegar 
+    threadsInfo[tindex].dinamicPriority = threadsInfo[tindex].staticPriority; //Reseta prioridade dinamica para estatica
+    threadYield();
+}
 
 THREAD_INDEX signalToIndex(uint32_t signal)
 {

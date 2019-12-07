@@ -117,14 +117,16 @@ void calculateInternalPriorities()
 	// O -1 eh para evitar o escalonador
 	for(i=0;i<TOTAL_THREADS - 1;i++)
     {
-		
+		if(threadsInfo[i].currentState != WAITING)//Se thread estiver esperando nao considera ela
+        {
+            
+        }
 	}
 }
 //Baseado nas prioridades internas aplica as prioridades do CMSIS = {osPriorityNormal, osPriorityIdle}
 osThreadId aplyPriorityFromCMSIS()
 {
     int i, lowestPrio = 999;
-    volatile char charId;
     osThreadId lowestId;
     // Lembrar que a prioridade interna de menor valor eh a mais alta
     for(i = 0; i < TOTAL_THREADS - 1; i++)
@@ -133,7 +135,6 @@ osThreadId aplyPriorityFromCMSIS()
         {
             lowestId = threadsInfo[i].id;
             lowestPrio = threadsInfo[i].dinamicPriority;
-            charId = threadsInfo[i].charId;
         }
     }
     

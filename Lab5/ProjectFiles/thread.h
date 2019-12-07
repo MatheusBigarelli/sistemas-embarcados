@@ -39,6 +39,7 @@ extern void createMailQueue();
 
 void threadSwitch(osThreadId tid);
 extern void threadYield();
+extern void moveThreadToWaiting(THREAD_INDEX tindex);
 
 // Baseado no SIGNAL retorna o indice no vetor de threads
 THREAD_INDEX signalToIndex(uint32_t signal);
