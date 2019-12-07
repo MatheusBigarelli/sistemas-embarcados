@@ -23,6 +23,7 @@ void ThreadA(const void *args)
         {
             if(x%maxIterationsPerCycle == 0)
             {
+                threadsInfo[THREAD_A_INDEX].executionPercent = (double)x/256;
                 threadYield();
             }
             sum += 2 * x + 2;
@@ -46,6 +47,7 @@ void ThreadB(const void *args)
         {
             if((int)n%maxIterationsPerCycle == 0)
             {
+                threadsInfo[THREAD_A_INDEX].executionPercent = (double)(n-1)/16;
                 threadYield();
             }
             sum += (2 << (int)n) / factorial(n);
@@ -68,6 +70,7 @@ void ThreadC(const void *args)
         {
             if((int)n%maxIterationsPerCycle == 0)
             {
+                threadsInfo[THREAD_A_INDEX].executionPercent = (double)(n-1)/72;
                 threadYield();
             }
             sum += (n + 1) / n;
@@ -90,6 +93,7 @@ void ThreadD(const void *args)
         {
             if((int)n%maxIterationsPerCycle == 0)
             {
+                threadsInfo[THREAD_D_INDEX].executionPercent = (double)(n-3)/9;
                 threadYield();
             }
             sum += 5/factorial(n);
@@ -112,6 +116,7 @@ void ThreadE(const void *args)
         {
             if((int)x%maxIterationsPerCycle == 0)
             {
+                threadsInfo[THREAD_E_INDEX].executionPercent = (double)(x-1)/100;
                 threadYield();
             }
             sum += x * (3.14159265358979323846 * 3.14159265358979323846);
@@ -132,8 +137,9 @@ void ThreadF(const void *args)
         sum = 0;
         for (y = 0; y <= 128; y++)
         {
-            if((int)y%maxIterationsPerCycle == 0)
+            if(y && (int)y%maxIterationsPerCycle == 0)
             {
+                threadsInfo[THREAD_F_INDEX].executionPercent = (double)y/128;
                 threadYield();
             }
             sum += y*y*y / (1 << (int)y);

@@ -2,7 +2,7 @@
 #include "matematica.h"
 
 void Display(const void *args);
-
+uint32_t ticksOffset;
 
 osThreadDef(ThreadA, osPriorityIdle, 1, 0);
 osThreadId tidThreadA;
@@ -113,11 +113,36 @@ void threadYield()
     osThreadSetPriority(osThreadGetId(), osPriorityIdle);
     osThreadSetPriority(tidMain, osPriorityNormal);
 }
+extern void UART0_TxString(char *data);
 
 void moveThreadToWaiting(THREAD_INDEX tindex) // Chamado quando thread termina de executar 
 {
+    uint32_t endTick = osKernelSysTick();
     threadsInfo[tindex].currentState = WAITING; // Thread ja terminou de executar, agora espera ate periodo chegar 
     threadsInfo[tindex].dinamicPriority = threadsInfo[tindex].staticPriority; //Reseta prioridade dinamica para estatica
+    
+    //Verifica prazos
+    if(threadsInfo[tindex].isRealtime)
+    {
+        if(endTick - ticksOffset > threadsInfo[tindex].tickOfDeadline)
+        {
+            UART0_TxString("Master Fault\r\n");
+        }
+    }
+    else
+    {
+        if(endTick - ticksOffset > threadsInfo[tindex].tickOfDeadline)
+        {
+            UART0_TxString("Secondary Fault\r\n");
+            UART0_TxString("Aumentar prioridade\r\n");
+        }
+        if(endTick - ticksOffset < threadsInfo[tindex].tickOfDeadline /2)
+        {
+            UART0_TxString("Secondary Fault\r\n");
+            UART0_TxString("Diminuir prioridade\r\n");
+        }
+    }
+    
     threadYield();
 }
 
@@ -153,14 +178,15 @@ void initThreadInfo(THREAD_INDEX tindex, uint32_t durationInTicks, int32_t stati
 void initThreadsInfo()
 {
 	int i;
-	// O -1 eh para evitar o escalonador
+	
     initThreadInfo(THREAD_A_INDEX, 0x0682, 10, 'A', tidThreadA, 128);
     initThreadInfo(THREAD_B_INDEX, 0x49AB, 0, 'B', tidThreadB, 4);
     initThreadInfo(THREAD_C_INDEX, 0x15F5, -30, 'C', tidThreadC, 32);
     initThreadInfo(THREAD_D_INDEX, 0x0CF0, 0, 'D', tidThreadD, 1);
     initThreadInfo(THREAD_E_INDEX, 0x1E29, -30, 'E', tidThreadE, 32);
-    initThreadInfo(THREAD_F_INDEX, 0x2829, -100, 'F', tidThreadF, 16);    
-    
+    initThreadInfo(THREAD_F_INDEX, 0x2829, -100, 'F', tidThreadF, 200);    
+
+    // O -1 eh para evitar o escalonador
 	for(i=0;i<TOTAL_THREADS - 1;i++){
 		threadsInfo[i].currentState = READY;
         threadsInfo[i].delayInTicks = 0;
@@ -169,5 +195,9 @@ void initThreadsInfo()
         threadsInfo[i].executionPercent = 0;
         threadsInfo[i].tickOfDeadline = threadsInfo[i].durationInTicks;
         threadsInfo[i].dinamicPriority = threadsInfo[i].staticPriority;
+        threadsInfo[i].isRealtime = false;
 	}
+    threadsInfo[THREAD_F_INDEX].isRealtime = true;
+    //Offset de ticks
+    ticksOffset = osKernelSysTick();
 }

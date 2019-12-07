@@ -110,19 +110,6 @@ int main (void)
 	return 0;
 }
 
-
-void calculateInternalPriorities()
-{
-	int i;
-	// O -1 eh para evitar o escalonador
-	for(i=0;i<TOTAL_THREADS - 1;i++)
-    {
-		if(threadsInfo[i].currentState != WAITING)//Se thread estiver esperando nao considera ela
-        {
-            
-        }
-	}
-}
 //Baseado nas prioridades internas aplica as prioridades do CMSIS = {osPriorityNormal, osPriorityIdle}
 osThreadId aplyPriorityFromCMSIS()
 {
@@ -140,9 +127,33 @@ osThreadId aplyPriorityFromCMSIS()
     
     return lowestId; // Retorna osThreadId da tarefa mais prioritaria
 }
+void updatePriority()
+{
+    int i;
+    uint32_t expectedTickOfDeadline;
+    for(i=0;i<TOTAL_THREADS - 1;i++)
+    {
+		if(threadsInfo[i].currentState == READY)//Se thread estiver pronta para entrar, mas ainda nao rodando
+        {
+            expectedTickOfDeadline = osKernelSysTick() + threadsInfo[i].durationInTicks*(1 - threadsInfo[i].executionPercent);
+            if(expectedTickOfDeadline > threadsInfo[i].tickOfDeadline)
+            {
+                threadsInfo[i].laxityTimeInTicks = 0;
+            }
+            else
+            {
+                threadsInfo[i].laxityTimeInTicks = threadsInfo[i].tickOfDeadline - expectedTickOfDeadline;
+            }
+            threadsInfo[i].dinamicPriority -= threadsInfo[i].laxityTimeInTicks; 
+        }
+	}
+}
+
 void schedule()
 {
-    osThreadId lowestId = aplyPriorityFromCMSIS();
+    osThreadId lowestId;
+    updatePriority();
+    lowestId = aplyPriorityFromCMSIS();
 	threadSwitch(lowestId);
 	
 }

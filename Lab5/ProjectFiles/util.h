@@ -47,6 +47,7 @@ typedef struct{
 	uint32_t durationInTicks;
     uint32_t tickOfDeadline;
     uint16_t maxIterationsPerCycle;
+    bool isRealtime;
 }Thread_Info;
 
 

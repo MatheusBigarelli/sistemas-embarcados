@@ -45,4 +45,6 @@ extern void moveThreadToWaiting(THREAD_INDEX tindex);
 THREAD_INDEX signalToIndex(uint32_t signal);
 void initThreadsInfo();
 void initThreadInfo(THREAD_INDEX tindex, uint32_t durationInTicks, int32_t staticPriority, char charId, osThreadId id, uint16_t maxIterationsPerCycle);
+
+
 #endif
