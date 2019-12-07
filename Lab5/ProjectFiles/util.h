@@ -13,6 +13,8 @@
 #define SIG_GANTT 0x00000020
 #define TOTAL_MATH_THREADS 6
 
+#define MAX_ITERATIONS 30
+
 typedef struct{
 	uint16_t ids[TOTAL_MATH_THREADS];
 	uint32_t durations[TOTAL_MATH_THREADS];

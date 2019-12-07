@@ -13,6 +13,7 @@ extern osThreadId tidThreadD;
 extern osThreadId tidThreadE;
 extern osThreadId tidThreadF;
 extern osThreadId tidMain;
+extern osThreadId tidDisplay;
 
 extern osMailQId qidUartMailQueue;
 
@@ -30,6 +31,33 @@ extern osMailQId qidUartMailQueue;
                          SIG_THREAD_D | \
                          SIG_THREAD_E | \
                          SIG_THREAD_F)
+
+
+
+typedef enum
+{
+    READY,
+    WAITING,
+} State;
+
+typedef struct
+{
+    osThreadId tid;
+    int numberOfTicksNeeded;
+    int laxityTime;
+    int startTick;
+    int totalTicks;
+    int dueTick;
+    int dueEstimate;
+    float duePercentage;
+    State state;
+    int staticPrio;
+    int dynamicPrio;
+} ThreadInfo;
+
+
+
+
 
 extern void callbackTimer(const void* args);
 extern void createThreads();

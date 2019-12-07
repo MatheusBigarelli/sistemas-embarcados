@@ -14,4 +14,7 @@ void ThreadE(const void *args);
 void ThreadF(const void *args);
 double factorial(double n);
 
+
+extern void startTask(osThreadId tid);
+
 #endif
