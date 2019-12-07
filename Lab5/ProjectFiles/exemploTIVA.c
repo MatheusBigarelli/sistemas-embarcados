@@ -24,6 +24,9 @@
 //To print on the screen
 tContext sContext;
 
+
+void schedule();
+
 /*----------------------------------------------------------------------------
  *    Initializations
  *---------------------------------------------------------------------------*/
@@ -87,12 +90,12 @@ int main (void)
 	clearUART();
 	while (true)
 	{
-		//schedule();
+		schedule();
 		
 		// Manda informações para onde precisa.
 		// HINT: send info display uart.
 		//mailMan();
-		event = osSignalWait(SIG_GANTT, osWaitForever);
+		event = osSignalWait(SIG_GANTT, 0);
 		if(event.status == osEventSignal){
 			// Recebeu SIG_GANTT
 			// Envia as informações necessárias para thread UART montar Gantt
@@ -108,7 +111,12 @@ int main (void)
 
 void schedule()
 {
-
+	threadSwitch(tidThreadA);
+	threadSwitch(tidThreadF);
+	threadSwitch(tidThreadB);
+	threadSwitch(tidThreadE);
+	threadSwitch(tidThreadC);
+	threadSwitch(tidThreadD);
 }
 
 void mailMan()

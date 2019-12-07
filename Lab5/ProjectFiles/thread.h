@@ -36,4 +36,9 @@ extern void createThreads();
 extern void createTimers();
 extern void createMailQueue();
 
+
+void threadSwitch(osThreadId tid);
+extern void threadYield();
+
+
 #endif

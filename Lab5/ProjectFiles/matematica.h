@@ -2,6 +2,7 @@
 #define __MATEMATICA_H__
 
 #include "util.h"
+#include "thread.h"
 
 #include <math.h>
 

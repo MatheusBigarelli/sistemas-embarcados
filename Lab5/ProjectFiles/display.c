@@ -8,6 +8,9 @@ void Display(void const* args)
 
     printHeader();
 
+    
+    threadYield();
+
     while (true)
     {
 

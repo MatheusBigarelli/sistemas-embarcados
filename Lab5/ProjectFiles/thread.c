@@ -4,42 +4,42 @@
 void Display(const void *args);
 
 
-osThreadDef(ThreadA, osPriorityNormal, 1, 0);
+osThreadDef(ThreadA, osPriorityBelowNormal, 1, 0);
 osThreadId tidThreadA;
 osTimerDef(TimerA, callbackTimer);
 osTimerId tidTimerA;
 
-osThreadDef(ThreadB, osPriorityNormal, 1, 0);
+osThreadDef(ThreadB, osPriorityBelowNormal, 1, 0);
 osThreadId tidThreadB;
 osTimerDef(TimerB, callbackTimer);
 osTimerId tidTimerB;
 
-osThreadDef(ThreadC, osPriorityNormal, 1, 0);
+osThreadDef(ThreadC, osPriorityBelowNormal, 1, 0);
 osThreadId tidThreadC;
 osTimerDef(TimerC, callbackTimer);
 osTimerId tidTimerC;
 
-osThreadDef(ThreadD, osPriorityNormal, 1, 0);
+osThreadDef(ThreadD, osPriorityBelowNormal, 1, 0);
 osThreadId tidThreadD;
 osTimerDef(TimerD, callbackTimer);
 osTimerId tidTimerD;
 
-osThreadDef(ThreadE, osPriorityNormal, 1, 0);
+osThreadDef(ThreadE, osPriorityBelowNormal, 1, 0);
 osThreadId tidThreadE;
 osTimerDef(TimerE, callbackTimer);
 osTimerId tidTimerE;
 
-osThreadDef(ThreadF, osPriorityNormal, 1, 0);
+osThreadDef(ThreadF, osPriorityBelowNormal, 1, 0);
 osThreadId tidThreadF;
 osTimerDef(TimerF, callbackTimer);
 osTimerId tidTimerF;
 
-osThreadDef(UART, osPriorityNormal, 1, 0);
+osThreadDef(UART, osPriorityBelowNormal, 1, 0);
 osThreadId tidUART;
 
 osThreadId tidMain;
 
-osThreadDef(Display, osPriorityNormal, 1, 0);
+osThreadDef(Display, osPriorityBelowNormal, 1, 0);
 osThreadId tidDisplay;
 osMailQDef(uartMailQ, 1, Gantt_Info);
 osMailQId qidUartMailQueue;
@@ -78,17 +78,22 @@ void callbackTimer(const void* args)
 {
     uint32_t signal = *(uint32_t*)args;
 
-    osSignalSet(tidMain, signal);
+    // osSignalSet(tidMain, signal);
 }
 
+void threadSwitch(osThreadId tid)
+{
+    // Aumentar a prioridade da thread escolhida.
+    // Fazer isso já troca a thread para a que tiver
+    // a maior prioridade.
+    osThreadSetPriority(tid, osPriorityHigh);
+}
 
 void threadYield()
 {
     // Diminuir prioridade da thread atual
-    osThreadSetPriority(osThreadGetId(), osPriorityIdle);
-    // Aumentar prioridade do escalonador
-    osThreadSetPriority(tidMain, osPriorityNormal);
-    
-    osThreadYield();
+    // Ao fazer isso a thread já é retirada caso exista
+    // uma thread com prioridade maior
+    osThreadSetPriority(osThreadGetId(), osPriorityBelowNormal);
 }
 
