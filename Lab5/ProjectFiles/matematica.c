@@ -15,12 +15,18 @@ void ThreadA(const void *args)
 {
     uint16_t x, sum;
     volatile uint32_t initialTimeTick = osKernelSysTick(), timeInTicks;
+    uint16_t maxIterationsPerCycle = threadsInfo[THREAD_A_INDEX].maxIterationsPerCycle;
     while (true)
     {
         sum = 0;
         for (x = 0; x <= 256; x++)
         {
+            if(x%maxIterationsPerCycle == 0)
+            {
+                threadYield();
+            }
             sum += 2 * x + 2;
+            
         }
         timeInTicks = osKernelSysTick() - initialTimeTick;
         moveThreadToWaiting(THREAD_A_INDEX);
@@ -32,11 +38,16 @@ void ThreadB(const void *args)
 {
     double n, sum;
     volatile uint32_t initialTimeTick = osKernelSysTick(), timeInTicks;
+    uint16_t maxIterationsPerCycle = threadsInfo[THREAD_B_INDEX].maxIterationsPerCycle + 1;
     while (true)
     {
         sum = 0;
         for (n = 1; n <= 16; n++)
         {
+            if((int)n%maxIterationsPerCycle == 0)
+            {
+                threadYield();
+            }
             sum += (2 << (int)n) / factorial(n);
         }
         timeInTicks = osKernelSysTick() - initialTimeTick;
@@ -49,11 +60,16 @@ void ThreadC(const void *args)
 {
     double n, sum;
     volatile uint32_t initialTimeTick = osKernelSysTick(), timeInTicks;
+    uint16_t maxIterationsPerCycle = threadsInfo[THREAD_C_INDEX].maxIterationsPerCycle + 1;
     while (true)
     {
         sum = 0;
         for (n = 1; n <= 72; n++)
         {
+            if((int)n%maxIterationsPerCycle == 0)
+            {
+                threadYield();
+            }
             sum += (n + 1) / n;
         }
         timeInTicks = osKernelSysTick() - initialTimeTick;
@@ -66,11 +82,16 @@ void ThreadD(const void *args)
 {
     double n, sum;
     volatile uint32_t initialTimeTick = osKernelSysTick(), timeInTicks;
+    uint16_t maxIterationsPerCycle = threadsInfo[THREAD_D_INDEX].maxIterationsPerCycle + 3;
     while (true)
     {
         sum = 1;
         for(n = 3; n <= 9; n += 2)
         {
+            if((int)n%maxIterationsPerCycle == 0)
+            {
+                threadYield();
+            }
             sum += 5/factorial(n);
         }
         timeInTicks = osKernelSysTick() - initialTimeTick;
@@ -83,11 +104,16 @@ void ThreadE(const void *args)
 {
     double x, sum;
     volatile uint32_t initialTimeTick = osKernelSysTick(), timeInTicks;
+    uint16_t maxIterationsPerCycle = threadsInfo[THREAD_E_INDEX].maxIterationsPerCycle + 1;
     while (true)
     {
         sum = 0;
         for (x = 1; x <= 100; x++)
         {
+            if((int)x%maxIterationsPerCycle == 0)
+            {
+                threadYield();
+            }
             sum += x * (3.14159265358979323846 * 3.14159265358979323846);
         }
         timeInTicks = osKernelSysTick() - initialTimeTick;
@@ -100,11 +126,16 @@ void ThreadF(const void *args)
 {
     double y, sum;
     volatile uint32_t initialTimeTick = osKernelSysTick(), timeInTicks;
+    uint16_t maxIterationsPerCycle = threadsInfo[THREAD_F_INDEX].maxIterationsPerCycle;
     while (true)
     {
         sum = 0;
         for (y = 0; y <= 128; y++)
         {
+            if((int)y%maxIterationsPerCycle == 0)
+            {
+                threadYield();
+            }
             sum += y*y*y / (1 << (int)y);
         }
         timeInTicks = osKernelSysTick() - initialTimeTick;

@@ -46,6 +46,7 @@ typedef struct{
 	uint32_t delayInTicks;
 	uint32_t durationInTicks;
     uint32_t tickOfDeadline;
+    uint16_t maxIterationsPerCycle;
 }Thread_Info;
 
 

@@ -141,24 +141,25 @@ THREAD_INDEX signalToIndex(uint32_t signal)
 }
 
 
-void initThreadInfo(THREAD_INDEX tindex, uint32_t durationInTicks, int32_t staticPriority, char charId, osThreadId id)
+void initThreadInfo(THREAD_INDEX tindex, uint32_t durationInTicks, int32_t staticPriority, char charId, osThreadId id, uint16_t maxIterationsPerCycle)
 {
     threadsInfo[tindex].durationInTicks = durationInTicks;
     threadsInfo[tindex].staticPriority = staticPriority;
     threadsInfo[tindex].charId = charId;
     threadsInfo[tindex].id = id;
+    threadsInfo[tindex].maxIterationsPerCycle = maxIterationsPerCycle;
 }
 
 void initThreadsInfo()
 {
 	int i;
 	// O -1 eh para evitar o escalonador
-    initThreadInfo(THREAD_A_INDEX, 0x0682, 10, 'A', tidThreadA);
-    initThreadInfo(THREAD_B_INDEX, 0x49AB, 0, 'B', tidThreadB);
-    initThreadInfo(THREAD_C_INDEX, 0x15F5, -30, 'C', tidThreadC);
-    initThreadInfo(THREAD_D_INDEX, 0x0CF0, 0, 'D', tidThreadD);
-    initThreadInfo(THREAD_E_INDEX, 0x1E29, -30, 'E', tidThreadE);
-    initThreadInfo(THREAD_F_INDEX, 0x2829, -100, 'F', tidThreadF);    
+    initThreadInfo(THREAD_A_INDEX, 0x0682, 10, 'A', tidThreadA, 128);
+    initThreadInfo(THREAD_B_INDEX, 0x49AB, 0, 'B', tidThreadB, 4);
+    initThreadInfo(THREAD_C_INDEX, 0x15F5, -30, 'C', tidThreadC, 32);
+    initThreadInfo(THREAD_D_INDEX, 0x0CF0, 0, 'D', tidThreadD, 1);
+    initThreadInfo(THREAD_E_INDEX, 0x1E29, -30, 'E', tidThreadE, 32);
+    initThreadInfo(THREAD_F_INDEX, 0x2829, -100, 'F', tidThreadF, 16);    
     
 	for(i=0;i<TOTAL_THREADS - 1;i++){
 		threadsInfo[i].currentState = READY;
