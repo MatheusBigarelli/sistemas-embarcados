@@ -8,4 +8,6 @@
 
 #include "TM4C129.h" // Device header
 
+#define SIMULADOR 0
+
 #endif

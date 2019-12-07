@@ -11,13 +11,13 @@
  * 		Jessica Isoton Sampaio - <jessicasampaio@alunos.utfpr.edu.br>
  * 		Mariana Carri�o        - <mcarriao@alunos.utfpr.edu.br>
  *===========================================================================*/
-
-#include "grlib/grlib.h"
+#include "thread.h"
+#include "uart.h"
 
 /*----------------------------------------------------------------------------
  * include libraries from drivers
  *----------------------------------------------------------------------------*/
-
+#include "grlib/grlib.h"
 #include "cfaf128x128x16.h"
 
 
@@ -30,6 +30,8 @@ tContext sContext;
 
 void init_all(){
 	cfaf128x128x16Init();
+	GPIO_Init();
+	UART_init();
 }
 
 void init_sidelong_menu(){
@@ -56,7 +58,6 @@ void init_sidelong_menu(){
 }
 
 
-#define SIMULADOR 1
 
 
 
@@ -79,21 +80,21 @@ int main (void)
 
 	osKernelStart();
 
-	tidMain = osGetThreadId();
-
+	tidMain = osThreadGetId();
+	UART0_TxString("Hi\r\n");
 	while (true)
 	{
-		schedule();
+		//schedule();
 		
 		// Manda informações para onde precisa.
 		// HINT: send info display uart.
-		mailMan();
+		//mailMan();
 	}
 
 	return 0;
 }
 
-void schedule(void)
+void schedule()
 {
 
 }

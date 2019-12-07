@@ -39,6 +39,7 @@ osTimerId tidTimerF;
 
 osThreadId tidMain;
 
+osMessageQDef(uartMsgBox, 1, char);
 
 void createThreads()
 {
@@ -60,9 +61,10 @@ void createTimers()
     tidTimerF = osTimerCreate(osTimer(TimerF), osTimerPeriodic, (void*) SIG_THREAD_F);
 }
 
+
 void callbackTimer(const void* args)
 {
-    int32_t signal = args;
+    uint32_t signal = *(uint32_t*)args;
 
     osSignalSet(tidMain, signal);
 }
@@ -71,9 +73,9 @@ void callbackTimer(const void* args)
 void threadYield()
 {
     // Diminuir prioridade da thread atual
-    osSetPriority(osThreadGetId(), osPriorityIdle);
+    osThreadSetPriority(osThreadGetId(), osPriorityIdle);
     // Aumentar prioridade do escalonador
-    osSetPriority(tidMain, osPriorityNormal);
+    osThreadSetPriority(tidMain, osPriorityNormal);
     
     osThreadYield();
 }

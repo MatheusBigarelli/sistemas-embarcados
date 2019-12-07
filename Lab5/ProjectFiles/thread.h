@@ -25,4 +25,8 @@ extern osThreadId tidMain;
                          SIG_THREAD_E | \
                          SIG_THREAD_F)
 
+extern void callbackTimer(const void* args);
+extern void createThreads();
+extern void createTimers();
+
 #endif

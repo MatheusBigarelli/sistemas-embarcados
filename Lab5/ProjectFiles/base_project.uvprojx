@@ -10,7 +10,7 @@
       <TargetName>TM4C129 RAM</TargetName>
       <ToolsetNumber>0x4</ToolsetNumber>
       <ToolsetName>ARM-ADS</ToolsetName>
-      <pCCUsed>5060528::V5.06 update 5 (build 528)::ARMCC</pCCUsed>
+      <pCCUsed>5060750::V5.06 update 6 (build 750)::ARMCC</pCCUsed>
       <uAC6>0</uAC6>
       <TargetOption>
         <TargetCommonOption>
@@ -386,6 +386,51 @@
               <FileName>exemploTIVA.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\exemploTIVA.c</FilePath>
+            </File>
+            <File>
+              <FileName>matematica.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\matematica.c</FilePath>
+            </File>
+            <File>
+              <FileName>thread.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\thread.c</FilePath>
+            </File>
+            <File>
+              <FileName>util.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\util.c</FilePath>
+            </File>
+            <File>
+              <FileName>matematica.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\matematica.h</FilePath>
+            </File>
+            <File>
+              <FileName>thread.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\thread.h</FilePath>
+            </File>
+            <File>
+              <FileName>util.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\util.h</FilePath>
+            </File>
+            <File>
+              <FileName>uart.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\uart.c</FilePath>
+            </File>
+            <File>
+              <FileName>uart.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\uart.h</FilePath>
+            </File>
+            <File>
+              <FileName>tm4c1294ncpdt.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\tm4c1294ncpdt.h</FilePath>
             </File>
           </Files>
         </Group>
@@ -865,6 +910,51 @@
               <FileName>exemploTIVA.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\exemploTIVA.c</FilePath>
+            </File>
+            <File>
+              <FileName>matematica.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\matematica.c</FilePath>
+            </File>
+            <File>
+              <FileName>thread.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\thread.c</FilePath>
+            </File>
+            <File>
+              <FileName>util.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\util.c</FilePath>
+            </File>
+            <File>
+              <FileName>matematica.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\matematica.h</FilePath>
+            </File>
+            <File>
+              <FileName>thread.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\thread.h</FilePath>
+            </File>
+            <File>
+              <FileName>util.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\util.h</FilePath>
+            </File>
+            <File>
+              <FileName>uart.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\uart.c</FilePath>
+            </File>
+            <File>
+              <FileName>uart.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\uart.h</FilePath>
+            </File>
+            <File>
+              <FileName>tm4c1294ncpdt.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\tm4c1294ncpdt.h</FilePath>
             </File>
           </Files>
         </Group>
