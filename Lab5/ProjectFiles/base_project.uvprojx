@@ -453,59 +453,9 @@
           <GroupName>drivers</GroupName>
           <Files>
             <File>
-              <FileName>buzzer.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\buzzer.c</FilePath>
-            </File>
-            <File>
-              <FileName>accel.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\accel.c</FilePath>
-            </File>
-            <File>
-              <FileName>buttons.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\buttons.c</FilePath>
-            </File>
-            <File>
               <FileName>cfaf128x128x16.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\cfaf128x128x16.c</FilePath>
-            </File>
-            <File>
-              <FileName>led.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\led.c</FilePath>
-            </File>
-            <File>
-              <FileName>mic.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\mic.c</FilePath>
-            </File>
-            <File>
-              <FileName>opt.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\opt.c</FilePath>
-            </File>
-            <File>
-              <FileName>rgb.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\rgb.c</FilePath>
-            </File>
-            <File>
-              <FileName>servo.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\servo.c</FilePath>
-            </File>
-            <File>
-              <FileName>joy.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\joy.c</FilePath>
-            </File>
-            <File>
-              <FileName>temp.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\temp.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -982,59 +932,9 @@
           <GroupName>drivers</GroupName>
           <Files>
             <File>
-              <FileName>buzzer.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\buzzer.c</FilePath>
-            </File>
-            <File>
-              <FileName>accel.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\accel.c</FilePath>
-            </File>
-            <File>
-              <FileName>buttons.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\buttons.c</FilePath>
-            </File>
-            <File>
               <FileName>cfaf128x128x16.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\cfaf128x128x16.c</FilePath>
-            </File>
-            <File>
-              <FileName>led.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\led.c</FilePath>
-            </File>
-            <File>
-              <FileName>mic.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\mic.c</FilePath>
-            </File>
-            <File>
-              <FileName>opt.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\opt.c</FilePath>
-            </File>
-            <File>
-              <FileName>rgb.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\rgb.c</FilePath>
-            </File>
-            <File>
-              <FileName>servo.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\servo.c</FilePath>
-            </File>
-            <File>
-              <FileName>joy.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\joy.c</FilePath>
-            </File>
-            <File>
-              <FileName>temp.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\temp.c</FilePath>
             </File>
           </Files>
         </Group>

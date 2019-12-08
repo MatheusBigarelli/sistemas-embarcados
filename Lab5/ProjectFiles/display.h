@@ -1,6 +1,7 @@
 #ifndef __DISPLAY__
 #define __DISPLAY__
 
+#include <stdio.h>
 #include <math.h>
 
 #include "util.h"
@@ -11,14 +12,16 @@
 
 #include "cfaf128x128x16.h"
 
+
+#define NUM_DIGITS 3
+
 /**--------------------------------------------------
  * Protótipos das funções.
  *---------------------------------------------------*/
 extern void displayInit();
 extern void printHeader();
+extern void updateInfo(Display_Info *info);
 
-extern void floatToString(float value, char *pBuf, uint32_t len, uint32_t base, uint8_t zeros, uint8_t precision);
-extern void intToString(int64_t value, char *pBuf, uint32_t len, uint32_t base, uint8_t zeros);
 
 
 #endif

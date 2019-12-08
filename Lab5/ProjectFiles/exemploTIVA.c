@@ -77,6 +77,14 @@ int main (void)
 	
 	osKernelStart();
 
+    //-------------------------------------------------
+	#if SIMULADOR == 0
+	#if DISPLAY
+	threadSwitch(tidDisplay);
+	#endif
+	#endif
+	//-------------------------------------------------
+
 	tidMain = osThreadGetId();
 	clearUART();
 	initThreadsInfo();
@@ -120,6 +128,13 @@ osThreadId aplyPriorityFromCMSIS()
         }
     }
     
+	#if DISPLAY
+	if (lowestPrio == 999)
+	{
+		return tidDisplay;
+	}
+	#endif
+
     return lowestId; // Retorna osThreadId da tarefa mais prioritaria
 }
 //static void intToString(int64_t value, char *pBuf, uint32_t len, uint32_t base, uint8_t zeros);
