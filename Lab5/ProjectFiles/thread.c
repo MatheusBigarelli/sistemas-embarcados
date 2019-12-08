@@ -97,6 +97,7 @@ void callbackTimer(const void* args)
     threadsInfo[threadIndex].startTick = osKernelSysTick();
 }
 
+// Muda thread do nosso escalonador para a definida pelo pelo parametro tid
 void threadSwitch(osThreadId tid)
 {
     // Aumentar a prioridade da thread escolhida.
@@ -106,6 +107,7 @@ void threadSwitch(osThreadId tid)
     osThreadSetPriority(tidMain, osPriorityIdle);
 }
 
+// Thread atual entrega o processador para o nosso escalonador
 void threadYield()
 {
     // Diminuir prioridade da thread atual
@@ -116,12 +118,14 @@ void threadYield()
 }
 extern void UART0_TxString(char *data);
 
-void moveThreadToWaiting(THREAD_INDEX tindex) // Chamado quando thread termina de executar 
+// Chamado quando thread termina de executar 
+// Essencialmente verifica o prazo da tarefa (para ver ocorrencia de master/secondary faults), 
+// move a tarefa para estado de esperando e por fim entrega o processador(threadYield)
+void moveThreadToWaiting(THREAD_INDEX tindex) 
 {
     uint32_t endTick = osKernelSysTick() - 124; //124 ticks ate obter o valor, a tarefa terminou antes
     uint32_t deadline = threadsInfo[tindex].tickOfDeadline;
     threadsInfo[tindex].currentState = WAITING; // Thread ja terminou de executar, agora espera ate periodo chegar 
-    threadsInfo[tindex].dinamicPriority = threadsInfo[tindex].staticPriority; //Reseta prioridade dinamica para estatica
     
     //Verifica prazos
     if(threadsInfo[tindex].isRealtime)
@@ -148,6 +152,7 @@ void moveThreadToWaiting(THREAD_INDEX tindex) // Chamado quando thread termina d
     threadYield();
 }
 
+// Dado um signal - recebido pelo funcao de callback do timer - obtemos o indice correspondente da thread
 THREAD_INDEX signalToIndex(uint32_t signal)
 {
     switch(signal)
@@ -167,6 +172,7 @@ THREAD_INDEX signalToIndex(uint32_t signal)
     }
 }
 
+// Dado um osThreadId obtemos o indice correspondente no vetor de threads
 THREAD_INDEX tidToIndex(osThreadId tid)
 {
     int i;
@@ -180,39 +186,37 @@ THREAD_INDEX tidToIndex(osThreadId tid)
     return -1;
 }
 
-
-void initThreadInfo(THREAD_INDEX tindex, uint32_t durationInTicks, int32_t staticPriority, char charId, osThreadId id, uint16_t maxIterationsPerCycle)
+// Iniciliaza um conjunto de de informacoes sobre uma thread especifica - indica pelo parametro tindex.
+void initThreadInfo(THREAD_INDEX tindex, uint32_t durationInTicks, double deadlinePercent, int32_t staticPriority, char charId, osThreadId id)
 {
     threadsInfo[tindex].durationInTicks = durationInTicks;
     threadsInfo[tindex].staticPriority = staticPriority;
     threadsInfo[tindex].charId = charId;
     threadsInfo[tindex].id = id;
-    threadsInfo[tindex].maxIterationsPerCycle = maxIterationsPerCycle;
 }
-
+// Inicializa as informacoes de todas as threads matematicas
 void initThreadsInfo()
 {
 	int i;
 	uint32_t startTick;
     
-    initThreadInfo(THREAD_A_INDEX, 0x0682, 10, 'A', tidThreadA, 128);
-    initThreadInfo(THREAD_B_INDEX, 0x49AB, 0, 'B', tidThreadB, 4);
-    initThreadInfo(THREAD_C_INDEX, 0x15F5, -30, 'C', tidThreadC, 32);
-    initThreadInfo(THREAD_D_INDEX, 0x0CF0, 0, 'D', tidThreadD, 1);
-    initThreadInfo(THREAD_E_INDEX, 0x1E29, -30, 'E', tidThreadE, 32);
-    initThreadInfo(THREAD_F_INDEX, 0x2829, -100, 'F', tidThreadF, 200);    
+    initThreadInfo(THREAD_A_INDEX, 0x0682, 0.7, 10, 'A', tidThreadA);
+    initThreadInfo(THREAD_B_INDEX, 0x49AB, 0.5, 0, 'B', tidThreadB);
+    initThreadInfo(THREAD_C_INDEX, 0x15F5, 0.3, -30, 'C', tidThreadC);
+    initThreadInfo(THREAD_D_INDEX, 0x0CF0, 0.5, 0, 'D', tidThreadD);
+    initThreadInfo(THREAD_E_INDEX, 0x1E29, 0.3, -30, 'E', tidThreadE);
+    initThreadInfo(THREAD_F_INDEX, 0x2829, 0.1, -100, 'F', tidThreadF);    
 
     
     startTick = osKernelSysTick();
-    // O -1 eh para evitar o escalonador
-	for(i=0;i<TOTAL_THREADS - 1;i++){
+
+	for(i=0;i<TOTAL_MATH_THREADS;i++){
 		threadsInfo[i].currentState = READY;
         threadsInfo[i].delayInTicks = 0;
         //Na primeira iteracao o Prazo estimado = Prazo real, logo tempo de relaxamento eh zero
         threadsInfo[i].laxityTimeInTicks = 0;
         threadsInfo[i].executionPercent = 0;
-        threadsInfo[i].tickOfDeadline = threadsInfo[i].durationInTicks;
-        threadsInfo[i].dinamicPriority = threadsInfo[i].staticPriority;
+        threadsInfo[i].tickOfDeadline = threadsInfo[i].durationInTicks * ( 1 + threadsInfo[i].deadlinePercent);
         threadsInfo[i].isRealtime = false;
         threadsInfo[i].startTick = startTick - 100; // Tira alguns ticks para compensar, pois a thread de fato não começou ainda
 	}

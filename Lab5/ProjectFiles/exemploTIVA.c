@@ -25,7 +25,6 @@
 //To print on the screen
 tContext sContext;
 
-
 void schedule();
 
 /*----------------------------------------------------------------------------
@@ -47,18 +46,6 @@ void init_sidelong_menu(){
 	
 	GrContextForegroundSet(&sContext, ClrWhite);
 	GrContextBackgroundSet(&sContext, ClrBlack);
-	
-	//Escreve menu lateral:
-	// GrStringDraw(&sContext,"Exemplo EK-TM4C1294XL", -1, 0, (sContext.psFont->ui8Height+2)*0, true);
-	// GrStringDraw(&sContext,"---------------------", -1, 0, (sContext.psFont->ui8Height+2)*1, true);
-	// GrStringDraw(&sContext,"RGB", -1, 0, (sContext.psFont->ui8Height+2)*2, true);
-	// GrStringDraw(&sContext,"ACC", -1, 0, (sContext.psFont->ui8Height+2)*3, true);
-	// GrStringDraw(&sContext,"TMP", -1, 0, (sContext.psFont->ui8Height+2)*4, true);
-	// GrStringDraw(&sContext,"OPT", -1, 0, (sContext.psFont->ui8Height+2)*5, true);
-	// GrStringDraw(&sContext,"MIC", -1, 0, (sContext.psFont->ui8Height+2)*6, true);
-	// GrStringDraw(&sContext,"JOY", -1, 0, (sContext.psFont->ui8Height+2)*7, true);
-	// GrStringDraw(&sContext,"BUT", -1, 0, (sContext.psFont->ui8Height+2)*8, true);
-
 }
 
 
@@ -119,52 +106,27 @@ osThreadId aplyPriorityFromCMSIS()
     // Lembrar que a prioridade interna de menor valor eh a mais alta
     for(i = 0; i < TOTAL_THREADS - 1; i++)
     {
-        if(threadsInfo[i].currentState != WAITING && threadsInfo[i].dinamicPriority < lowestPrio)//Se thread estiver esperando nao considera ela
+        if(threadsInfo[i].currentState != WAITING && threadsInfo[i].staticPriority < lowestPrio)//Se thread estiver esperando nao considera ela
         {
             lowestId = threadsInfo[i].id;
-            lowestPrio = threadsInfo[i].dinamicPriority;
+            lowestPrio = threadsInfo[i].staticPriority;
         }
     }
     
     return lowestId; // Retorna osThreadId da tarefa mais prioritaria
 }
-uint32_t deltaInTicks = 0;
-void updatePriority()
-{
-    int i;
-    uint32_t expectedTickOfDeadline;
-    for(i=0;i<TOTAL_THREADS - 1;i++)
-    {
-		if(threadsInfo[i].currentState == READY)//Se thread estiver pronta para entrar, mas ainda nao rodando
-        {
-            expectedTickOfDeadline = osKernelSysTick() + threadsInfo[i].durationInTicks*(1 - threadsInfo[i].executionPercent);
-            if(expectedTickOfDeadline > threadsInfo[i].tickOfDeadline)
-            {
-                threadsInfo[i].laxityTimeInTicks = 0;
-            }
-            else
-            {
-                threadsInfo[i].laxityTimeInTicks = threadsInfo[i].tickOfDeadline - expectedTickOfDeadline;
-            }
-            threadsInfo[i].dinamicPriority -= threadsInfo[i].laxityTimeInTicks; 
-        }
-	}
-}
+// Funcao principal do escalonador
+// Primeiro o escalonador "converte" as suas prioridades em prioridades que o RTOS consegue usar
+// Após isso a tarefa prioritaria e o escalonador terao prioridade osPriorityNormal e todas as outras osPriorityIdle
+// Apos o threadSwitch o escalonador tambem tera sua prioridade reduzida para osPriorityIdle, de modo que a tarefa prioritaria podera entao executar
 void schedule()
 {
     osThreadId lowestId;
     uint32_t initialTick;
-    updatePriority();
+    // Ira atualizar apenas na ocorrencia de secondary faults
     lowestId = aplyPriorityFromCMSIS();
     // Inicia execucao da tarefa lowestId
-    initialTick = osKernelSysTick();
 	threadSwitch(lowestId);
-    deltaInTicks = osKernelSysTick() - initialTick;
     // tarefa terminou de executar ou entregou o processador
 	
-}
-
-void mailMan()
-{
-
 }

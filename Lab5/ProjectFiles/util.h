@@ -39,15 +39,15 @@ typedef enum{
 typedef struct{
     osThreadId id;
     char charId;
-	int32_t dinamicPriority, staticPriority;
+	int32_t staticPriority;
     uint32_t startTick;
 	uint32_t laxityTimeInTicks;
 	STATE currentState;
 	double executionPercent;
+    double deadlinePercent;
 	uint32_t delayInTicks;
 	uint32_t durationInTicks;
     uint32_t tickOfDeadline;
-    uint16_t maxIterationsPerCycle;
     bool isRealtime;
 }Thread_Info;
 
