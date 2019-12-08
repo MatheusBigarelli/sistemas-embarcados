@@ -4,7 +4,7 @@ Thread_Info threadsInfo[TOTAL_THREADS];
 /*----------------------------------------------------------------------------
  *  Transforming int to string
  *---------------------------------------------------------------------------*/
-static void intToString(int64_t value, char *pBuf, uint32_t len, uint32_t base, uint8_t zeros)
+void intToString(int64_t value, char *pBuf, uint32_t len, uint32_t base, uint8_t zeros)
 {
     static const char *pAscii = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     bool n = false;
@@ -64,7 +64,7 @@ static void intToString(int64_t value, char *pBuf, uint32_t len, uint32_t base, 
     } while (value > 0);
 }
 
-static void floatToString(float value, char *pBuf, uint32_t len, uint32_t base, uint8_t zeros, uint8_t precision)
+void floatToString(float value, char *pBuf, uint32_t len, uint32_t base, uint8_t zeros, uint8_t precision)
 {
     static const char *pAscii = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     uint8_t start = 0xFF;

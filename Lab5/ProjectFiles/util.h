@@ -9,7 +9,7 @@
 
 #include "TM4C129.h" // Device header
 
-#define SIMULADOR 1
+#define SIMULADOR 0
 #define SIG_GANTT 0x00000020
 #define TOTAL_MATH_THREADS 6
 #define TOTAL_THREADS TOTAL_MATH_THREADS + 1
@@ -24,6 +24,17 @@ typedef enum{
 	READY = 1,
 	RUNNING = 2
 }STATE;
+
+
+typedef struct
+{
+    char charId;
+    int32_t staticPriority;
+    uint32_t laxityTimeInTicks;
+    STATE currentState;
+    double executionPercent;
+    uint32_t delayInTicks;
+} Display_Info;
 
 typedef enum{
     THREAD_A_INDEX = 0,
@@ -53,4 +64,8 @@ typedef struct{
 
 extern Thread_Info threadsInfo[TOTAL_THREADS];
 extern Gantt_Info ganttInfo[TOTAL_THREADS];
+
+extern void floatToString(float value, char *pBuf, uint32_t len, uint32_t base, uint8_t zeros, uint8_t precision);
+extern void intToString(int64_t value, char *pBuf, uint32_t len, uint32_t base, uint8_t zeros);
+
 #endif

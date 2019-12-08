@@ -41,6 +41,12 @@ osThreadId tidMain;
 
 osThreadDef(Display, osPriorityIdle, 1, 0);
 osThreadId tidDisplay;
+
+//-------------------------------------------------
+osMailQDef(displayMailQ, 24, Thread_Info);
+osMailQId qidDisplayMailQueue;
+//-------------------------------------------------
+
 osMailQDef(uartMailQ, 1, Gantt_Info);
 osMailQId qidUartMailQueue;
 
@@ -68,23 +74,27 @@ void createTimers()
     tidTimerE = osTimerCreate(osTimer(TimerE), osTimerPeriodic, (void*) SIG_THREAD_E);
     tidTimerF = osTimerCreate(osTimer(TimerF), osTimerPeriodic, (void*) SIG_THREAD_F);
     
-//    osTimerStart(tidTimerA, 125);
-//    osTimerStart(tidTimerB, 500);
-//    osTimerStart(tidTimerC, 200);
-//    osTimerStart(tidTimerD, 1000);
-//    osTimerStart(tidTimerE, 166);
-//    osTimerStart(tidTimerF, 100);
+   osTimerStart(tidTimerA, 125);
+   osTimerStart(tidTimerB, 500);
+   osTimerStart(tidTimerC, 200);
+   osTimerStart(tidTimerD, 1000);
+   osTimerStart(tidTimerE, 166);
+   osTimerStart(tidTimerF, 100);
     
-    osTimerStart(tidTimerA, 2);
-    osTimerStart(tidTimerB, 3);
-    osTimerStart(tidTimerC, 4);
-    osTimerStart(tidTimerD, 6);
-    osTimerStart(tidTimerE, 5);
-    osTimerStart(tidTimerF, 1);
+    // osTimerStart(tidTimerA, 20);
+    // osTimerStart(tidTimerB, 30);
+    // osTimerStart(tidTimerC, 40);
+    // osTimerStart(tidTimerD, 60);
+    // osTimerStart(tidTimerE, 50);
+    // osTimerStart(tidTimerF, 10);
 }
 
 void createMailQueue()
 {
+    //-------------------------------------------------
+    qidDisplayMailQueue = osMailCreate(osMailQ(displayMailQ), NULL);
+    //-------------------------------------------------
+
     qidUartMailQueue = osMailCreate(osMailQ(uartMailQ), NULL);
 }
 
@@ -125,8 +135,23 @@ void moveThreadToWaiting(THREAD_INDEX tindex)
 {
     uint32_t endTick = osKernelSysTick() - 124; //124 ticks ate obter o valor, a tarefa terminou antes
     uint32_t deadline = threadsInfo[tindex].tickOfDeadline;
+
+    Display_Info *info = (Display_Info *)osMailAlloc(qidDisplayMailQueue, 0);
+
     threadsInfo[tindex].currentState = WAITING; // Thread ja terminou de executar, agora espera ate periodo chegar 
     
+
+    if (info)
+    {
+        info->charId = threadsInfo[tindex].charId;
+        info->delayInTicks = threadsInfo[tindex].delayInTicks;
+        info->executionPercent = threadsInfo[tindex].executionPercent;
+        info->laxityTimeInTicks = threadsInfo[tindex].laxityTimeInTicks;
+        info->staticPriority = threadsInfo[tindex].staticPriority;
+
+        osMailPut(qidDisplayMailQueue, info);
+    }
+
     //Verifica prazos
     if(threadsInfo[tindex].isRealtime)
     {

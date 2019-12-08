@@ -55,7 +55,7 @@
 //   <i> Defines default stack size for threads with osThreadDef stacksz = 0
 //   <i> Default: 200
 #ifndef OS_STKSIZE
- #define OS_STKSIZE 200
+ #define OS_STKSIZE 800
 #endif
 
 //   <o>Main Thread stack size [bytes] <64-32768:8><#/4>
@@ -169,7 +169,7 @@
 //   <i> Number of concurrent active timer callback functions.
 //   <i> Default: 4
 #ifndef OS_TIMERCBQS
- #define OS_TIMERCBQS   4
+ #define OS_TIMERCBQS   8
 #endif
 
 // </e>

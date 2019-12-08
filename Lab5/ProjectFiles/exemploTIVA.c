@@ -74,6 +74,12 @@ int main (void)
 	
 	osKernelStart();
 
+    //-------------------------------------------------
+	#if SIMULADOR == 0
+	threadSwitch(tidDisplay);
+	#endif
+	//-------------------------------------------------
+
 	tidMain = osThreadGetId();
 	clearUART();
 	initThreadsInfo();
@@ -113,6 +119,11 @@ osThreadId aplyPriorityFromCMSIS()
         }
     }
     
+	if (lowestPrio == 999)
+	{
+		return tidDisplay;
+	}
+
     return lowestId; // Retorna osThreadId da tarefa mais prioritaria
 }
 // Funcao principal do escalonador

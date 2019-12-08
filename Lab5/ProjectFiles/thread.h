@@ -14,6 +14,13 @@ extern osThreadId tidThreadE;
 extern osThreadId tidThreadF;
 extern osThreadId tidMain;
 
+//-------------------------------------------------
+
+extern osThreadId tidDisplay;
+
+extern osMailQId qidDisplayMailQueue;
+//-------------------------------------------------
+
 extern osMailQId qidUartMailQueue;
 
 #define SIG_THREAD_A 0x00000000
