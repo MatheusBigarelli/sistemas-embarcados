@@ -26,7 +26,10 @@
 tContext sContext;
 
 void schedule();
+void setupMail();
 
+extern void floatToString(float value, char *pBuf, uint32_t len, uint32_t base, uint8_t zeros, uint8_t precision);
+extern void intToString(int64_t value, char *pBuf, uint32_t len, uint32_t base, uint8_t zeros);
 /*----------------------------------------------------------------------------
  *    Initializations
  *---------------------------------------------------------------------------*/
@@ -58,7 +61,7 @@ void init_sidelong_menu(){
 int main (void)
 {
 	Gantt_Info* info;
-	
+	int i;
 	osEvent event;
 
 	osKernelInitialize();
@@ -80,19 +83,23 @@ int main (void)
 	while (true)
 	{
 		schedule();
-		
-		// Manda informações para onde precisa.
-		// HINT: send info display uart.
-		//mailMan();
-//		event = osSignalWait(SIG_GANTT, 0);
-//		if(event.status == osEventSignal){
-//			// Recebeu SIG_GANTT
-//			// Envia as informações necessárias para thread UART montar Gantt
+        setupMail();
+        
+		event = osSignalWait(SIG_GANTT, 0);
+		if(event.status == osEventSignal){
+			// Recebeu SIG_GANTT
+            UART0_TxString("Pediu gant\r\n");
+			// Envia as informações necessárias para thread UART montar Gantt
 //			info = osMailAlloc(qidUartMailQueue, osWaitForever);
-//			info->ids[0] = 0;
-//			info->durations[0] = 100;
-//			osMailPut(qidUartMailQueue, info);
-//		}
+//            for(i = 0; i< TOTAL_MATH_THREADS; i++)
+//            {
+//                info->charId = ganttInfo[i].charId;
+//                strcpy(info->ganttString, ganttInfo[i].ganttString);
+//                info->activations = ganttInfo[i].activations;
+//                osMailPut(qidUartMailQueue, info);
+//            }
+            threadSwitch(tidUART);
+		}
 	}
 
 	return 0;
@@ -104,7 +111,7 @@ osThreadId aplyPriorityFromCMSIS()
     int i, lowestPrio = 999;
     osThreadId lowestId;
     // Lembrar que a prioridade interna de menor valor eh a mais alta
-    for(i = 0; i < TOTAL_THREADS - 1; i++)
+    for(i = 0; i < TOTAL_MATH_THREADS; i++)
     {
         if(threadsInfo[i].currentState != WAITING && threadsInfo[i].staticPriority < lowestPrio)//Se thread estiver esperando nao considera ela
         {
@@ -115,6 +122,7 @@ osThreadId aplyPriorityFromCMSIS()
     
     return lowestId; // Retorna osThreadId da tarefa mais prioritaria
 }
+//static void intToString(int64_t value, char *pBuf, uint32_t len, uint32_t base, uint8_t zeros);
 // Funcao principal do escalonador
 // Primeiro o escalonador "converte" as suas prioridades em prioridades que o RTOS consegue usar
 // Após isso a tarefa prioritaria e o escalonador terao prioridade osPriorityNormal e todas as outras osPriorityIdle
@@ -122,11 +130,35 @@ osThreadId aplyPriorityFromCMSIS()
 void schedule()
 {
     osThreadId lowestId;
-    uint32_t initialTick;
     // Ira atualizar apenas na ocorrencia de secondary faults
     lowestId = aplyPriorityFromCMSIS();
     // Inicia execucao da tarefa lowestId
 	threadSwitch(lowestId);
     // tarefa terminou de executar ou entregou o processador
 	
+}
+
+void setupMail()
+{
+    int i;
+    char buffer[128];
+    volatile uint32_t startTick, endTick;
+    if(remaingThreadToCompleteCycle == 0)
+    {
+        // Todas as tarefas ja executaram pelo menos uma vez, acumula suas informacoes para formar o Gantt
+        for(i = 0; i< TOTAL_MATH_THREADS; i++)
+        {
+            startTick = ganttInfo[i].startTick;
+            endTick = ganttInfo[i].endTick;
+            intToString(startTick, buffer, 128, 10, 0);
+            strcat(ganttInfo[i].ganttString, buffer);
+            strcat(ganttInfo[i].ganttString, ",");
+            intToString(endTick, buffer, 128, 10, 0);
+            strcat(ganttInfo[i].ganttString, buffer);
+            strcat(ganttInfo[i].ganttString, ":");
+            ganttInfo[i].activations++;
+        }
+        
+        remaingThreadToCompleteCycle = TOTAL_MATH_THREADS;
+    }
 }

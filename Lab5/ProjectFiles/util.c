@@ -1,10 +1,11 @@
 #include "util.h"
 
 Thread_Info threadsInfo[TOTAL_THREADS];
+Gantt_Info ganttInfo[TOTAL_THREADS];
 /*----------------------------------------------------------------------------
  *  Transforming int to string
  *---------------------------------------------------------------------------*/
-static void intToString(int64_t value, char *pBuf, uint32_t len, uint32_t base, uint8_t zeros)
+void intToString(int64_t value, char *pBuf, uint32_t len, uint32_t base, uint8_t zeros)
 {
     static const char *pAscii = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     bool n = false;
@@ -64,7 +65,7 @@ static void intToString(int64_t value, char *pBuf, uint32_t len, uint32_t base, 
     } while (value > 0);
 }
 
-static void floatToString(float value, char *pBuf, uint32_t len, uint32_t base, uint8_t zeros, uint8_t precision)
+void floatToString(float value, char *pBuf, uint32_t len, uint32_t base, uint8_t zeros, uint8_t precision)
 {
     static const char *pAscii = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     uint8_t start = 0xFF;
@@ -95,4 +96,12 @@ static void floatToString(float value, char *pBuf, uint32_t len, uint32_t base, 
         value *= (float)base;
         pBuf[start++] = pAscii[(uint32_t)value];
     }
+}
+
+void fillGantInfo(THREAD_INDEX tindex, uint32_t startTick, uint32_t endTick, char charId)
+{
+    // A divisao por 1666 eh para o mapeamento para o mermaid (onde foi necessario utilizar dias como medida de tempo ....)
+    ganttInfo[tindex].startTick = startTick/1666;
+    ganttInfo[tindex].endTick = endTick/1666;
+    ganttInfo[tindex].charId = charId;
 }

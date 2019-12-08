@@ -13,6 +13,7 @@ extern osThreadId tidThreadD;
 extern osThreadId tidThreadE;
 extern osThreadId tidThreadF;
 extern osThreadId tidMain;
+extern osThreadId tidUART;
 
 extern osMailQId qidUartMailQueue;
 
@@ -51,4 +52,5 @@ void initThreadInfo(THREAD_INDEX tindex, uint32_t durationInTicks, double deadli
 
 extern uint32_t ticksOffset;
 
+extern uint16_t remaingThreadToCompleteCycle; // Numero de threads que falta para que todas tenham executado pelo menos uma vez no ciclo
 #endif

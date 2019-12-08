@@ -1,6 +1,8 @@
 #include "uart.h"
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
+
 /* Funcao: void GPIO_Init(void)
  * Inicializa o GPIO para UART
  * Param: Nenhum
@@ -28,24 +30,26 @@ void GPIO_Init(void)
 		// 6. Setar os bits de DEN para habilitar I/O digital
     GPIO_PORTA_AHB_DEN_R = GPIO_PORTA_BITS;
 }
-
+bool startNewUART = true;
 void UART(void const* arg)
 {
 	osEvent event;
-	Gantt_Info* info;
+	int i;
+    UART0_TxString("UART iniciada\r\n");
 	while(1)
 	{
-		
-		event = osMailGet(qidUartMailQueue, osWaitForever);
-		if(event.status == osEventMail){
-			info = (Gantt_Info*)event.value.p;
-			if(info != NULL){
-				clearUART();
-				printGanttDiagram();
-				osMailFree(qidUartMailQueue, info);
-			}
-		}
-		
+		// Essa thread so executa segundo a ordem do escalonador
+        // o escalonador so ativa ela quando recebe uma interrupcao na UART
+		if(startNewUART)
+        {
+            clearUART();
+            UART0_TxString("gantt\r\n");
+            UART0_TxString("\t title A Gantt Diagram\r\n");
+            UART0_TxString("\t dateFormat DDD\r\n");
+            startNewUART = false;
+        }
+        printGanttDiagram();
+		threadYield();
 	}
 }
 
@@ -106,10 +110,11 @@ void UART_init(void)
 void UART0_Handler(void) //Do modo como foi configurado esse handler sera chamado a cada byte(char) recebido na UART
 {
 	char c;
-	int k;
-	char newParameterStr[16];
+    volatile int32_t aux;
 	c = UART0_DR_R & 0xFF;
-	osSignalSet(tidMain, SIG_GANTT);
+    startNewUART = true;
+    UART0_TxString("Interrup\r\n");
+	aux = osSignalSet(tidMain, SIG_GANTT);
 }
 
 /* Funcao: void clearUART(void)
@@ -131,18 +136,58 @@ void clearUART(void)
  * Param: Nenhum
  * Ret: Nenhum
  */
-void printGanttDiagram(void)
+void printGanttDiagram()
 {
-    int i;
-	UART0_TxString("gantt\r\n");
-	UART0_TxString("\t title A Gantt Diagram\r\n");
-	UART0_TxString("\t dateFormat SSS\r\n");
-	UART0_TxString("\t axisFormat %L\r\n");//Tempo em us
-    for(i = 0; i<TOTAL_THREADS;i++)
+    int i,j, numberOfActivations;
+    char buffer[64];
+    Gantt_Info currentInfo;
+    for(i=0; i < TOTAL_MATH_THREADS; i++)
     {
-        
+        numberOfActivations = 0;
+        currentInfo = ganttInfo[i];
+        sprintf(buffer, "section thread%c", currentInfo.charId);
+        UART0_TxString(buffer);
+        UART0_TxString("\r\nTask: ");
+        for(j = 0; j < 4096; j++)
+        {
+            if(currentInfo.ganttString[j] != ':')
+            {
+                UART0_TxChar(currentInfo.ganttString[j]);
+            }
+            if(currentInfo.ganttString[j] == ':')
+            {
+                numberOfActivations++;
+                UART0_TxString("\r\n");
+                if(numberOfActivations == currentInfo.activations || currentInfo.activations == 0)
+                {
+                    break;
+                }
+                else
+                {
+                    UART0_TxString("Task: ");
+                }
+            }
+            
+        }
     }
-	UART0_TxString("Desenvolvendo...\r\n");
+    
+    //UART0_TxString(info.ganttString[i]);
+//    for(i = 0; i<4096;i++)
+//    {
+//        while(info.ganttString[i] != ':')
+//        {
+//            UART0_TxChar(info.ganttString[i]);
+//        }
+//        if(info.ganttString[i] == ':') // indicador de novo par de ticks
+//        {
+//            numberOfActivations++;
+//            UART0_TxString("\r\n");
+//        }
+//        if(numberOfActivations == info.activations) // O resto da string é lixo
+//        {
+//            break;
+//        }
+//    }
 	UART0_TxString("\r\n");
 }
 /* Funcao: void UART0_TxChar(char data)

@@ -25,12 +25,13 @@ void ThreadA(const void *args)
             
         }
         endTick = osKernelSysTick();
-        
+        fillGantInfo(THREAD_A_INDEX, initialTimeTick, endTick, threadsInfo[THREAD_A_INDEX].charId);
         moveThreadToWaiting(THREAD_A_INDEX);
     }
 }
 
 // 0x49AB ticks
+// 29658 ticks
 void ThreadB(const void *args)
 {
     double n, sum;
@@ -44,11 +45,13 @@ void ThreadB(const void *args)
             sum += (2 << (int)n) / factorial(n);
         }
         endTick = osKernelSysTick();
+        fillGantInfo(THREAD_B_INDEX, initialTimeTick, endTick, threadsInfo[THREAD_B_INDEX].charId);
         moveThreadToWaiting(THREAD_B_INDEX);
     }
 }
 
 // 0x15F5 ticks
+// 10911 ticks
 void ThreadC(const void *args)
 {
     double n, sum;
@@ -62,11 +65,13 @@ void ThreadC(const void *args)
             sum += (n + 1) / n;
         }
         endTick = osKernelSysTick();
+        fillGantInfo(THREAD_C_INDEX, initialTimeTick, endTick, threadsInfo[THREAD_C_INDEX].charId);
         moveThreadToWaiting(THREAD_C_INDEX);
     }
 }
 
 // 0xCF0 ticks
+// 5781 ticks
 void ThreadD(const void *args)
 {
     double n, sum;
@@ -80,11 +85,13 @@ void ThreadD(const void *args)
             sum += 5/factorial(n);
         }
         endTick = osKernelSysTick();
+        fillGantInfo(THREAD_D_INDEX, initialTimeTick, endTick, threadsInfo[THREAD_D_INDEX].charId);
         moveThreadToWaiting(THREAD_D_INDEX);
     }
 }
 
 // 0x1E29 ticks
+// 13793 ticks
 void ThreadE(const void *args)
 {
     double x, sum;
@@ -98,11 +105,13 @@ void ThreadE(const void *args)
             sum += x * (3.14159265358979323846 * 3.14159265358979323846);
         }
         endTick = osKernelSysTick();
+        fillGantInfo(THREAD_E_INDEX, initialTimeTick, endTick, threadsInfo[THREAD_E_INDEX].charId);
         moveThreadToWaiting(THREAD_E_INDEX);
     }
 }
 
 // 0x2829 ticks
+// 20899 ticks
 void ThreadF(const void *args)
 {
     double y, sum;
@@ -118,6 +127,7 @@ void ThreadF(const void *args)
             sum += y*y*y / (1 << (int)y);
         }
         endTick = osKernelSysTick();
+        fillGantInfo(THREAD_F_INDEX, initialTimeTick, endTick, threadsInfo[THREAD_F_INDEX].charId);
         moveThreadToWaiting(THREAD_F_INDEX);
     }
 }

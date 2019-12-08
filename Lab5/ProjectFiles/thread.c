@@ -3,6 +3,7 @@
 
 void Display(const void *args);
 uint32_t ticksOffset;
+uint16_t remaingThreadToCompleteCycle = TOTAL_MATH_THREADS;
 
 osThreadDef(ThreadA, osPriorityIdle, 1, 0);
 osThreadId tidThreadA;
@@ -41,7 +42,8 @@ osThreadId tidMain;
 
 osThreadDef(Display, osPriorityIdle, 1, 0);
 osThreadId tidDisplay;
-osMailQDef(uartMailQ, 1, Gantt_Info);
+
+osMailQDef(uartMailQ, TOTAL_MATH_THREADS, Gantt_Info);
 osMailQId qidUartMailQueue;
 
 void createThreads()
@@ -68,19 +70,19 @@ void createTimers()
     tidTimerE = osTimerCreate(osTimer(TimerE), osTimerPeriodic, (void*) SIG_THREAD_E);
     tidTimerF = osTimerCreate(osTimer(TimerF), osTimerPeriodic, (void*) SIG_THREAD_F);
     
-//    osTimerStart(tidTimerA, 125);
-//    osTimerStart(tidTimerB, 500);
-//    osTimerStart(tidTimerC, 200);
-//    osTimerStart(tidTimerD, 1000);
-//    osTimerStart(tidTimerE, 166);
-//    osTimerStart(tidTimerF, 100);
+    osTimerStart(tidTimerA, 125);
+    osTimerStart(tidTimerB, 500);
+    osTimerStart(tidTimerC, 200);
+    osTimerStart(tidTimerD, 1000);
+    osTimerStart(tidTimerE, 166);
+    osTimerStart(tidTimerF, 100);
     
-    osTimerStart(tidTimerA, 2);
-    osTimerStart(tidTimerB, 3);
-    osTimerStart(tidTimerC, 4);
-    osTimerStart(tidTimerD, 6);
-    osTimerStart(tidTimerE, 5);
-    osTimerStart(tidTimerF, 1);
+//    osTimerStart(tidTimerA, 2);
+//    osTimerStart(tidTimerB, 3);
+//    osTimerStart(tidTimerC, 4);
+//    osTimerStart(tidTimerD, 6);
+//    osTimerStart(tidTimerE, 5);
+//    osTimerStart(tidTimerF, 1);
 }
 
 void createMailQueue()
@@ -126,7 +128,7 @@ void moveThreadToWaiting(THREAD_INDEX tindex)
     uint32_t endTick = osKernelSysTick() - 124; //124 ticks ate obter o valor, a tarefa terminou antes
     uint32_t deadline = threadsInfo[tindex].tickOfDeadline;
     threadsInfo[tindex].currentState = WAITING; // Thread ja terminou de executar, agora espera ate periodo chegar 
-    
+    remaingThreadToCompleteCycle--;
     //Verifica prazos
     if(threadsInfo[tindex].isRealtime)
     {
@@ -219,6 +221,8 @@ void initThreadsInfo()
         threadsInfo[i].tickOfDeadline = threadsInfo[i].durationInTicks * ( 1 + threadsInfo[i].deadlinePercent);
         threadsInfo[i].isRealtime = false;
         threadsInfo[i].startTick = startTick - 100; // Tira alguns ticks para compensar, pois a thread de fato não começou ainda
+        
+        ganttInfo[i].activations = 0; // Aproveita o loop 
 	}
     threadsInfo[THREAD_F_INDEX].isRealtime = true;
     //Offset de ticks

@@ -25,7 +25,7 @@ extern void UART0_TxChar(char data);
 extern void UART0_TxString(char *data);
 
 void clearUART(void);
-void printGanttDiagram(void);
+void printGanttDiagram();
 
 bool checkChar(char c);
 bool isCommand(char *buffer, int size);
