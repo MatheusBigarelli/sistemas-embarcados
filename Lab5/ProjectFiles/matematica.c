@@ -30,6 +30,7 @@ void ThreadA(const void *args)
             
         }
         timeInTicks = osKernelSysTick() - initialTimeTick;
+        
         moveThreadToWaiting(THREAD_A_INDEX);
     }
 }
@@ -132,19 +133,22 @@ void ThreadF(const void *args)
     double y, sum;
     volatile uint32_t initialTimeTick = osKernelSysTick(), timeInTicks;
     uint16_t maxIterationsPerCycle = threadsInfo[THREAD_F_INDEX].maxIterationsPerCycle;
+    ticksOffset = initialTimeTick;
     while (true)
     {
         sum = 0;
+        // start = osKernelSysTick()
         for (y = 0; y <= 128; y++)
         {
             if(y && (int)y%maxIterationsPerCycle == 0)
             {
+                //osKernelSysTick()
                 threadsInfo[THREAD_F_INDEX].executionPercent = (double)y/128;
                 threadYield();
             }
             sum += y*y*y / (1 << (int)y);
         }
-        timeInTicks = osKernelSysTick() - initialTimeTick;
+       // timeInTicks = osKernelSysTick() - initialTimeTick;
         moveThreadToWaiting(THREAD_F_INDEX);
     }
 }

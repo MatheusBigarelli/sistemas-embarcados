@@ -14,6 +14,7 @@
 #include "thread.h"
 #include "uart.h"
 
+
 /*----------------------------------------------------------------------------
  * include libraries from drivers
  *----------------------------------------------------------------------------*/
@@ -127,6 +128,7 @@ osThreadId aplyPriorityFromCMSIS()
     
     return lowestId; // Retorna osThreadId da tarefa mais prioritaria
 }
+uint32_t deltaInTicks = 0;
 void updatePriority()
 {
     int i;
@@ -148,13 +150,17 @@ void updatePriority()
         }
 	}
 }
-
 void schedule()
 {
     osThreadId lowestId;
+    uint32_t initialTick;
     updatePriority();
     lowestId = aplyPriorityFromCMSIS();
+    // Inicia execucao da tarefa lowestId
+    initialTick = osKernelSysTick();
 	threadSwitch(lowestId);
+    deltaInTicks = osKernelSysTick() - initialTick;
+    // tarefa terminou de executar ou entregou o processador
 	
 }
 

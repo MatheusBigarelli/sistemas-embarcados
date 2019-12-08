@@ -43,8 +43,12 @@ extern void moveThreadToWaiting(THREAD_INDEX tindex);
 
 // Baseado no SIGNAL retorna o indice no vetor de threads
 THREAD_INDEX signalToIndex(uint32_t signal);
+// Baseado no osThreadId retorna o indice no vetor de threads
+THREAD_INDEX tidToIndex(osThreadId tid);
+
 void initThreadsInfo();
 void initThreadInfo(THREAD_INDEX tindex, uint32_t durationInTicks, int32_t staticPriority, char charId, osThreadId id, uint16_t maxIterationsPerCycle);
 
+extern uint32_t ticksOffset;
 
 #endif

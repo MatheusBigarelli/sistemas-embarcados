@@ -94,6 +94,7 @@ void callbackTimer(const void* args)
     volatile uint8_t threadIndex;
     threadIndex = signalToIndex(signal); // Agora sabe qual thread teve seu timer ativado.
     threadsInfo[threadIndex].currentState = READY; // Tarefa pronta para executar
+    threadsInfo[threadIndex].startTick = osKernelSysTick();
 }
 
 void threadSwitch(osThreadId tid)
@@ -117,29 +118,30 @@ extern void UART0_TxString(char *data);
 
 void moveThreadToWaiting(THREAD_INDEX tindex) // Chamado quando thread termina de executar 
 {
-    uint32_t endTick = osKernelSysTick();
+    uint32_t endTick = osKernelSysTick() - 124; //124 ticks ate obter o valor, a tarefa terminou antes
+    uint32_t deadline = threadsInfo[tindex].tickOfDeadline;
     threadsInfo[tindex].currentState = WAITING; // Thread ja terminou de executar, agora espera ate periodo chegar 
     threadsInfo[tindex].dinamicPriority = threadsInfo[tindex].staticPriority; //Reseta prioridade dinamica para estatica
     
     //Verifica prazos
     if(threadsInfo[tindex].isRealtime)
     {
-        if(endTick - ticksOffset > threadsInfo[tindex].tickOfDeadline)
+        if(endTick - ticksOffset >deadline)
         {
-            UART0_TxString("Master Fault\r\n");
+            //UART0_TxString("Master Fault\r\n");
         }
     }
     else
     {
-        if(endTick - ticksOffset > threadsInfo[tindex].tickOfDeadline)
+        if(endTick - ticksOffset > deadline)
         {
-            UART0_TxString("Secondary Fault\r\n");
-            UART0_TxString("Aumentar prioridade\r\n");
+            //UART0_TxString("Secondary Fault\r\n");
+            //UART0_TxString("Aumentar prioridade\r\n");
         }
-        if(endTick - ticksOffset < threadsInfo[tindex].tickOfDeadline /2)
+        if(endTick - ticksOffset < deadline /2)
         {
-            UART0_TxString("Secondary Fault\r\n");
-            UART0_TxString("Diminuir prioridade\r\n");
+            //UART0_TxString("Secondary Fault\r\n");
+            //UART0_TxString("Diminuir prioridade\r\n");
         }
     }
     
@@ -165,6 +167,19 @@ THREAD_INDEX signalToIndex(uint32_t signal)
     }
 }
 
+THREAD_INDEX tidToIndex(osThreadId tid)
+{
+    int i;
+    for(i = 0; i< TOTAL_THREADS; i++)
+    {
+        if(threadsInfo[i].id == tid)
+        {
+            return i;
+        }
+    }
+    return -1;
+}
+
 
 void initThreadInfo(THREAD_INDEX tindex, uint32_t durationInTicks, int32_t staticPriority, char charId, osThreadId id, uint16_t maxIterationsPerCycle)
 {
@@ -178,7 +193,8 @@ void initThreadInfo(THREAD_INDEX tindex, uint32_t durationInTicks, int32_t stati
 void initThreadsInfo()
 {
 	int i;
-	
+	uint32_t startTick;
+    
     initThreadInfo(THREAD_A_INDEX, 0x0682, 10, 'A', tidThreadA, 128);
     initThreadInfo(THREAD_B_INDEX, 0x49AB, 0, 'B', tidThreadB, 4);
     initThreadInfo(THREAD_C_INDEX, 0x15F5, -30, 'C', tidThreadC, 32);
@@ -186,6 +202,8 @@ void initThreadsInfo()
     initThreadInfo(THREAD_E_INDEX, 0x1E29, -30, 'E', tidThreadE, 32);
     initThreadInfo(THREAD_F_INDEX, 0x2829, -100, 'F', tidThreadF, 200);    
 
+    
+    startTick = osKernelSysTick();
     // O -1 eh para evitar o escalonador
 	for(i=0;i<TOTAL_THREADS - 1;i++){
 		threadsInfo[i].currentState = READY;
@@ -196,8 +214,8 @@ void initThreadsInfo()
         threadsInfo[i].tickOfDeadline = threadsInfo[i].durationInTicks;
         threadsInfo[i].dinamicPriority = threadsInfo[i].staticPriority;
         threadsInfo[i].isRealtime = false;
+        threadsInfo[i].startTick = startTick - 100; // Tira alguns ticks para compensar, pois a thread de fato não começou ainda
 	}
     threadsInfo[THREAD_F_INDEX].isRealtime = true;
     //Offset de ticks
-    ticksOffset = osKernelSysTick();
 }

@@ -40,6 +40,7 @@ typedef struct{
     osThreadId id;
     char charId;
 	int32_t dinamicPriority, staticPriority;
+    uint32_t startTick;
 	uint32_t laxityTimeInTicks;
 	STATE currentState;
 	double executionPercent;
