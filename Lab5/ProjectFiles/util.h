@@ -10,6 +10,8 @@
 #include "TM4C129.h" // Device header
 
 #define SIMULADOR 0
+#define DISPLAY 1
+#define DISPLAY_QUEUE 1
 #define SIG_GANTT 0x00000020
 #define TOTAL_MATH_THREADS 6
 #define TOTAL_THREADS TOTAL_MATH_THREADS + 1

@@ -13,6 +13,7 @@ void Display(void const* args)
 
     while (true)
     {
+        #if DISPLAY_QUEUE
         event = osMailGet(qidDisplayMailQueue, osWaitForever);
         if (event.status == osEventMail)
         {
@@ -23,6 +24,9 @@ void Display(void const* args)
                 osMailFree(qidDisplayMailQueue, info);
             }
         }
+        #else
+        threadYield();
+        #endif
     }
 }
 
@@ -51,37 +55,39 @@ void printHeader()
 
 void updateInfo(Display_Info *info)
 {
-    char buf[NUM_DIGITS];
+    char buf[4];
+    uint8_t state;
     uint8_t index = info->charId - 'A';
-    sprintf(buf, "%4x", info->staticPriority);
+
+    intToString(info->staticPriority, buf, 4, 16, 0);
     GrStringDraw(&sContext, buf, -1, 2 * (sContext.psFont->ui8MaxWidth),
         (sContext.psFont->ui8Height + 3) * (2 + index), true);
 
-    sprintf(buf, "%3x", info->laxityTimeInTicks);
-    GrStringDraw(&sContext, buf, -1, 5 * (sContext.psFont->ui8MaxWidth),
+    intToString(info->laxityTimeInTicks, buf, 3, 16, 0);
+    GrStringDraw(&sContext, buf, -1, 6 * (sContext.psFont->ui8MaxWidth),
         (sContext.psFont->ui8Height + 3) * (2 + index), true);
 
-    sprintf(buf, "%1x", info->currentState);
-    GrStringDraw(&sContext, buf, -1, 10 * (sContext.psFont->ui8MaxWidth),
+    intToString(info->currentState, buf, 2, 16, 0);
+    GrStringDraw(&sContext, buf, -1, 9 * (sContext.psFont->ui8MaxWidth),
         (sContext.psFont->ui8Height + 3) * (2 + index), true);
 
-    sprintf(buf, "%2x", info->executionPercent);
+    intToString(info->executionPercent, buf, 2, 16, 0);
     GrStringDraw(&sContext, buf, -1, 11 * (sContext.psFont->ui8MaxWidth),
         (sContext.psFont->ui8Height + 3) * (2 + index), true);
 
-    sprintf(buf, "%3x", info->delayInTicks);
+    intToString(info->delayInTicks, buf, 3, 16, 0);
     GrStringDraw(&sContext, buf, -1, 14 * (sContext.psFont->ui8MaxWidth),
         (sContext.psFont->ui8Height + 3) * (2 + index), true);
 
-    sprintf(buf, "%3x", info->delayInTicks);
-    GrStringDraw(&sContext, buf, -1, 14 * (sContext.psFont->ui8MaxWidth),
-        (sContext.psFont->ui8Height + 3) * (2 + index), true);
+    // sprintf(buf, "%3x", info->delayInTicks);
+    // GrStringDraw(&sContext, buf, -1, 14 * (sContext.psFont->ui8MaxWidth),
+    //     (sContext.psFont->ui8Height + 3) * (2 + index), true);
 
-    sprintf(buf, "%1x", info->delayInTicks);
-    GrStringDraw(&sContext, buf, -1, 14 * (sContext.psFont->ui8MaxWidth),
-        (sContext.psFont->ui8Height + 3) * (2 + index), true);
+    // sprintf(buf, "%1x", info->delayInTicks);
+    // GrStringDraw(&sContext, buf, -1, 14 * (sContext.psFont->ui8MaxWidth),
+    //     (sContext.psFont->ui8Height + 3) * (2 + index), true);
 
-    sprintf(buf, "%2x", info->delayInTicks);
-    GrStringDraw(&sContext, buf, -1, 14 * (sContext.psFont->ui8MaxWidth),
-        (sContext.psFont->ui8Height + 3) * (2 + index), true);
+    // sprintf(buf, "%2x", info->delayInTicks);
+    // GrStringDraw(&sContext, buf, -1, 14 * (sContext.psFont->ui8MaxWidth),
+    //     (sContext.psFont->ui8Height + 3) * (2 + index), true);
 }

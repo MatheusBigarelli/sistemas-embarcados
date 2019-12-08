@@ -76,7 +76,9 @@ int main (void)
 
     //-------------------------------------------------
 	#if SIMULADOR == 0
+	#if DISPLAY
 	threadSwitch(tidDisplay);
+	#endif
 	#endif
 	//-------------------------------------------------
 
@@ -119,10 +121,12 @@ osThreadId aplyPriorityFromCMSIS()
         }
     }
     
+	#if DISPLAY
 	if (lowestPrio == 999)
 	{
 		return tidDisplay;
 	}
+	#endif
 
     return lowestId; // Retorna osThreadId da tarefa mais prioritaria
 }

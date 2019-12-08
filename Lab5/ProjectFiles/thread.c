@@ -61,7 +61,9 @@ void createThreads()
 
     #if SIMULADOR == 0
     tidUART = osThreadCreate(osThread(UART), NULL);
+    #if DISPLAY
     tidDisplay = osThreadCreate(osThread(Display), NULL);
+    #endif
     #endif
 }
 
@@ -92,7 +94,9 @@ void createTimers()
 void createMailQueue()
 {
     //-------------------------------------------------
+    #if DISPLAY_QUEUE
     qidDisplayMailQueue = osMailCreate(osMailQ(displayMailQ), NULL);
+    #endif
     //-------------------------------------------------
 
     qidUartMailQueue = osMailCreate(osMailQ(uartMailQ), NULL);
@@ -136,21 +140,26 @@ void moveThreadToWaiting(THREAD_INDEX tindex)
     uint32_t endTick = osKernelSysTick() - 124; //124 ticks ate obter o valor, a tarefa terminou antes
     uint32_t deadline = threadsInfo[tindex].tickOfDeadline;
 
+    #if DISPLAY_QUEUE
     Display_Info *info = (Display_Info *)osMailAlloc(qidDisplayMailQueue, 0);
+    #endif
 
     threadsInfo[tindex].currentState = WAITING; // Thread ja terminou de executar, agora espera ate periodo chegar 
     
 
+    #if DISPLAY_QUEUE
     if (info)
     {
-        info->charId = threadsInfo[tindex].charId;
-        info->delayInTicks = threadsInfo[tindex].delayInTicks;
-        info->executionPercent = threadsInfo[tindex].executionPercent;
-        info->laxityTimeInTicks = threadsInfo[tindex].laxityTimeInTicks;
         info->staticPriority = threadsInfo[tindex].staticPriority;
+        info->laxityTimeInTicks = threadsInfo[tindex].laxityTimeInTicks;
+        info->currentState = threadsInfo[tindex].currentState;
+        info->executionPercent = threadsInfo[tindex].executionPercent;
+        info->delayInTicks = threadsInfo[tindex].delayInTicks;
+        info->charId = threadsInfo[tindex].charId;
 
         osMailPut(qidDisplayMailQueue, info);
     }
+    #endif
 
     //Verifica prazos
     if(threadsInfo[tindex].isRealtime)
