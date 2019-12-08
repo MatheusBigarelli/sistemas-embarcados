@@ -50,7 +50,6 @@ THREAD_INDEX tidToIndex(osThreadId tid);
 void initThreadsInfo();
 void initThreadInfo(THREAD_INDEX tindex, uint32_t durationInTicks, double deadlinePercent,  int32_t staticPriority, char charId, osThreadId id);
 
-extern uint32_t ticksOffset;
 
 extern uint16_t remaingThreadToCompleteCycle; // Numero de threads que falta para que todas tenham executado pelo menos uma vez no ciclo
 #endif

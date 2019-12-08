@@ -43,9 +43,6 @@ osThreadId tidMain;
 osThreadDef(Display, osPriorityIdle, 1, 0);
 osThreadId tidDisplay;
 
-osMailQDef(uartMailQ, TOTAL_MATH_THREADS, Gantt_Info);
-osMailQId qidUartMailQueue;
-
 void createThreads()
 {
     tidThreadA = osThreadCreate(osThread(ThreadA), NULL);
@@ -83,11 +80,6 @@ void createTimers()
 //    osTimerStart(tidTimerD, 6);
 //    osTimerStart(tidTimerE, 5);
 //    osTimerStart(tidTimerF, 1);
-}
-
-void createMailQueue()
-{
-    qidUartMailQueue = osMailCreate(osMailQ(uartMailQ), NULL);
 }
 
 void callbackTimer(const void* args)

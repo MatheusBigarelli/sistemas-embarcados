@@ -15,6 +15,7 @@
 #define TOTAL_THREADS TOTAL_MATH_THREADS + 1
 
 
+extern uint32_t ticksOffset;
 
 
 typedef enum{

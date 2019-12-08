@@ -73,7 +73,6 @@ int main (void)
 
 	createThreads();
 	createTimers();
-	createMailQueue();
 	
 	osKernelStart();
 

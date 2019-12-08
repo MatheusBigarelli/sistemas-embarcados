@@ -101,7 +101,7 @@ void floatToString(float value, char *pBuf, uint32_t len, uint32_t base, uint8_t
 void fillGantInfo(THREAD_INDEX tindex, uint32_t startTick, uint32_t endTick, char charId)
 {
     // A divisao por 1666 eh para o mapeamento para o mermaid (onde foi necessario utilizar dias como medida de tempo ....)
-    ganttInfo[tindex].startTick = startTick/1666;
-    ganttInfo[tindex].endTick = endTick/1666;
+    ganttInfo[tindex].startTick = (startTick - ticksOffset)/1499;
+    ganttInfo[tindex].endTick = (endTick - ticksOffset)/1499;
     ganttInfo[tindex].charId = charId;
 }
