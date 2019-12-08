@@ -97,15 +97,7 @@ int main (void)
 		if(event.status == osEventSignal){
 			// Recebeu SIG_GANTT
             UART0_TxString("Pediu gant\r\n");
-			// Envia as informações necessárias para thread UART montar Gantt
-//			info = osMailAlloc(qidUartMailQueue, osWaitForever);
-//            for(i = 0; i< TOTAL_MATH_THREADS; i++)
-//            {
-//                info->charId = ganttInfo[i].charId;
-//                strcpy(info->ganttString, ganttInfo[i].ganttString);
-//                info->activations = ganttInfo[i].activations;
-//                osMailPut(qidUartMailQueue, info);
-//            }
+            osSignalSet(tidUART, SIG_GANTT);
             threadSwitch(tidUART);
 		}
 	}

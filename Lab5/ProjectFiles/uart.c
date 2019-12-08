@@ -40,6 +40,7 @@ void UART(void const* arg)
 	{
 		// Essa thread so executa segundo a ordem do escalonador
         // o escalonador so ativa ela quando recebe uma interrupcao na UART
+        event = osSignalWait(SIG_GANTT, osWaitForever);
 		if(startNewUART)
         {
             clearUART();
@@ -128,7 +129,7 @@ void clearUART(void)
 	UART0_TxChar(12);
 	// Os comandos anteriores removendo o proximo caractere(por que?)
 	UART0_TxChar('1'); // Escreve 1 apenas para corrigir o comportamento acima
-	//UART0_TxString("\r\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
+	UART0_TxString("\r\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
 
 }
 /* Funcao: void printGanttDiagram(void)

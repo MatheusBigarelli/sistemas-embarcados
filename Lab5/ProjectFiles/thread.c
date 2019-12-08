@@ -140,7 +140,8 @@ void moveThreadToWaiting(THREAD_INDEX tindex)
 {
     uint32_t endTick = osKernelSysTick() - 124; //124 ticks ate obter o valor, a tarefa terminou antes
     uint32_t deadline = threadsInfo[tindex].tickOfDeadline;
-
+    char buffer[128];
+    
     #if DISPLAY_QUEUE
     Display_Info *info = (Display_Info *)osMailAlloc(qidDisplayMailQueue, 0);
     #endif
@@ -168,20 +169,27 @@ void moveThreadToWaiting(THREAD_INDEX tindex)
     {
         if(endTick - ticksOffset >deadline)
         {
-            //UART0_TxString("Master Fault\r\n");
+            
+            UART0_TxString("Master Fault\r\n");
+            sprintf(buffer, "Thread:%c,Tempo:%d,TickDeadline:%d\r\n",threadsInfo[tindex].charId,threadsInfo[tindex].laxityTimeInTicks,threadsInfo[tindex].tickOfDeadline);
+            UART0_TxString(buffer);
         }
     }
     else
     {
         if(endTick - ticksOffset > deadline)
         {
-            //UART0_TxString("Secondary Fault\r\n");
-            //UART0_TxString("Aumentar prioridade\r\n");
+            UART0_TxString("Secondary Fault\r\n");
+            sprintf(buffer, "Thread:%c,Tempo:%d,TickDeadline:%d\r\n",threadsInfo[tindex].charId,threadsInfo[tindex].laxityTimeInTicks,threadsInfo[tindex].tickOfDeadline);
+            UART0_TxString(buffer);
+            threadsInfo[tindex].staticPriority = threadsInfo[tindex].staticPriority - 10;
         }
         if(endTick - ticksOffset < deadline /2)
         {
-            //UART0_TxString("Secondary Fault\r\n");
-            //UART0_TxString("Diminuir prioridade\r\n");
+            UART0_TxString("Secondary Fault\r\n");
+            sprintf(buffer, "Thread:%c,Tempo:%d,TickDeadline:%d\r\n",threadsInfo[tindex].charId,threadsInfo[tindex].laxityTimeInTicks,threadsInfo[tindex].tickOfDeadline);
+            UART0_TxString(buffer);
+            threadsInfo[tindex].staticPriority = threadsInfo[tindex].staticPriority + 10 ;
         }
     }
     
@@ -236,12 +244,12 @@ void initThreadsInfo()
 	int i;
 	uint32_t startTick;
     
-    initThreadInfo(THREAD_A_INDEX, 0x0682, 0.7, 10, 'A', tidThreadA);
-    initThreadInfo(THREAD_B_INDEX, 0x49AB, 0.5, 0, 'B', tidThreadB);
-    initThreadInfo(THREAD_C_INDEX, 0x15F5, 0.3, -30, 'C', tidThreadC);
-    initThreadInfo(THREAD_D_INDEX, 0x0CF0, 0.5, 0, 'D', tidThreadD);
-    initThreadInfo(THREAD_E_INDEX, 0x1E29, 0.3, -30, 'E', tidThreadE);
-    initThreadInfo(THREAD_F_INDEX, 0x2829, 0.1, -100, 'F', tidThreadF);    
+    initThreadInfo(THREAD_A_INDEX, 1889, 0.7, 10, 'A', tidThreadA);
+    initThreadInfo(THREAD_B_INDEX, 29658, 0.5, 0, 'B', tidThreadB);
+    initThreadInfo(THREAD_C_INDEX, 10911, 0.3, -30, 'C', tidThreadC);
+    initThreadInfo(THREAD_D_INDEX, 5781, 0.5, 0, 'D', tidThreadD);
+    initThreadInfo(THREAD_E_INDEX, 13793, 0.3, -30, 'E', tidThreadE);
+    initThreadInfo(THREAD_F_INDEX, 20899, 0.1, -100, 'F', tidThreadF);    
 
     
     startTick = osKernelSysTick();
