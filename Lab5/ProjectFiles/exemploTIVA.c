@@ -87,16 +87,6 @@ int main (void)
 		event = osSignalWait(SIG_GANTT, 0);
 		if(event.status == osEventSignal){
 			// Recebeu SIG_GANTT
-            UART0_TxString("Pediu gant\r\n");
-			// Envia as informações necessárias para thread UART montar Gantt
-//			info = osMailAlloc(qidUartMailQueue, osWaitForever);
-//            for(i = 0; i< TOTAL_MATH_THREADS; i++)
-//            {
-//                info->charId = ganttInfo[i].charId;
-//                strcpy(info->ganttString, ganttInfo[i].ganttString);
-//                info->activations = ganttInfo[i].activations;
-//                osMailPut(qidUartMailQueue, info);
-//            }
             threadSwitch(tidUART);
 		}
 	}
@@ -140,7 +130,7 @@ void schedule()
 void setupMail()
 {
     int i;
-    char buffer[128];
+    char buffer[3];
     volatile uint32_t startTick, endTick;
     if(remaingThreadToCompleteCycle == 0)
     {
@@ -149,10 +139,10 @@ void setupMail()
         {
             startTick = ganttInfo[i].startTick;
             endTick = ganttInfo[i].endTick;
-            intToString(startTick, buffer, 128, 10, 0);
+            intToString(startTick, buffer, 3, 10, 3);
             strcat(ganttInfo[i].ganttString, buffer);
             strcat(ganttInfo[i].ganttString, ",");
-            intToString(endTick, buffer, 128, 10, 0);
+            intToString(endTick, buffer, 3, 10, 3);
             strcat(ganttInfo[i].ganttString, buffer);
             strcat(ganttInfo[i].ganttString, ":");
             ganttInfo[i].activations++;
