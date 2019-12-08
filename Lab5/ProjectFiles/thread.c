@@ -171,7 +171,7 @@ void moveThreadToWaiting(THREAD_INDEX tindex)
         {
             
             UART0_TxString("Master Fault\r\n");
-            sprintf(buffer, "Thread:%c,Tempo:%d,TickDeadline:%d\r\n",threadsInfo[tindex].charId,threadsInfo[tindex].laxityTimeInTicks,threadsInfo[tindex].tickOfDeadline);
+            sprintf(buffer, "Thread:%c,TickDeadline:%d\r\n",threadsInfo[tindex].charId,threadsInfo[tindex].tickOfDeadline);
             UART0_TxString(buffer);
         }
     }
@@ -180,14 +180,14 @@ void moveThreadToWaiting(THREAD_INDEX tindex)
         if(endTick - ticksOffset > deadline)
         {
             UART0_TxString("Secondary Fault\r\n");
-            sprintf(buffer, "Thread:%c,Tempo:%d,TickDeadline:%d\r\n",threadsInfo[tindex].charId,threadsInfo[tindex].laxityTimeInTicks,threadsInfo[tindex].tickOfDeadline);
+            sprintf(buffer, "Thread:%c,TickDeadline:%d\r\n",threadsInfo[tindex].charId,threadsInfo[tindex].tickOfDeadline);
             UART0_TxString(buffer);
             threadsInfo[tindex].staticPriority = threadsInfo[tindex].staticPriority - 10;
         }
         if(endTick - ticksOffset < deadline /2)
         {
             UART0_TxString("Secondary Fault\r\n");
-            sprintf(buffer, "Thread:%c,Tempo:%d,TickDeadline:%d\r\n",threadsInfo[tindex].charId,threadsInfo[tindex].laxityTimeInTicks,threadsInfo[tindex].tickOfDeadline);
+            sprintf(buffer, "Thread:%c,TickDeadline:%d\r\n",threadsInfo[tindex].charId,threadsInfo[tindex].tickOfDeadline);
             UART0_TxString(buffer);
             threadsInfo[tindex].staticPriority = threadsInfo[tindex].staticPriority + 10 ;
         }
