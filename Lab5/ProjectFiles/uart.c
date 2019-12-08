@@ -133,10 +133,15 @@ void clearUART(void)
  */
 void printGanttDiagram(void)
 {
+    int i;
 	UART0_TxString("gantt\r\n");
 	UART0_TxString("\t title A Gantt Diagram\r\n");
 	UART0_TxString("\t dateFormat SSS\r\n");
-	UART0_TxString("\t axisFormat %L\r\n");
+	UART0_TxString("\t axisFormat %L\r\n");//Tempo em us
+    for(i = 0; i<TOTAL_THREADS;i++)
+    {
+        
+    }
 	UART0_TxString("Desenvolvendo...\r\n");
 	UART0_TxString("\r\n");
 }

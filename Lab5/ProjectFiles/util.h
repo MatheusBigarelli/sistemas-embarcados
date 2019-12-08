@@ -16,8 +16,7 @@
 
 
 typedef struct{
-	uint16_t ids[TOTAL_MATH_THREADS];
-	uint32_t durations[TOTAL_MATH_THREADS];
+	uint32_t startTick, endTick;
 }Gantt_Info;
 
 typedef enum{
@@ -53,5 +52,5 @@ typedef struct{
 
 
 extern Thread_Info threadsInfo[TOTAL_THREADS];
-
+extern Gantt_Info ganttInfo[TOTAL_THREADS];
 #endif
